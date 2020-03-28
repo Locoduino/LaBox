@@ -158,19 +158,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="TestExe.ino" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\..\ArduiEmulatorWin\ArduiEmulatorLib\ArduiEmulatorLib.vcxproj">
       <Project>{2cedff9d-11ac-46b3-92b0-8b43cbccffac}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Commanders\VStudio\Commanders.vcxproj">
-      <Project>{9b47755b-558d-4577-9c7f-4e573605cae3}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\DIO2\VStudio\DIO2.vcxproj">
       <Project>{cc4048d1-7ac0-4d3d-98a3-2922d996b5ab}</Project>
     </ProjectReference>
-    <ProjectReference Include="DCCpp.vcxproj">
+    <ProjectReference Include="LaBox.vcxproj">
       <Project>{7b26ba45-2af4-4eb1-8780-d28e09b51759}</Project>
     </ProjectReference>
   </ItemGroup>
