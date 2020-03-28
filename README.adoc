@@ -1,6 +1,6 @@
-= DCCpp extension Library for Arduino =
+= LaBox : DCC/Wifi Controller for ESP32 =
 
-This is the library version of a program for Arduino to control railroading DCC devices.
+This is an adaptation of DCCpp project to build a DCC controller called LaBox.
 
 For more information about this library please visit us at
 http://www.locoduino.org/spip.php?article228 in french or
@@ -9,8 +9,7 @@ In extras folder, click on Doc/index.html to have a complete documentation in En
 
 == License ==
 
-Copyright (c) 2017/2020 Locoduino.org. All right reserved.
-Copyright (c) 2017/2020 Thierry Paris.  All right reserved.
+Copyright (c) 2020 Locoduino.org. All right reserved.
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
