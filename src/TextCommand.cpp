@@ -30,7 +30,6 @@ Part of DCC++ BASE STATION for the Arduino
    commandString[0] = 0;
  } // TextCommand:TextCommand
  
- 
  void TextCommand::process(){
    char c;
    
@@ -58,12 +57,7 @@ Part of DCC++ BASE STATION for the Arduino
          commandString[0] = 0;
        else if (c == '>')               // end of new command
        {
-         if (parse(commandString) == false)
-         {
-             #if defined(DCCPP_DEBUG_MODE)
-                       Serial.println("invalid command !");
-             #endif
-         }
+				 MessageStack::MessagesStack.PushMessage(commandString);
        }
        else if (strlen(commandString) < MAX_COMMAND_LENGTH)    // if comandString still has space, append character just read from network
          sprintf(commandString, "%s%c", commandString, c);     // otherwise, character is ignored (but continue to look for '<' or '>')
@@ -79,12 +73,27 @@ Part of DCC++ BASE STATION for the Arduino
        if (c == '<')                    // start of new command
          commandString[0] = 0;
        else if (c == '>')               // end of new command
-         parse(commandString);
+				 MessageStack::MessagesStack.PushMessage(commandString);
        else if (strlen(commandString) < MAX_COMMAND_LENGTH)  // if commandString still has space, append character just read from serial line
          sprintf(commandString, "%s%c", commandString, c); // otherwise, character is ignored (but continue to look for '<' or '>')
      } // while
    
    #endif
+
+		int pending = MessageStack::MessagesStack.GetPendingMessageIndex();
+		if (pending != 255)
+		{
+			char buffer[MESSAGE_MAXSIZE];
+
+			MessageStack::MessagesStack.GetMessage(pending, buffer);
+
+			if (parse(buffer) == false)
+			{
+#if defined(DCCPP_DEBUG_MODE)
+				Serial.println("invalid command !");
+#endif
+			}
+		}
  } // TextCommand:process
    
 ///////////////////////////////////////////////////////////////////////////////

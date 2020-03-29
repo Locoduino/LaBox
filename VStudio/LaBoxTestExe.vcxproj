@@ -171,6 +171,9 @@
   <ItemGroup>
     <ClCompile Include="ArduinoIno.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\examples\WifiDcc\WifiDcc.ino" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

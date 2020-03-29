@@ -19,7 +19,9 @@ class DCCpp
 		//static int readCv(volatile RegisterList *inReg, byte inCvId, int callBack = 100, int callBackSub = 200) { return inReg->readCV(inCvId, callBack, callBackSub); }
 		static void writeCv(volatile RegisterList *inReg, int inCvId, byte inCvValue, int callBack = 100, int callBackSub = 200);
 		static int identifyLocoId(volatile RegisterList *inReg);
+#ifdef USE_LOCOMOTIVES
 		static void setFunctions(volatile RegisterList *inReg, int nReg, int inLocoId, FunctionsState &inStates);
+#endif
 
 	public:
 		static byte ackThreshold;
@@ -219,13 +221,14 @@ class DCCpp
 		*/
 		static inline void writeCvMain(int inCvId, byte inValue, int callBack = 100, int callBackSub = 200) { writeCv(&(mainRegs), inCvId, inValue, callBack, callBackSub); }
 
+#ifdef USE_LOCOMOTIVES
 		/** Set the functions states of the given decoder on the main track.
 		@param nReg	Register number. Avoid register 0, used for one shot commands like accessories or CV programming.
 		@param inLocoId	Decoder address in short or long format.
 		@param inStates	FunctionsState class with the wanted new status.
 		*/
 		static inline void setFunctionsMain(int nReg, int inLocoId, FunctionsState &inStates) { setFunctions(&(mainRegs), nReg, inLocoId, inStates); }
-
+#endif
 		// Programming track functions
 
 		/** For the given decoder id, set the speed and the direction on the programming track.
@@ -259,12 +262,14 @@ class DCCpp
 		*/
 		static inline void writeCvProg(int inCvId, byte inValue, int callBack = 100, int callBackSub = 200) { writeCv(&(progRegs), inCvId, inValue, callBack, callBackSub); }
 
+#ifdef USE_LOCOMOTIVES
 		/** Set the functions states of the given decoder on the programming track.
 		@param nReg	Register number. Avoid register 0, used for one shot commands like accessories or CV programming.
 		@param inLocoId	Decoder address in short or long format.
 		@param inStates	FunctionsState class with the wanted new status.
 		*/
 		static inline void setFunctionsProg(int nReg, int inLocoId, FunctionsState &inStates) { setFunctions(&(progRegs), nReg, inLocoId, inStates); }
+#endif
 
 		// Accessories
 

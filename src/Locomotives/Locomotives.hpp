@@ -27,6 +27,13 @@ public:
 	@return The found locomotive or NULL if not found.
 	*/
 	static Locomotive* get(uint16_t inAddress);
+	/** Adds a new locomotive.
+	@param inName	Locomotive new name.
+	@param inAddress	Locomotive new DCC address.
+	@param inSpeedMax	Locomotive max speed steps, default is 128.
+	@return pointer on the new locomotive or NULL if no place available.
+	*/
+	static Locomotive* add(const char* inName, uint16_t inAddress, uint8_t inSpeedMax = 128);
 	/** Removes a particular locomotive.
 	@param inAddress	The DCC id (1-65535) of the locomotive.
 	*/

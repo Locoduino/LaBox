@@ -7,6 +7,7 @@ description: <FunctionsState class>
 #include "Arduino.h"
 #include "DCCpp.h"
 
+#ifdef USE_LOCOMOTIVES
 FunctionsState::FunctionsState()
 {
 	this->clear();
@@ -63,4 +64,5 @@ void FunctionsState::printActivated()
 
 	Serial.println("");
 }
+#endif
 #endif

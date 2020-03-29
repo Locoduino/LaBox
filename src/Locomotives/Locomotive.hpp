@@ -28,10 +28,19 @@ public:
 	Locomotive* pNextLocomotive;					/**< Address of the next object of this class. NULL means end of the list of Locomotives. Do not change it !*/
 
 	/** Creates a new instance for only one register.
+	@param inName	Locomotive new name.
+	@param inSpeedRegister	Locomotive DCC++ register.
+	@param inAddress	Locomotive new DCC address.
+	@param inSpeedMax	Locomotive max speed steps, default is 128.
 	*/
 	Locomotive(const char* inName, uint8_t speedRegister, uint16_t inAddress = 3, uint8_t inSpeedMax = 128);
 
 	/** Creates a new instance for two registers.
+	@param inName	Locomotive new name.
+	@param inSpeedRegister	Locomotive DCC++ speed register.
+	@param inFunctionRegister	Locomotive DCC++ function register.
+	@param inAddress	Locomotive new DCC address.
+	@param inSpeedMax	Locomotive max speed steps, default is 128.
 	*/
 	Locomotive(const char* inName, uint8_t speedRegister, uint8_t functionRegister, uint16_t inAddress = 3, uint8_t inSpeedMax = 128);
 
@@ -44,7 +53,7 @@ public:
 	*/
 	uint16_t getAddress() { return this->address; }
 	/** Sets the locomotive name
-	@param inNames	Locomotive new name.
+	@param inName	Locomotive new name.
 	*/
 	void setName(const char * inName) { strncpy(this->name, inName, LOCOMOTIVE_NAME_SIZE); }
 	/** Gets the locomotive name.

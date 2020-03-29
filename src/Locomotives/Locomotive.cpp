@@ -7,6 +7,7 @@ description: <FunctionsState class>
 #include "Arduino.h"
 #include "DCCpp.h"
 
+#ifdef USE_LOCOMOTIVES
 Locomotive::Locomotive(const char* inName, uint8_t inSpeedRegister, uint16_t inAddress, uint8_t inSpeedMax)
 {
 	// 'static' data, not updated during the run.
@@ -53,4 +54,5 @@ void Locomotive::printLocomotive()
 
 	Serial.println("");
 }
+#endif
 #endif

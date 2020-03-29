@@ -36,6 +36,12 @@ public:
 	static bool isAllocated(byte inRegister);
 
 #ifdef DCCPP_DEBUG_MODE
+#ifdef VISUALSTUDIO
+	/** Unit test function
+	*/
+	static void Test();
+#endif
+
 	/** Print the list of assigned locomotives.
 	@remark Only available if DCCPP_DEBUG_MODE is defined.
 	*/

@@ -438,6 +438,7 @@ bool DCCpp::setThrottle(volatile RegisterList *inpRegs, int nReg,  int inLocoId,
   return true;
 }
 
+#ifdef USE_LOCOMOTIVES
 void DCCpp::setFunctions(volatile RegisterList *inpRegs, int nReg, int inLocoId, FunctionsState &inStates)
 {
 #ifdef DCCPP_DEBUG_MODE
@@ -559,6 +560,7 @@ void DCCpp::setFunctions(volatile RegisterList *inpRegs, int nReg, int inLocoId,
   inStates.printActivated();
 #endif
 }
+#endif
 
 int DCCpp::identifyLocoId(volatile RegisterList *inReg)
 {
