@@ -18,25 +18,28 @@ class MessageStack
 {
 private:
 	char messages[MESSAGE_MAXNUMBER][MESSAGE_MAXSIZE];
+	SemaphoreHandle_t xSemaphore; // semaphore d'exclusion mutuelle
 
-	MessageStack()
-	{
-		for (byte i = 0; i < MESSAGE_MAXNUMBER; i++)
-			FreeMessage(i);
-	}
-
+	MessageStack();
 	void FreeMessage(byte inMessageIndex); 
 
 public:
 	/** Stack of messages itself.*/
 	static MessageStack MessagesStack;
 
+	/** Initialize the list.
+	@param inMultiThread	If the stack is used in multi-thread environnement, initialize the semaphore.
+	*/
+	void begin(bool inMultiThread);
+  
 	/** Add a new message	to the stack.
 	@param inMessage	Message to add to the stack.
 	@param inType	type
 	@param inData	associated data
+  @return true if the massage has been pushed. false if it is lost due to max stack size reached...
 	*/
-	void PushMessage(const char *inMessage);
+	bool PushMessage(const char *inMessage);
+
 	/** Gets the given message from the stack, at the given index.
 	@param inIndex	index of the message to get.
 	@param inBufferToFill	buffer to fill. Must be allocated at size MESSAGE_MAXSIZE.
@@ -44,12 +47,18 @@ public:
 	@remark A previous call to GetPendingMessageIndex() will give the first available message index.
 	*/
 	const char *GetMessage(byte inIndex, char *inBufferToFill);
+
 	/** Gets the first available message index in the stack. There is no history of stack filling, so the 
 	first one is not necessary the oldest in the list...
 	@return First available message, or 255 if no message available.
 	*/
 	byte GetPendingMessageIndex();
 
+	/** Counts the number of item in the stack.
+	@return number of items in the stack.
+	*/
+	byte GetCount();
+  
 #ifdef DCCPP_DEBUG_MODE
 #ifdef VISUALSTUDIO
 	/** Unit test function
@@ -63,6 +72,21 @@ public:
 	void printStack();
 #endif
 };
+
+#define START_SEMAPHORE()	\
+	{ \
+		byte semaphoreTaken = this->xSemaphore == NULL?1:0; \
+		if (this->xSemaphore != NULL) \
+			if (xSemaphoreTake(this->xSemaphore, (TickType_t)100) == pdTRUE) \
+				semaphoreTaken = 1; \
+		if (semaphoreTaken == 1)
+
+#define END_SEMAPHORE()	\
+		xSemaphoreGive(this->xSemaphore); \
+	}
+
+#define ABORT_SEMAPHORE()	\
+		xSemaphoreGive(this->xSemaphore);
 
 
 #endif

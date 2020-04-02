@@ -2,47 +2,88 @@
 
 MessageStack MessageStack::MessagesStack;
 
-void MessageStack::FreeMessage(byte inMessageIndex) 
+void MessageStack::begin(bool inMultiThread)
 {
-	this->messages[inMessageIndex][0] = 0;
+	if (inMultiThread)
+	{
+		this->xSemaphore = xSemaphoreCreateMutex();
+	}
 }
 
-void MessageStack::PushMessage(const char *inMessage)
+MessageStack::MessageStack()
 {
+	for (byte i = 0; i < MESSAGE_MAXNUMBER; i++)
+  {
+    this->messages[i][0] = 0;
+  }
+}
+
+void MessageStack::FreeMessage(byte inMessageIndex)
+{
+	START_SEMAPHORE()
+  this->messages[inMessageIndex][0] = 0;
+	END_SEMAPHORE()
+}
+
+bool MessageStack::PushMessage(const char *inMessage)
+{
+	START_SEMAPHORE()
 	for (int i = 0; i < MESSAGE_MAXNUMBER; i++)
 		if (this->messages[i][0] == 0)
 		{
 			strncpy(this->messages[i], inMessage, MESSAGE_MAXSIZE);
-			return;
+			ABORT_SEMAPHORE()
+			return true;
 		}
 
 #ifdef DCCPP_DEBUG_MODE
 	Serial.println(F("Error : a message has been lost ! Stack is full !"));
 #endif
+	END_SEMAPHORE()
+  return false;
 }
 
 byte MessageStack::GetPendingMessageIndex()
 {
+	START_SEMAPHORE()
 	for (int i = 0; i < MESSAGE_MAXNUMBER; i++)
 		if (this->messages[i][0] != 0)
+		{
+			ABORT_SEMAPHORE()
 			return i;
+		}
 
+	END_SEMAPHORE()
 	return 255;
 }
 
 const char *MessageStack::GetMessage(byte inMessage, char *inMessageBuffer)
 {
+	START_SEMAPHORE()
 	strncpy(inMessageBuffer, this->messages[inMessage], MESSAGE_MAXSIZE);
+	END_SEMAPHORE()
 
 	this->FreeMessage(inMessage);
 
 	return inMessageBuffer;
 }
 
+byte MessageStack::GetCount()
+{
+  int count = 0;
+  START_SEMAPHORE()
+  for (int i = 0; i < MESSAGE_MAXNUMBER; i++)
+    if (this->messages[i][0] != 0)
+    {
+      count++;
+    }
+
+  END_SEMAPHORE()
+  return count;
+}
+
 #ifdef DCCPP_DEBUG_MODE
 #ifdef VISUALSTUDIO
-/** Unit test function
-*/
 void MessageStack::Test()
 {
 	char buffer[MESSAGE_MAXSIZE];
