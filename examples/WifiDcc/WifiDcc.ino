@@ -10,8 +10,8 @@ description: <LaBox Wifi Controller sample>
 #error To be able to compile this sample,the lines #define USE_TEXTCOMMAND and #define USE_WIFI must be uncommented in DCCpp.h
 #endif
 
-const char* ssid     = "mySsid";
-const char* password = "myPswd";
+const char* ssid     = "VIDEOFUTUR_C56165_2.4G";
+const char* password = "EenPghQD";
 
 WiFiServer DCCPP_INTERFACE(2560);
 

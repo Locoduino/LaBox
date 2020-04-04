@@ -28,6 +28,10 @@ WITH OPTIONAL PARAMETERS, AND BRACKETED BY < AND > SYMBOLS.  SPACES BETWEEN PARA
 ARE REQUIRED.  SPACES ANYWHERE ELSE ARE IGNORED.  A SPACE BETWEEN THE SINGLE-CHARACTER
 COMMAND AND THE FIRST PARAMETER IS ALSO NOT REQUIRED.*/
 struct TextCommand{
+#if defined(ARDUINO_ARCH_ESP32)
+  static void receiveCommands();
+#endif
+
   static char commandString[MAX_COMMAND_LENGTH+1];
   static void init(volatile RegisterList *, volatile RegisterList *, CurrentMonitor *);
   static bool parse(char *);

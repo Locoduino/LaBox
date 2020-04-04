@@ -426,7 +426,7 @@ Main include file of the library.*/
 
 ////////////////////////////////////////////////////////
 // Add a '//' at the beginning of the line to be in production mode.
-//#define DCCPP_DEBUG_MODE
+#define DCCPP_DEBUG_MODE
 
 ///////////////////////////////////////////////////////
 // Verbose mode lets you see all actions done by the 

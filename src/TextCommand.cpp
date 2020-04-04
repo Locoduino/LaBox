@@ -25,60 +25,68 @@ Part of DCC++ BASE STATION for the Arduino
  
  char TextCommand::commandString[MAX_COMMAND_LENGTH+1];
  
- 
+ void TextCommand::receiveCommands()
+ {
+	 char c;
+
+#if defined(USE_ETHERNET) || defined(USE_WIFI)
+#if defined(USE_ETHERNET)
+	 EthernetClient client = DCCPP_INTERFACE.available();
+	 //-> Ajout CB
+#elif defined(USE_WIFI)
+	 WiFiClient client = DCCPP_INTERFACE.available();
+#endif
+
+	 if (client) {
+		 if (DCCppConfig::Protocol == EthernetProtocol::HTTP) {
+			 DCCPP_INTERFACE.println("HTTP/1.1 200 OK");
+			 DCCPP_INTERFACE.println("Content-Type: text/html");
+			 DCCPP_INTERFACE.println("Access-Control-Allow-Origin: *");
+			 DCCPP_INTERFACE.println("Connection: close");
+			 DCCPP_INTERFACE.println("");
+		 }
+
+		 while (client.connected() && client.available()) {        // while there is data on the network
+
+			 c = client.read();
+			 if (c == '<')                    // start of new command
+				 commandString[0] = 0;
+			 else if (c == '>')               // end of new command
+			 {
+				 MessageStack::MessagesStack.PushMessage(commandString);
+			 }
+			 else if (strlen(commandString) < MAX_COMMAND_LENGTH)    // if comandString still has space, append character just read from network
+				 sprintf(commandString, "%s%c", commandString, c);     // otherwise, character is ignored (but continue to look for '<' or '>')
+		 } // while
+
+		 if (DCCppConfig::Protocol == EthernetProtocol::HTTP)
+			 client.stop();
+	 }
+
+#endif
+
+	 // Serial comm always active...
+	 while (Serial.available() > 0) {    // while there is data on the serial line
+		 c = Serial.read();
+		 if (c == '<')                    // start of new command
+			 commandString[0] = 0;
+		 else if (c == '>')               // end of new command
+			 MessageStack::MessagesStack.PushMessage(commandString);
+		 else if (strlen(commandString) < MAX_COMMAND_LENGTH)  // if commandString still has space, append character just read from serial line
+			 sprintf(commandString, "%s%c", commandString, c); // otherwise, character is ignored (but continue to look for '<' or '>')
+	 } // while
+ }
+
  void TextCommand::init(volatile RegisterList *_mRegs, volatile RegisterList *_pRegs, CurrentMonitor *_mMonitor){
    commandString[0] = 0;
  } // TextCommand:TextCommand
  
  void TextCommand::process(){
-   char c;
-   
- #if defined(USE_ETHERNET) || defined(USE_WIFI)
-   #if defined(USE_ETHERNET)
-      EthernetClient client = DCCPP_INTERFACE.available();
-      //-> Ajout CB
-   #elif defined(USE_WIFI)
-      WiFiClient client = DCCPP_INTERFACE.available();
-   #endif
- 
-   if (client) {
-      if (DCCppConfig::Protocol == EthernetProtocol::HTTP) {
-        DCCPP_INTERFACE.println("HTTP/1.1 200 OK");
-        DCCPP_INTERFACE.println("Content-Type: text/html");
-        DCCPP_INTERFACE.println("Access-Control-Allow-Origin: *");
-        DCCPP_INTERFACE.println("Connection: close");
-        DCCPP_INTERFACE.println("");
-      }
- 
-     while (client.connected() && client.available()) {        // while there is data on the network
-        
-       c = client.read();
-       if (c == '<')                    // start of new command
-         commandString[0] = 0;
-       else if (c == '>')               // end of new command
-       {
-				 MessageStack::MessagesStack.PushMessage(commandString);
-       }
-       else if (strlen(commandString) < MAX_COMMAND_LENGTH)    // if comandString still has space, append character just read from network
-         sprintf(commandString, "%s%c", commandString, c);     // otherwise, character is ignored (but continue to look for '<' or '>')
-     } // while
- 
-     if (DCCppConfig::Protocol == EthernetProtocol::HTTP)
-       client.stop();
-   }
-   
-  #else  // SERIAL case
-     while (DCCPP_INTERFACE.available()>0) {    // while there is data on the serial line
-       c = DCCPP_INTERFACE.read();
-       if (c == '<')                    // start of new command
-         commandString[0] = 0;
-       else if (c == '>')               // end of new command
-				 MessageStack::MessagesStack.PushMessage(commandString);
-       else if (strlen(commandString) < MAX_COMMAND_LENGTH)  // if commandString still has space, append character just read from serial line
-         sprintf(commandString, "%s%c", commandString, c); // otherwise, character is ignored (but continue to look for '<' or '>')
-     } // while
-   
-   #endif
+  
+#ifndef ARDUINO_ARCH_ESP32
+	 // On not ESP32 architectures, load and process immediatly the commands.
+	 receiveCommands();
+#endif
 
 		int pending = MessageStack::MessagesStack.GetPendingMessageIndex();
 		if (pending != 255)

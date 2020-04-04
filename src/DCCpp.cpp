@@ -20,6 +20,10 @@ bool DCCpp::programMode;
 bool DCCpp::panicStopped;
 byte DCCpp::ackThreshold = 0;
 
+#if defined(ARDUINO_ARCH_ESP32) && defined(USE_TEXTCOMMAND)
+TaskHandle_t Task1;
+#endif
+
 // *********************************************************** DCCpp class
 
 static bool first = true;
@@ -121,6 +125,17 @@ void DCCpp::beginProg(uint8_t inSignalPin, uint8_t inSignalEnable, uint8_t inCur
 #endif
 }
 
+#if defined(ARDUINO_ARCH_ESP32) && defined(USE_TEXTCOMMAND)
+//Task1code
+void Task1code(void* pvParameters)
+{
+  while (true)
+  {
+     TextCommand::receiveCommands();
+  }
+}
+#endif
+
 void DCCpp::begin()
 {
   DCCpp::programMode = false;
@@ -158,6 +173,29 @@ void DCCpp::begin()
 #ifdef DCCPP_DEBUG_MODE
   //pinMode(LED_BUILTIN, OUTPUT);
   Serial.println(F("begin achieved"));
+#endif
+
+  MessageStack::MessagesStack.begin(true);
+
+#if defined(ARDUINO_ARCH_ESP32) && defined(USE_TEXTCOMMAND)
+#ifdef DCCPP_DEBUG_MODE
+  int core = xPortGetCoreID();
+  Serial.print("Ino executing on core ");
+  Serial.println(core);
+#endif
+
+  // Remove WatchDog on Core 0 to avoid continual reboot...
+  disableCore0WDT();
+
+  //create a task that will be executed in the Task1code() function, with priority 1 and executed on core 1
+  xTaskCreatePinnedToCore(
+    Task1code,   // Task function.
+    "ReceiveCommands",     // name of task.
+    10000,       // Stack size of task
+    NULL,        // parameter of the task
+    1,           // priority of the task
+    &Task1,      // Task handle to keep track of created task
+    0);    // pin task to thge other available core.
 #endif
 
 } // begin
@@ -200,14 +238,22 @@ void DCCpp::beginWifi(const char *inSsid, const char *inPassword, EthernetProtoc
 
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
+#ifdef DCCPP_DEBUG_MODE
     Serial.print(".");
+#endif
   }
+#ifdef DCCPP_DEBUG_MODE
+  Serial.println("");
+#endif
 
   DCCPP_INTERFACE.begin();
 #ifdef DCCPP_DEBUG_MODE
   //pinMode(LED_BUILTIN, OUTPUT);
+#ifdef DCCPP_PRINT_DCCPP
   showConfiguration();
-  Serial.println(F("beginWifi achieved"));
+#endif
+  Serial.print(inSsid);
+  Serial.println(F(" connected ! beginWifi achieved."));
 #endif
 } // beginWifi
 #endif
