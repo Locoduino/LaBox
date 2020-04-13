@@ -6,7 +6,7 @@
 #include <Arduino.h>
 
 #define MESSAGE_MAXNUMBER	10
-#define MESSAGE_MAXSIZE	10
+#define MESSAGE_MAXSIZE	34		// idem MAX_COMMAND_LENGTH + 1 + 3
 
 /** The message stack is a small location for a few messages received and ready to be send to the caller.
 This is a barely a list. If the string for the given index is empty, so no this index is free.

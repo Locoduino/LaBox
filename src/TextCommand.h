@@ -36,7 +36,12 @@ struct TextCommand{
   static void init(volatile RegisterList *, volatile RegisterList *, CurrentMonitor *);
   static bool parse(char *);
   static void process();
+
+  static Throttle* pCurrentThrottle;
 }; // TextCommand
   
+#define DCCPP_INTERFACE	(*TextCommand::pCurrentThrottle)
+
+
 #endif
 #endif

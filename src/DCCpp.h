@@ -422,8 +422,9 @@ _______________
 /** @file DCCpp.h
 Main include file of the library.*/
 
-#define DCCPP_LIBRARY_VERSION		"VERSION DCCpp library: 1.4.0"
+#define DCCPP_LIBRARY_VERSION		"VERSION DCCpp library: 1.4.1"
 
+#pragma warning (disable : 4005)
 ////////////////////////////////////////////////////////
 // Add a '//' at the beginning of the line to be in production mode.
 #define DCCPP_DEBUG_MODE
@@ -439,6 +440,7 @@ Main include file of the library.*/
 // is very heavy in program memory. So to avoid problems
 // you can make this function available by uncomment the next line, only when necessary.
 //#define DCCPP_PRINT_DCCPP
+#pragma warning (default : 4005)
 
 ///////////////////////////////////////////////////////
 // This define gets rid of 2 timers and uses only Timer2 to tick every 58us and change logic levels on both tracks. 
@@ -463,7 +465,8 @@ Main include file of the library.*/
 //#define USE_ETHERNET_WIZNET_5200
 //#define USE_ETHERNET_ENC28J60
 #define USE_WIFI
-//#define USE_LOCOMOTIVES
+#define USE_LOCOMOTIVES
+#define USE_THROTTLES
 
 #ifdef DOXYGEN_SPECIFIC
     // DO NOT CHANGE THESE LINES IN THIS BLOCK 'DOXYGEN_SPECIFIC' : Only here for documentation !
@@ -537,6 +540,9 @@ Main include file of the library.*/
 #include "Comm.h"
 #ifdef USE_LOCOMOTIVES
 #include "Locomotives/Locomotives.hpp"
+#endif
+#ifdef USE_THROTTLES
+#include "Throttles/Throttles.hpp"
 #endif
 #ifdef USE_TURNOUT
 #include "Turnout.h"

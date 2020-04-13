@@ -177,6 +177,14 @@ void DCCpp::begin()
 
   MessageStack::MessagesStack.begin(true);
 
+  Throttle* pCurr = Throttles::getFirst();
+
+  while (pCurr != NULL)
+  {
+    pCurr->begin();
+    pCurr = pCurr->pNextThrottle;
+  }
+
 #if defined(ARDUINO_ARCH_ESP32) && defined(USE_TEXTCOMMAND)
 #ifdef DCCPP_DEBUG_MODE
   int core = xPortGetCoreID();
@@ -199,64 +207,6 @@ void DCCpp::begin()
 #endif
 
 } // begin
-
-#ifdef USE_ETHERNET
-void DCCpp::beginEthernet(uint8_t *inMac, uint8_t *inIp, EthernetProtocol inProtocol)
-{
-  if (inIp != NULL)
-    for (int i = 0; i < 4; i++)
-      DCCppConfig::EthernetIp[i] = inIp[i];
-
-  for (int i = 0; i < 6; i++)
-    DCCppConfig::EthernetMac[i] = inMac[i];
-
-  DCCppConfig::Protocol = inProtocol;
-
-  if (inIp == NULL)
-    Ethernet.begin(inMac);                  // Start networking using DHCP to get an IP Address
-  else
-    Ethernet.begin(inMac, inIp);           // Start networking using STATIC IP Address
-
-  DCCPP_INTERFACE.begin();
-#ifdef DCCPP_DEBUG_MODE
-  //pinMode(LED_BUILTIN, OUTPUT);
-  showConfiguration();
-  Serial.println(F("beginEthernet achieved"));
-#endif
-} // beginEthernet
-#endif
-
-#ifdef USE_WIFI
-void DCCpp::beginWifi(const char *inSsid, const char *inPassword, EthernetProtocol inProtocol)
-//void DCCpp::beginWifi(char *inSsid, char *inPassword)
-{
-  strncpy(DCCppConfig::WifiSsid, inSsid, 40);
-  strncpy(DCCppConfig::WifiPassword, inPassword, 40);
-  DCCppConfig::Protocol = inProtocol;
-
-  WiFi.begin(inSsid, inPassword);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-#ifdef DCCPP_DEBUG_MODE
-    Serial.print(".");
-#endif
-  }
-#ifdef DCCPP_DEBUG_MODE
-  Serial.println("");
-#endif
-
-  DCCPP_INTERFACE.begin();
-#ifdef DCCPP_DEBUG_MODE
-  //pinMode(LED_BUILTIN, OUTPUT);
-#ifdef DCCPP_PRINT_DCCPP
-  showConfiguration();
-#endif
-  Serial.print(inSsid);
-  Serial.println(F(" connected ! beginWifi achieved."));
-#endif
-} // beginWifi
-#endif
 
 #ifdef DCCPP_PRINT_DCCPP
 ///////////////////////////////////////////////////////////////////////////////
@@ -346,39 +296,7 @@ void DCCpp::showConfiguration()
 
 
 #ifdef USE_TEXTCOMMAND
-  Serial.print(F("\n\nINTERFACE:    "));
-  //#ifdef USE_ETHERNET
-#if defined(USE_ETHERNET)
-  Serial.println(F("ETHERNET "));
-  Serial.print(F("MAC ADDRESS:  "));
-  for (int i = 0; i < 5; i++) {
-    Serial.print(DCCppConfig::EthernetMac[i], HEX);
-    Serial.print(F(":"));
-  }
-  Serial.println(DCCppConfig::EthernetMac[5], HEX);
-  //	Serial.print(F("PORT:         "));
-  //	Serial.println(DCCppConfig::EthernetPort);
-  Serial.print(F("IP ADDRESS:   "));
-  Serial.println(Ethernet.localIP());
-
-  /*#ifdef IP_ADDRESS
-  	Serial.println(F(" (STATIC)"));
-    #else
-  	Serial.println(F(" (DHCP)"));
-    #endif*/
-
-
-#elif defined(USE_WIFI)
-  Serial.println(F("WIFI "));
-  //  Serial.print(F("PORT:         "));
-  //  Serial.println(DCCppConfig::EthernetPort);
-  Serial.print(F("IP ADDRESS:   "));
-  Serial.println(WiFi.localIP());
-
-#else
-  Serial.println(F("SERIAL"));
-#endif
-
+  Throttles::printThrottles();
 #endif
   //	Serial.print(F("\n\nPROGRAM HALTED - PLEASE RESTART ARDUINO"));
 
@@ -422,9 +340,8 @@ void DCCpp::powerOn(bool inMain, bool inProg)
   if (done)
   {
     DCCPP_INTERFACE.print("<p1>");
-#if !defined(USE_ETHERNET)
-    DCCPP_INTERFACE.println("");
-#endif
+    if (DCCPP_INTERFACE.sendNewline())
+      DCCPP_INTERFACE.println("");
   }
 }
 
@@ -445,9 +362,8 @@ void DCCpp::powerOff(bool inMain, bool inProg)
   if (done)
   {
     DCCPP_INTERFACE.print("<p0>");
-#if !defined(USE_ETHERNET)
-    DCCPP_INTERFACE.println("");
-#endif
+    if (DCCPP_INTERFACE.sendNewline())
+      DCCPP_INTERFACE.println("");
   }
 }
 

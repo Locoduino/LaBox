@@ -16,24 +16,6 @@ static byte ackThreshold = 30;
 //#include "PacketRegister.h"
 //#include "Comm.h"
 
-#ifdef USE_ETHERNET
-uint8_t DCCppConfig::EthernetIp[4];
-uint8_t DCCppConfig::EthernetMac[6];
-int DCCppConfig::EthernetPort = 0;
-
-EthernetProtocol DCCppConfig::Protocol = EthernetProtocol::TCP;
-#endif
-
-#ifdef USE_WIFI
-uint8_t DCCppConfig::WifiIp[4];
-uint8_t DCCppConfig::WifiIpMac[6];
-char DCCppConfig::WifiSsid[40];
-char DCCppConfig::WifiPassword[40];
-int DCCppConfig::WifiPort = 0;
-
-EthernetProtocol DCCppConfig::Protocol = EthernetProtocol::TCP;
-#endif
-
 byte DCCppConfig::SignalEnablePinMain = UNDEFINED_PIN;
 byte DCCppConfig::CurrentMonitorMain = UNDEFINED_PIN;
 					
@@ -169,9 +151,8 @@ void RegisterList::setThrottle(int nReg, int cab, int tSpeed, int tDirection) vo
 	DCCPP_INTERFACE.print(tSpeed); DCCPP_INTERFACE.print(" ");
 	DCCPP_INTERFACE.print(tDirection);
 	DCCPP_INTERFACE.print(">");
-#if !defined(USE_ETHERNET)
-	DCCPP_INTERFACE.println("");
-#endif
+	if (DCCPP_INTERFACE.sendNewline())
+		DCCPP_INTERFACE.println("");
 #endif
 	speedTable[nReg] = tDirection == 1 ? tSpeed : -tSpeed;
 
@@ -224,9 +205,8 @@ void RegisterList::setFunction(int nReg, int cab, int fByte, int eByte) volatile
 	DCCPP_INTERFACE.print(fByte); DCCPP_INTERFACE.print(" ");
 	DCCPP_INTERFACE.print(eByte);
 	DCCPP_INTERFACE.print(">");
-#if !defined(USE_ETHERNET)
-	DCCPP_INTERFACE.println("");
-#endif
+	if (DCCPP_INTERFACE.sendNewline())
+		DCCPP_INTERFACE.println("");
 #endif
 	/* NMRA DCC norm ask for two DCC packets instead of only one:
 	"Command Stations that generate these packets, and which are not periodically refreshing these functions,
@@ -324,9 +304,8 @@ void RegisterList::writeTextPacket(int nReg, byte *b, int nBytes) volatile
 
 	if (nBytes<2 || nBytes>5) {    // invalid valid packet
 		DCCPP_INTERFACE.print("<mInvalid Packet>");
-#if !defined(USE_ETHERNET)
-		DCCPP_INTERFACE.println("");
-#endif
+		if (DCCPP_INTERFACE.sendNewline())
+			DCCPP_INTERFACE.println("");
 		return;
 	}
 
@@ -457,9 +436,8 @@ int RegisterList::readCVraw(int cv, int callBack, int callBackSub) volatile
 	DCCPP_INTERFACE.print(" ");
 	DCCPP_INTERFACE.print(bValue);
 	DCCPP_INTERFACE.print(">");
-#if !defined(USE_ETHERNET)
-	DCCPP_INTERFACE.println("");
-#endif
+	if (DCCPP_INTERFACE.sendNewline())
+		DCCPP_INTERFACE.println("");
 #endif
 
 #ifdef DCCPP_DEBUG_MODE
@@ -558,9 +536,8 @@ void RegisterList::writeCVByte(int cv, int bValue, int callBack, int callBackSub
 	DCCPP_INTERFACE.print(" ");
 	DCCPP_INTERFACE.print(bValue);
 	DCCPP_INTERFACE.print(">");
-#if !defined(USE_ETHERNET)
-	DCCPP_INTERFACE.println("");
-#endif
+	if (DCCPP_INTERFACE.sendNewline())
+		DCCPP_INTERFACE.println("");
 #endif
 } // RegisterList::writeCVByte(ints)
 
@@ -630,9 +607,8 @@ void RegisterList::writeCVBit(int cv, int bNum, int bValue, int callBack, int ca
 	DCCPP_INTERFACE.print(" ");
 	DCCPP_INTERFACE.print(bValue);
 	DCCPP_INTERFACE.print(">");
-#if !defined(USE_ETHERNET)
-	DCCPP_INTERFACE.println("");
-#endif
+	if (DCCPP_INTERFACE.sendNewline())
+		DCCPP_INTERFACE.println("");
 #endif
 } // RegisterList::writeCVBit(ints)
 
@@ -752,9 +728,8 @@ void RegisterList::printPacket(int nReg, byte *b, int nBytes, int nRepeat) volat
   DCCPP_INTERFACE.print(" / ");
   DCCPP_INTERFACE.print(nRepeat);
   DCCPP_INTERFACE.print(">");
-#if !defined(USE_ETHERNET)
-  DCCPP_INTERFACE.println("");
-#endif
+	if (DCCPP_INTERFACE.sendNewline())
+		DCCPP_INTERFACE.println("");
 } // RegisterList::printPacket()
 #endif
 

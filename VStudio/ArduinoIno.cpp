@@ -6,7 +6,8 @@
 #include "Arduino.h"
 
 //#include "../examples/WifiDcc/WifiDcc.ino"
-#include "../examples/SerialDcc/SerialDcc.ino"
+//#include "../examples/SerialDcc/SerialDcc.ino"
+#include "../examples/LaBox/LaBox.ino"
 
 int main()
 {

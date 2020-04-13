@@ -20,23 +20,6 @@ Part of DCC++ BASE STATION for the Arduino
 #define VERSION "2.0.0"
 
 /////////////////////////////////////////////////////////////////////////////////////
-// SELECT COMMUNICATION INTERACE
-/////////////////////////////////////////////////////////////////////////////////////
-//#if defined(USE_ETHERNET) || defined(USE_WIFI)
-#if defined(USE_ETHERNET)
-	#define DCCPP_INTERFACE eServer
-	#define SDCARD_CS 4
-
-#elif defined(USE_WIFI)
-	#define DCCPP_INTERFACE eServer
-  
-#else
-  // define DCCPP_INTERFACE as serial in all cases to be able at least to print diagnostic messages on console
-  #define DCCPP_INTERFACE Serial
-
-#endif
-
-/////////////////////////////////////////////////////////////////////////////////////
 // SET WHETHER TO SHOW PACKETS - DIAGNOSTIC MODE ONLY
 /////////////////////////////////////////////////////////////////////////////////////
 

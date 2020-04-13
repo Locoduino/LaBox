@@ -52,7 +52,12 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+	<PropertyGroup>
+		<IntDirSharingDetected>
+			None
+		</IntDirSharingDetected>
+	</PropertyGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="Shared">
@@ -172,7 +177,7 @@
     <ClCompile Include="ArduinoIno.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\examples\WifiDcc\WifiDcc.ino" />
+    <None Include="..\examples\LaBox\LaBox.ino" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
