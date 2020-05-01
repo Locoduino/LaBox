@@ -19,6 +19,8 @@ CurrentMonitor DCCpp::progMonitor;  // create monitor for current on Program Tra
 bool DCCpp::programMode;
 bool DCCpp::panicStopped;
 byte DCCpp::ackThreshold = 0;
+bool DCCpp::IsPowerOnMain = false;
+bool DCCpp::IsPowerOnProg = false;
 
 #if defined(ARDUINO_ARCH_ESP32) && defined(USE_TEXTCOMMAND)
 TaskHandle_t Task1;
@@ -169,14 +171,9 @@ void DCCpp::begin()
   if (EEStore::needsRefreshing())
     EEStore::store();
 #endif
-
-#ifdef DCCPP_DEBUG_MODE
-  //pinMode(LED_BUILTIN, OUTPUT);
-  Serial.println(F("begin achieved"));
-#endif
-
   MessageStack::MessagesStack.begin(true);
 
+#ifdef USE_THROTTLES
   Throttle* pCurr = Throttles::getFirst();
 
   while (pCurr != NULL)
@@ -184,6 +181,7 @@ void DCCpp::begin()
     pCurr->begin();
     pCurr = pCurr->pNextThrottle;
   }
+#endif
 
 #if defined(ARDUINO_ARCH_ESP32) && defined(USE_TEXTCOMMAND)
 #ifdef DCCPP_DEBUG_MODE
@@ -206,6 +204,10 @@ void DCCpp::begin()
     0);    // pin task to thge other available core.
 #endif
 
+#ifdef DCCPP_DEBUG_MODE
+  //pinMode(LED_BUILTIN, OUTPUT);
+  Serial.println(F("begin achieved"));
+#endif
 } // begin
 
 #ifdef DCCPP_PRINT_DCCPP
@@ -296,7 +298,9 @@ void DCCpp::showConfiguration()
 
 
 #ifdef USE_TEXTCOMMAND
+#ifdef USE_THROTTLES
   Throttles::printThrottles();
+#endif
 #endif
   //	Serial.print(F("\n\nPROGRAM HALTED - PLEASE RESTART ARDUINO"));
 
@@ -329,18 +333,22 @@ void DCCpp::powerOn(bool inMain, bool inProg)
   {
     digitalWrite(DCCppConfig::SignalEnablePinProg, HIGH);
     done = true;
+    IsPowerOnMain = true;
   }
 
   if (inMain && DCCppConfig::SignalEnablePinMain != UNDEFINED_PIN)
   {
     digitalWrite(DCCppConfig::SignalEnablePinMain, HIGH);
     done = true;
+    IsPowerOnProg = true;
   }
 
   if (done)
   {
     DCCPP_INTERFACE.print("<p1>");
+#ifdef USE_THROTTLES
     if (DCCPP_INTERFACE.sendNewline())
+#endif
       DCCPP_INTERFACE.println("");
   }
 }
@@ -352,17 +360,21 @@ void DCCpp::powerOff(bool inMain, bool inProg)
   {
     digitalWrite(DCCppConfig::SignalEnablePinProg, LOW);
     done = true;
+    IsPowerOnMain = false;
   }
   if (inMain && DCCppConfig::SignalEnablePinMain != UNDEFINED_PIN)
   {
     digitalWrite(DCCppConfig::SignalEnablePinMain, LOW);
     done = true;
+    IsPowerOnProg = false;
   }
 
   if (done)
   {
     DCCPP_INTERFACE.print("<p0>");
+#ifdef USE_THROTTLES
     if (DCCPP_INTERFACE.sendNewline())
+#endif
       DCCPP_INTERFACE.println("");
   }
 }

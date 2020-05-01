@@ -15,13 +15,8 @@ class Locomotives
 {
 private:
 	static Locomotive* pFirstLocomotive;	/**< Address of the first object of this class. NULL means empty list of Locomotives. Do not change it !*/
-	static bool useFunctionRegister;
 
 public:
-	/** Set the flag to use two registers by locomotive to keep alive functions after a long current cut.
-	@param inUse	True if each locomotive must use one register for speed and another one for functions.
-	*/
-	static void setUseFunctionRegister(bool inUse) { useFunctionRegister = inUse; }
 	/** Get a particular Locomotive.
 	@param inAddress	The DCC id (1-65535) of the locomotive.
 	@return The found locomotive or NULL if not found.
@@ -33,7 +28,7 @@ public:
 	@param inSpeedMax	Locomotive max speed steps, default is 128.
 	@return pointer on the new locomotive or NULL if no place available.
 	*/
-	static Locomotive* add(const char* inName, uint16_t inAddress, uint8_t inSpeedMax = 128);
+	static Locomotive* add(const String& inName, uint16_t inAddress, uint8_t inSpeedMax = 128);
 	/** Removes a particular locomotive.
 	@param inAddress	The DCC id (1-65535) of the locomotive.
 	*/
@@ -42,11 +37,11 @@ public:
 	@param inName	The name of the locomotive.
 	@return The found locomotive or NULL if not found.
 	*/
-	static Locomotive* get(const char* inName);
+	static Locomotive* get(const String& inName);
 	/** Removes a particular locomotive.
 	@param inName	The name of the locomotive.
 	*/
-	static void remove(const char* inName);
+	static void remove(const String& inName);
 	/** Get the maximum number of locomotives.
 	@return Number of locomotives.
 	*/

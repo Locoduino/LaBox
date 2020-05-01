@@ -55,6 +55,7 @@ public:
 	virtual int available() {	return 0;	}
 	virtual char read() { return 0; }
 	virtual size_t println(const char* pMessage) { return 0; }
+	virtual size_t println(const String& inMessage) { return 0; }
 };
 
 /** Use this macro to define a SerialInterface.
@@ -81,6 +82,10 @@ public:\
 	inline size_t println(const char *pMessage) \
 	{\
 		return SERIAL_PORT.println(pMessage);\
+	}\
+	inline size_t println(const String& inMessage) \
+	{\
+		return SERIAL_PORT.println(inMessage);\
 	}\
 \
 };

@@ -13,7 +13,8 @@ Part of DCC++ BASE STATION for the Arduino
 enum EthernetProtocol
 {
 	HTTP,
-	TCP
+	TCP,
+	UDP
 };
 #endif
 

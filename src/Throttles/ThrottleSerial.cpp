@@ -6,8 +6,8 @@ description: <Throttle Serial class>
 
 #include "DCCpp.h"
 
-#ifdef USE_THROTTLES
-ThrottleSerial::ThrottleSerial(const char* inName, SerialInterface* inpInterface) : Throttle(inName)
+#if defined(USE_TEXTCOMMAND) && defined(USE_THROTTLES)
+ThrottleSerial::ThrottleSerial(const String& inName, SerialInterface* inpInterface) : Throttle(inName)
 {
 	this->pInterface = inpInterface;
 }
@@ -17,33 +17,22 @@ bool ThrottleSerial::begin()
 	return true;
 }
 
-bool ThrottleSerial::receiveMessages()
+bool ThrottleSerial::loop()
 {
-	char commandString[MAX_COMMAND_LENGTH + 1];
-	char c;
+	bool added = false;
 
 	// Serial comm always active...
-	while (this->pInterface->available() > 0) {    // while there is data on the serial line
-		c = this->pInterface->read();
-		if (c == '<')                    // start of new command
-			commandString[0] = 0;
-		else 
-			if (c == '>')
-			{// end of new command
-				this->pushMessageInStack(this->id, commandString);
-				return true;
-			}
-			else 
-				if (strlen(commandString) < MAX_COMMAND_LENGTH)  // if commandString still has space, append character just read from serial line
-					sprintf(commandString, "%s%c", commandString, c); // otherwise, character is ignored (but continue to look for '<' or '>')
+	while (this->pInterface->available() > 0) 
+	{    // while there is data on the serial line
+		added = Throttle::getCharacter(this->pInterface->read(), this);
 	} // while
 
-	return false;
+	return added;
 }
 
-bool ThrottleSerial::sendMessage(const char *pMessage)
+bool ThrottleSerial::sendMessage(const String& inMessage)
 {
-	this->pInterface->println(pMessage);
+	this->pInterface->println(inMessage);
 	return true;
 }
 
@@ -59,9 +48,15 @@ bool ThrottleSerial::isConnected()
 #ifdef DCCPP_DEBUG_MODE
 void ThrottleSerial::printThrottle()
 {
-	Serial.print(this->name);
-	Serial.print(" id:");
 	Serial.print(this->id);
+	Serial.print(" : ");
+	Serial.print(this->name);
+	if (this->pConverter != NULL)
+	{
+		Serial.print(" (");
+		this->pConverter->printConverter();
+		Serial.print(") ");
+	}
 
 	Serial.println("");
 }

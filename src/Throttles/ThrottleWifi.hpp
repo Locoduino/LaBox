@@ -5,9 +5,10 @@
 
 #include "DCCpp.h"
 
-#if defined(USE_THROTTLES) && defined(USE_WIFI)
+#if defined(USE_TEXTCOMMAND) && defined(USE_THROTTLES) && defined(USE_WIFI)
 
 #include <WiFi.h>
+#include <WiFiAP.h>
 
 /** This is a class to handle wifi communications.
 */
@@ -20,6 +21,7 @@ private:
 	EthernetProtocol protocol = EthernetProtocol::TCP;
 
 	WiFiServer *pServer;
+	WiFiClient client;
 
 public:
 	static void connectWifi(const char* inSsid, const char* inPassword);
@@ -27,11 +29,11 @@ public:
 	/** Creates a new instance of this wifi class.
 	@param inName	throttle new name.
 	*/
-	ThrottleWifi(const char* inName,uint8_t* inMac, uint8_t* inIp, int inPort, EthernetProtocol inProtocol);
+	ThrottleWifi(const String& inName,uint8_t* inMac, uint8_t* inIp, int inPort, EthernetProtocol inProtocol);
 
 	bool begin();
-	bool receiveMessages();
-	bool sendMessage(const char *);
+	bool loop();
+	bool sendMessage(const String& inMessage);
 	void end();
 	bool isConnected();
 	bool sendNewline();

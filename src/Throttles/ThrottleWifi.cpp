@@ -6,8 +6,8 @@ description: <Throttle Wifi class>
 
 #include "DCCpp.h"
 
-#if defined(USE_THROTTLES) && defined(USE_WIFI)
-ThrottleWifi::ThrottleWifi(const char* inName, uint8_t* inMac, uint8_t* inIp, int inPort, EthernetProtocol inProtocol) : Throttle(inName)
+#if defined(USE_TEXTCOMMAND) && defined(USE_THROTTLES) && defined(USE_WIFI)
+ThrottleWifi::ThrottleWifi(const String& inName, uint8_t* inMac, uint8_t* inIp, int inPort, EthernetProtocol inProtocol) : Throttle(inName)
 {
 	for (int i = 0; i < 4; i++)
 	{
@@ -33,14 +33,33 @@ ThrottleWifi::ThrottleWifi(const char* inName, uint8_t* inMac, uint8_t* inIp, in
 
 void ThrottleWifi::connectWifi(const char* inSsid, const char* inPassword)
 {
+	//DO NOT TOUCH
+	//  This is here to force the ESP32 to reset the WiFi and initialise correctly.
+	WiFi.mode(WIFI_STA);
+	delay(1000);
+	WiFi.disconnect(true);
+	delay(1000);
+	WiFi.softAPdisconnect(true);           // disconnects AP Mode 
+	delay(1000);
+	// End silly stuff !!!
+
+#ifdef USE_WIFI_LOCALSSID
+	WiFi.softAP(inSsid, inPassword);
+	IPAddress myIP = WiFi.softAPIP();
+	Serial.print("AP IP address: ");
+	Serial.println(myIP);
+#else
 	WiFi.begin(inSsid, inPassword);
 
 	while (WiFi.status() != WL_CONNECTED) {
 		delay(500);
 #ifdef DCCPP_DEBUG_MODE
 		Serial.print(".");
+		Serial.print(WiFi.status());
 #endif
 	}
+#endif
+
 #ifdef DCCPP_DEBUG_MODE
 	Serial.println("");
 
@@ -51,19 +70,20 @@ void ThrottleWifi::connectWifi(const char* inSsid, const char* inPassword)
 
 bool ThrottleWifi::begin()
 {
+	Serial.println("begin");
 	this->pServer->begin();
 	return true;
 }
 
-bool ThrottleWifi::receiveMessages()
+bool ThrottleWifi::loop()
 {
-	char commandString[MAX_COMMAND_LENGTH + 1];
-	char c;
 	bool added = false;
 
-	WiFiClient client = this->pServer->available();
+	WiFiClient foundClient = this->pServer->available();
 
-	if (client) {
+	if (!this->client && foundClient) {
+		this->client = foundClient;
+		Serial.println("Client found");
 		if (this->protocol == EthernetProtocol::HTTP) {
 			this->pServer->println("HTTP/1.1 200 OK");
 			this->pServer->println("Content-Type: text/html");
@@ -71,31 +91,29 @@ bool ThrottleWifi::receiveMessages()
 			this->pServer->println("Connection: close");
 			this->pServer->println("");
 		}
-
-		while (client.connected() && client.available()) {        // while there is data on the network
-
-			c = client.read();
-			if (c == '<')                    // start of new command
-				commandString[0] = 0;
-			else if (c == '>')               // end of new command
-			{
-				this->pushMessageInStack(this->id, commandString);
-				added = true;
-			}
-			else if (strlen(commandString) < MAX_COMMAND_LENGTH)    // if comamndString still has space, append character just read from network
-				sprintf(commandString, "%s%c", commandString, c);     // otherwise, character is ignored (but continue to look for '<' or '>')
-		} // while
-
-		if (this->protocol == EthernetProtocol::HTTP)
-			client.stop();
 	}
 
-	return true;
+	if (this->client) 
+	{
+		while (this->client.available()) 
+		{        // while there is data on the network
+			added = Throttle::getCharacter(this->client.read(), this);
+		}
+
+		if (this->protocol == EthernetProtocol::HTTP)
+			this->client.stop();
+	}
+
+	return added;
 }
 
-bool ThrottleWifi::sendMessage(const char *pMessage)
+bool ThrottleWifi::sendMessage(const String& inMessage)
 {
-	this->pServer->println(pMessage);
+#ifdef DCCPP_DEBUG_MODE
+	Serial.print("-> ");
+	Serial.println(inMessage);
+#endif
+	this->pServer->println(inMessage);
 	return true;
 }
 
@@ -116,14 +134,20 @@ bool ThrottleWifi::sendNewline()
 #ifdef DCCPP_DEBUG_MODE
 void ThrottleWifi::printThrottle()
 {
+	Serial.print(this->id);
+	Serial.print(" : ");
 	Serial.print("ThrottleWifi : ");
 	Serial.print(this->name);
-	Serial.print(" id:");
-	Serial.print(this->id);
+	if (this->pConverter != NULL)
+	{
+		Serial.print(" (");
+		this->pConverter->printConverter();
+		Serial.print(") ");
+	}
 	if (this->isConnected())
 	{
 		Serial.print(" ip:");
-		Serial.print(WiFi.localIP());
+		Serial.print(this->client.remoteIP());
 	}
 	else
 	{

@@ -1,20 +1,25 @@
 /*************************************************************
 project: <DCCpp library>
 author: <Thierry PARIS>
-description: <FunctionsState class>
+description: <Throttle base class>
 *************************************************************/
 
 #include "Arduino.h"
 #include "DCCpp.h"
 
-#ifdef USE_THROTTLES
-Throttle::Throttle(const char* inName)
+#if defined(USE_THROTTLES)
+Throttle::Throttle(const String& inName)
 {
 	// 'static' data, not updated during the run.
-	strncpy(this->name, inName, THROTTLE_NAME_SIZE);
+	this->name = inName;
+	this->printMemo = "";
+	this->commandString[0] = 0;
 
 	this->id = 0;
-	this->printMemo[0] = 0;
+
+	// Default start/end characters for DCC++ syntax commands
+	this->startCommandCharacter = '<';
+	this->endCommandCharacter = '>';
 
 	// Variable data
 	this->pNextThrottle = NULL;
@@ -26,7 +31,7 @@ Throttle::Throttle(const char* inName)
 // DDDSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
 // Where DDD is the numerical form of the Throttle Id which have got the message, in ordrer to answer to this throttle only.
 // SSSSSSSSSSSSSSSSSSSSSSSSSSSSSS is the classic DCC++ message received by the throttle.
-void Throttle::pushMessageInStack(uint16_t inThrottleId, const char* pMessage)
+void Throttle::pushMessageInStack(uint16_t inThrottleId, const String& inMessage)
 {
 	char buffer[MESSAGE_MAXSIZE];
 
@@ -34,22 +39,60 @@ void Throttle::pushMessageInStack(uint16_t inThrottleId, const char* pMessage)
 	buffer[1] = '0' + (inThrottleId - ((inThrottleId / 100) * 100)) / 10;
 	buffer[2] = '0' + inThrottleId % 10;
 	buffer[3] = 0;
-	strncpy(buffer + 3, pMessage, MESSAGE_MAXSIZE - 3);
+	strncpy(buffer + 3, inMessage.c_str(), MESSAGE_MAXSIZE - 3);
 	MessageStack::MessagesStack.PushMessage(buffer);
 }
 
-const char* Throttle::getMessageFromStackMessage(const char* pMessage)
+const String& Throttle::getMessageFromStackMessage(const String& inMessage, String &inToReturn)
 {
-	return pMessage + 3;
+	inToReturn = inMessage.substring(3);
+
+	return inToReturn;
 }
 
-Throttle* Throttle::getThrottleFromStackMessage(const char* pMessage)
+Throttle* Throttle::getThrottleFromStackMessage(const String& inMessage)
 {
 	uint16_t id = 0;
 
-	id = ((pMessage[0] - '0') * 100) + ((pMessage[1] - '0') * 10) + (pMessage[2] - '0');
+	id = ((inMessage[0] - '0') * 100) + ((inMessage[1] - '0') * 10) + (inMessage[2] - '0');
 
 	return Throttles::get(id);
+}
+
+bool Throttle::getCharacter(char inC, Throttle* inpThrottle)
+{
+	//Serial.println((int)inC);
+	if (inC == (char)inpThrottle->startCommandCharacter)                    // start of new command
+		{
+			inpThrottle->commandString[0] = 0;
+		}
+		else
+		{
+			if (inC == (char)inpThrottle->endCommandCharacter)               // end of new command
+			{
+#ifdef DCCPP_DEBUG_MODE
+				Serial.print(inpThrottle->id);
+				Serial.print(" From WiThrottle : ");
+				Serial.println(inpThrottle->commandString);
+#endif
+				inpThrottle->pushMessage(inpThrottle->commandString);
+				inpThrottle->commandString[0] = 0;
+				return true;
+			}
+			else
+			{
+				if (inC > ' ' && strlen(inpThrottle->commandString) < MAX_COMMAND_LENGTH)    // if comamndString still has space, append character just read from network
+					sprintf(inpThrottle->commandString, "%s%c", inpThrottle->commandString, inC);     // otherwise, character is ignored (but continue to look for start or end characters)}
+			}
+		}
+
+		return false;
+}
+
+void Throttle::setCommandCharacters(int inStartCharacter, int inEndCharacter)
+{
+	this->startCommandCharacter = inStartCharacter;
+	this->endCommandCharacter = inEndCharacter;
 }
 
 bool Throttle::sendNewline()
@@ -61,14 +104,26 @@ bool Throttle::sendNewline()
 
 void Throttle::Print(const char line[])
 {
-	strncat(this->printMemo, line, THROTTLE_PRINTMEMO_SIZE);
+	this->printMemo.concat(line);
 }
 
 void Throttle::Println(const char line[])
 {
-	strncat(this->printMemo, line, THROTTLE_PRINTMEMO_SIZE);
+	this->printMemo.concat(line);
 	this->sendMessage(this->printMemo);
-	this->printMemo[0] = 0;
+	this->printMemo = "";
+}
+
+void Throttle::Print(const String &line)
+{
+	this->printMemo.concat(line);
+}
+
+void Throttle::Println(const String &line)
+{
+	this->printMemo.concat(line);
+	this->sendMessage(this->printMemo);
+	this->printMemo = "";
 }
 
 void Throttle::Print(int value)
@@ -109,6 +164,21 @@ void Throttle::Println(int value, int i)
 	this->Println("");
 }
 
+void Throttle::Print(IPAddress value)
+{
+	for (int i = 0; i < 3; i++)
+	{
+		this->Print(value[i], DEC);
+		this->Print('.');
+	}
+	this->Print(value[3], DEC);
+}
+
+void Throttle::Println(IPAddress value)
+{
+	this->Print(value);
+	this->Println("");
+}
 // Static print part
 
 void Throttle::print(const char line[])
@@ -125,6 +195,38 @@ void Throttle::println(const char line[])
 		TextCommand::pCurrentThrottle->Println(line);
 	else
 		Serial.println(line);
+}
+
+void Throttle::print(const String &line)
+{
+	if (TextCommand::pCurrentThrottle != NULL)
+		TextCommand::pCurrentThrottle->Print(line);
+	else
+		Serial.print(line.c_str());
+}
+
+void Throttle::println(const String &line)
+{
+	if (TextCommand::pCurrentThrottle != NULL)
+		TextCommand::pCurrentThrottle->Println(line);
+	else
+		Serial.println(line.c_str());
+}
+
+void Throttle::print(IPAddress value)
+{
+	if (TextCommand::pCurrentThrottle != NULL)
+		TextCommand::pCurrentThrottle->Print(value);
+	else
+		Serial.print(value);
+}
+
+void Throttle::println(IPAddress value)
+{
+	if (TextCommand::pCurrentThrottle != NULL)
+		TextCommand::pCurrentThrottle->Println(value);
+	else
+		Serial.println(value);
 }
 
 void Throttle::print(int value)
@@ -201,21 +303,28 @@ void Throttle::test()
 		MessageStack::MessagesStack.GetMessage(index, buffer);
 
 		Throttle* throttle = Throttle::getThrottleFromStackMessage(buffer);
-		strncpy(buffer, Throttle::getMessageFromStackMessage(buffer), MESSAGE_MAXSIZE - 3);
+		String message;
+		Throttle::getMessageFromStackMessage(buffer, message);
 
 		Serial.print(throttle->getName());
 		Serial.print(" : ");
-		Serial.println(buffer);
+		Serial.println(message);
 	}
 }
 #endif
 
+bool Throttle::pushMessage(const String& inpCommand)
+{
+	this->pushMessageInStack(this->id, inpCommand);
+	return true;
+}
+
 #ifdef DCCPP_DEBUG_MODE
 void Throttle::printThrottle()
 {
-	Serial.print(this->name);
-	Serial.print(" id:");
 	Serial.print(this->id);
+	Serial.print(" : ");
+	Serial.print(this->name);
 
 	Serial.println("");
 }

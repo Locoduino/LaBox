@@ -7,8 +7,8 @@ description: <Throttle Ethernet class>
 #include "DCCpp.h"
 
 #if !defined(ARDUINO_ARCH_ESP32)
-#if defined(USE_THROTTLES) && defined(USE_ETHERNET)
-ThrottleEthernet::ThrottleEthernet(const char* inName, uint8_t* inMac, uint8_t* inIp, int inPort, enum EthernetProtocol inProtocol) : Throttle(inName)
+#if defined(USE_TEXTCOMMAND) && defined(USE_THROTTLES) && defined(USE_ETHERNET)
+ThrottleEthernet::ThrottleEthernet(const String& inName, uint8_t* inMac, uint8_t* inIp, int inPort, enum EthernetProtocol inProtocol) : Throttle(inName)
 {
 	for (int i = 0; i < 4; i++)
 	{
@@ -44,10 +44,8 @@ bool ThrottleEthernet::begin()
 	return true;
 }
 
-bool ThrottleEthernet::receiveMessages()
+bool ThrottleEthernet::loop()
 {
-	char commandString[MAX_COMMAND_LENGTH + 1];
-	char c;
 	bool added = false;
 
 	EthernetClient client = this->pServer->available();
@@ -62,18 +60,8 @@ bool ThrottleEthernet::receiveMessages()
 		}
 
 		while (client.connected() && client.available()) {        // while there is data on the network
-
-			c = client.read();
-			if (c == '<')                    // start of new command
-				commandString[0] = 0;
-			else if (c == '>')               // end of new command
-			{
-				this->pushMessageInStack(this->id, commandString);
-				added = true;
-			}
-			else if (strlen(commandString) < MAX_COMMAND_LENGTH)    // if comandString still has space, append character just read from network
-				sprintf(commandString, "%s%c", commandString, c);     // otherwise, character is ignored (but continue to look for '<' or '>')
-		} // while
+			added = Throttle::getCharacter(client.read(), this);
+		}
 
 		if (this->protocol == EthernetProtocol::HTTP)
 			client.stop();
@@ -82,9 +70,9 @@ bool ThrottleEthernet::receiveMessages()
 	return added;
 }
 
-bool ThrottleEthernet::sendMessage(const char *pMessage)
+bool ThrottleEthernet::sendMessage(const String&  inMessage)
 {
-	this->pServer->println(pMessage);
+	this->pServer->println(inMessage);
 	return true;
 }
 
@@ -105,9 +93,15 @@ bool ThrottleEthernet::sendNewline()
 #ifdef DCCPP_DEBUG_MODE
 void ThrottleEthernet::printThrottle()
 {
-	Serial.print(this->name);
-	Serial.print(" id:");
 	Serial.print(this->id);
+	Serial.print(" : ");
+	Serial.print(this->name);
+	if (this->pConverter != NULL)
+	{
+		Serial.print(" (");
+		this->pConverter->printConverter();
+		Serial.print(") ");
+	}
 
 	Serial.println("");
 }

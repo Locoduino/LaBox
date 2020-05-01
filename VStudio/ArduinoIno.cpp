@@ -9,6 +9,9 @@
 //#include "../examples/SerialDcc/SerialDcc.ino"
 #include "../examples/LaBox/LaBox.ino"
 
+//const char* ssid = "VIDEOFUTUR_C56165_2.4G";
+//const char* password = "EenPghQD";
+
 int main()
 {
 	emulatorSetup();

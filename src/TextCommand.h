@@ -37,11 +37,16 @@ struct TextCommand{
   static bool parse(char *);
   static void process();
 
+#ifdef USE_THROTTLES
   static Throttle* pCurrentThrottle;
+#endif
 }; // TextCommand
   
+#ifdef USE_THROTTLES
 #define DCCPP_INTERFACE	(*TextCommand::pCurrentThrottle)
-
+#else
+#define DCCPP_INTERFACE	Serial
+#endif
 
 #endif
 #endif

@@ -3,8 +3,9 @@
 #define __ThrottleSerial_hpp__
 //-------------------------------------------------------------------
 
-#ifdef USE_THROTTLES
 #include "DCCpp.h"
+
+#if defined(USE_TEXTCOMMAND) && defined(USE_THROTTLES)
 
 /** This is a class to handle Serial communications.
 */
@@ -18,11 +19,11 @@ public:
 	@param inName	throttle new name.
 	@param inpInterface	Serial canal for communication.
 	*/
-	ThrottleSerial(const char* inName, SerialInterface* inpInterface);
+	ThrottleSerial(const String& inName, SerialInterface* inpInterface);
 
 	bool begin();
-	bool receiveMessages();
-	bool sendMessage(const char *);
+	bool loop();
+	bool sendMessage(const String& inMessage);
 	void end();
 	bool isConnected();
 

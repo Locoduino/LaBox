@@ -5,7 +5,7 @@
 
 #include "DCCpp.h"
 
-#include "Throttle.hpp"
+#if defined(USE_THROTTLES)
 
 /**	This is the static class for assigned Throttle list.
 */
@@ -39,11 +39,11 @@ public:
 	@param inName	The name of the throttle.
 	@return The found throttle or NULL if not found.
 	*/
-	static Throttle* get(const char* inName);
+	static Throttle* get(const String& inName);
 	/** Removes a particular throttle.
 	@param inName	The name of the throttle.
 	*/
-	static void remove(const char* inName);
+	static void remove(const String& inName);
 	/** Get the total number of assigned throttles.
 	@return Number of throttles.
 	*/
@@ -56,4 +56,5 @@ public:
 	static void printThrottles();
 #endif
 };
+#endif
 #endif

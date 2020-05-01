@@ -52,12 +52,12 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-	<PropertyGroup>
-		<IntDirSharingDetected>
+  <PropertyGroup>
+    <IntDirSharingDetected>
 			None
 		</IntDirSharingDetected>
-	</PropertyGroup>
-	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="Shared">
@@ -166,6 +166,8 @@
     <ClInclude Include="..\src\Locomotives\Locomotives.hpp" />
     <ClInclude Include="..\src\Locomotives\Registers.hpp" />
     <ClInclude Include="..\src\MessageStack.hpp" />
+    <ClInclude Include="..\src\Throttles\MessageConverter.hpp" />
+    <ClInclude Include="..\src\Throttles\MessageConverterWiThrottle.hpp" />
     <ClInclude Include="..\src\Throttles\SerialInterface.hpp" />
     <ClInclude Include="..\src\Throttles\Throttle.hpp" />
     <ClInclude Include="..\src\Throttles\ThrottleEthernet.hpp" />
@@ -202,6 +204,8 @@
     <ClCompile Include="..\src\Locomotives\Locomotives.cpp" />
     <ClCompile Include="..\src\Locomotives\Registers.cpp" />
     <ClCompile Include="..\src\MessageStack.cpp" />
+    <ClCompile Include="..\src\Throttles\MessageConverter.cpp" />
+    <ClCompile Include="..\src\Throttles\MessageConverterWiThrottle.cpp" />
     <ClCompile Include="..\src\Throttles\Throttle.cpp" />
     <ClCompile Include="..\src\Throttles\ThrottleEthernet.cpp" />
     <ClCompile Include="..\src\Throttles\Throttles.cpp" />

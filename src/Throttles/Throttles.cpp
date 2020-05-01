@@ -32,13 +32,13 @@ Throttle* Throttles::get(uint16_t inId)
 	return NULL;
 }
 
-Throttle* Throttles::get(const char* inName)
+Throttle* Throttles::get(const String& inName)
 {
 	Throttle* pCurr = pFirstThrottle;
 
 	while (pCurr != NULL)
 	{
-		if (strcmp(pCurr->getName(), inName) == 0)
+		if (pCurr->getName() == inName)
 		{
 			return pCurr;
 		}
@@ -105,7 +105,7 @@ void Throttles::remove(uint16_t inId)
 	}
 }
 
-void Throttles::remove(const char* inName)
+void Throttles::remove(const String& inName)
 {
 	Throttle* pToRemove = get(inName);
 
@@ -137,14 +137,10 @@ int Throttles::count()
 void Throttles::printThrottles()
 {
 	Throttle* pCurr = pFirstThrottle;
-	uint8_t count = 1;
 
 	while (pCurr != NULL)
 	{
-		Serial.print(count);
-		Serial.print(" : ");
 		pCurr->printThrottle();
-		count++;
 		pCurr = pCurr->pNextThrottle;
 	}
 }

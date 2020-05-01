@@ -28,6 +28,8 @@ class DCCpp
 		static volatile RegisterList mainRegs, progRegs;
 		static CurrentMonitor mainMonitor;
 		static CurrentMonitor progMonitor;
+		static bool IsPowerOnMain;
+		static bool IsPowerOnProg;
 	
 	public:
 		// begins

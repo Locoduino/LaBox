@@ -9,7 +9,6 @@ description: <FunctionsState class>
 
 #ifdef USE_LOCOMOTIVES
 Locomotive* Locomotives::pFirstLocomotive = NULL;
-bool Locomotives::useFunctionRegister = false;
 
 Locomotive* Locomotives::get(uint16_t inAddress)
 {
@@ -27,13 +26,13 @@ Locomotive* Locomotives::get(uint16_t inAddress)
 	return NULL;
 }
 
-Locomotive* Locomotives::get(const char* inName)
+Locomotive* Locomotives::get(const String& inName)
 {
 	Locomotive* pCurr = pFirstLocomotive;
 
 	while (pCurr != NULL)
 	{
-		if (strcmp(pCurr->getName(), inName) == 0)
+		if (pCurr->getName() ==  inName)
 		{
 			return pCurr;
 		}
@@ -43,11 +42,10 @@ Locomotive* Locomotives::get(const char* inName)
 	return NULL;
 }
 
-Locomotive* Locomotives::add(const char* inName, uint16_t inAddress, uint8_t inSpeedMax)
+Locomotive* Locomotives::add(const String& inName, uint16_t inAddress, uint8_t inSpeedMax)
 {
 	Locomotive* pNewLocomotive = NULL;
 
-	uint8_t functionReg = 0;
 	uint8_t speedReg = Registers::allocateRegister();
 
 	if (speedReg == 0)
@@ -56,22 +54,7 @@ Locomotive* Locomotives::add(const char* inName, uint16_t inAddress, uint8_t inS
 		return NULL;
 	}
 
-	if (useFunctionRegister)
-	{
-		functionReg = Registers::allocateRegister();
-
-		if (functionReg == 0)
-		{
-			// No more registers available.
-			return NULL;
-		}
-
-		pNewLocomotive = new Locomotive(inName, speedReg, functionReg, inAddress, inSpeedMax);
-	}
-	else
-	{
-		pNewLocomotive = new Locomotive(inName, speedReg, inAddress, inSpeedMax);
-	}
+	pNewLocomotive = new Locomotive(inName, speedReg, inAddress, inSpeedMax);
 
 	if (pNewLocomotive != NULL)
 	{
@@ -97,7 +80,6 @@ Locomotive* Locomotives::add(const char* inName, uint16_t inAddress, uint8_t inS
 	}
 
 	Registers::freeRegister(speedReg);
-	Registers::freeRegister(functionReg);
 
 	return NULL;
 }
@@ -130,7 +112,7 @@ void Locomotives::remove(uint16_t inAddress)
 	}
 }
 
-void Locomotives::remove(const char* inName)
+void Locomotives::remove(const String& inName)
 {
 	Locomotive* pToRemove = get(inName);
 

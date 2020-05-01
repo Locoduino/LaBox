@@ -22,18 +22,75 @@ Part of DCC++ BASE STATION for the Arduino
  extern void *__brkval;
  #endif
  
-	Throttle* TextCommand::pCurrentThrottle = NULL;
+#ifdef USE_WIFI
+#include"WiFi.h"
+#endif
+
+#ifdef USE_THROTTLES
+ Throttle* TextCommand::pCurrentThrottle = NULL;
+#endif
   char TextCommand::commandString[MAX_COMMAND_LENGTH+1];
  
- void TextCommand::receiveCommands()
+	void TextCommand::receiveCommands()
  {
+#ifdef USE_THROTTLES
 	 Throttle* pCurr = Throttles::getFirst();
 
 	 while (pCurr != NULL)
 	 {
-		 pCurr->receiveMessages();
+		 pCurr->loop();
 		 pCurr = pCurr->pNextThrottle;
 	 }
+#else
+		char c;
+
+#if defined(USE_ETHERNET)
+
+		EthernetClient client = DCCPP_INTERFACE.available();
+
+		if (client) {
+
+			if (DCCppConfig::Protocol == EthernetProtocol::HTTP) {
+				DCCPP_INTERFACE.println("HTTP/1.1 200 OK");
+				DCCPP_INTERFACE.println("Content-Type: text/html");
+				DCCPP_INTERFACE.println("Access-Control-Allow-Origin: *");
+				DCCPP_INTERFACE.println("Connection: close");
+				DCCPP_INTERFACE.println("");
+			}
+
+			while (client.connected() && client.available()) {        // while there is data on the network
+				added = Throttle::getCharacter(client.read(), this);
+				c = client.read();
+				if (c == '<')                    // start of new command
+					commandString[0] = 0;
+				else if (c == '>')               // end of new command
+				{
+					MessageStack::MessagesStack.PushMessage(commandString);
+				}
+				else if (strlen(commandString) < MAX_COMMAND_LENGTH)    // if comandString still has space, append character just read from network
+					sprintf(commandString, "%s%c", commandString, c);     // otherwise, character is ignored (but continue to look for '<' or '>')
+			} // while
+
+			if (DCCppConfig::Protocol == EthernetProtocol::HTTP)
+				client.stop();
+		}
+
+#else  // SERIAL case
+
+		while (DCCPP_INTERFACE.available() > 0) {    // while there is data on the serial line
+			c = DCCPP_INTERFACE.read();
+			if (c == '<')                    // start of new command
+				commandString[0] = 0;
+			else if (c == '>')               // end of new command
+			{
+				MessageStack::MessagesStack.PushMessage(commandString);
+			}
+			else if (strlen(commandString) < MAX_COMMAND_LENGTH)	// if commandString still has space, append character just read from serial line
+				sprintf(commandString, "%s%c", commandString, c);	// otherwise, character is ignored (but continue to look for '<' or '>')
+		} // while
+
+#endif
+#endif
  }
 
  void TextCommand::init(volatile RegisterList *_mRegs, volatile RegisterList *_pRegs, CurrentMonitor *_mMonitor){
@@ -47,19 +104,30 @@ Part of DCC++ BASE STATION for the Arduino
 	 receiveCommands();
 #endif
 
-		int pending = MessageStack::MessagesStack.GetPendingMessageIndex();
+	 int pending = MessageStack::MessagesStack.GetPendingMessageIndex();
 		if (pending != 255)
 		{
-			char buffer[MESSAGE_MAXSIZE];
+			char buffer[MESSAGE_MAXSIZE+10];
 
 			MessageStack::MessagesStack.GetMessage(pending, buffer);
 
-			if (parse(buffer) == false)
+#ifdef USE_THROTTLES
+			pCurrentThrottle = Throttle::getThrottleFromStackMessage(buffer);
+			if (pCurrentThrottle != NULL && pCurrentThrottle->pConverter != NULL)
 			{
-#if defined(DCCPP_DEBUG_MODE)
-				Serial.println("invalid command !");
-#endif
+				String message;
+				Throttle::getMessageFromStackMessage(buffer, message);
+				strncpy(buffer, message.c_str(), MESSAGE_MAXSIZE - 3);
+				pCurrentThrottle->pConverter->convert(pCurrentThrottle, buffer);
 			}
+			else
+#endif
+				if (parse(buffer) == false)
+				{
+#if defined(DCCPP_DEBUG_MODE)
+					Serial.println("invalid command !");
+#endif
+				}
 		}
  } // TextCommand:process
    
@@ -67,9 +135,12 @@ Part of DCC++ BASE STATION for the Arduino
 
 bool TextCommand::parse(char *com)
 {
-
+#ifdef USE_THROTTLES
+	String message;
 	pCurrentThrottle = Throttle::getThrottleFromStackMessage(com);
-	strncpy(com, Throttle::getMessageFromStackMessage(com), MESSAGE_MAXSIZE - 3);
+	Throttle::getMessageFromStackMessage(com, message);
+	strncpy(com, message.c_str(), MESSAGE_MAXSIZE - 3);
+#endif
 
 #ifdef DCCPP_DEBUG_MODE
 	Serial.print('<');
@@ -104,7 +175,9 @@ bool TextCommand::parse(char *com)
 	   */
 
 	  DCCpp::mainRegs.setThrottle(com+1);
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return true;
 
 	case 'f':       
@@ -156,7 +229,9 @@ bool TextCommand::parse(char *com)
 		*/
 
 		DCCpp::mainRegs.setFunction(com+1);
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return true;
 
 	case 'a':       
@@ -197,7 +272,9 @@ bool TextCommand::parse(char *com)
 
 	  DCCpp::mainRegs.setAccessory(com+1);
 
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return true;
 
 #ifdef USE_TURNOUT
@@ -209,7 +286,9 @@ bool TextCommand::parse(char *com)
 
 	  bool ret = Turnout::parse(com+1);
 
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return ret;
 #endif
 
@@ -222,7 +301,9 @@ bool TextCommand::parse(char *com)
 
 	  bool ret = Output::parse(com+1);
 
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return ret;
 #endif
 
@@ -235,7 +316,9 @@ bool TextCommand::parse(char *com)
  */
 	  bool ret = Sensor::parse(com+1);	  
 
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return ret;
 
 #ifdef DCCPP_PRINT_DCCPP
@@ -255,7 +338,9 @@ bool TextCommand::parse(char *com)
 
 	  Sensor::status();
 
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return true;
 #endif
 #endif
@@ -283,7 +368,9 @@ bool TextCommand::parse(char *com)
 
 	  DCCpp::mainRegs.writeCVByteMain(com+1);
 
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return true;
 
 
@@ -310,7 +397,9 @@ bool TextCommand::parse(char *com)
 
 	  DCCpp::mainRegs.writeCVBitMain(com+1);
 
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return true;
 
 	case 'W':      
@@ -337,7 +426,9 @@ bool TextCommand::parse(char *com)
 
 	  DCCpp::progRegs.writeCVByte(com+1);
 
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return true;
 
 	case 'B':      
@@ -365,7 +456,9 @@ bool TextCommand::parse(char *com)
 
 	  DCCpp::progRegs.writeCVBit(com+1);
 
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return true;
 
 	case 'R':     
@@ -391,7 +484,9 @@ bool TextCommand::parse(char *com)
 
 	  DCCpp::progRegs.readCV(com+1);
 
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return true;
 
 	case '1':      
@@ -412,7 +507,9 @@ bool TextCommand::parse(char *com)
 
 	  DCCpp::powerOn();
 
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return true;
 		  
 	case '0':     
@@ -433,7 +530,9 @@ bool TextCommand::parse(char *com)
 
 		DCCpp::powerOff();
 
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return true;
 
 	case 'c':     
@@ -456,10 +555,14 @@ bool TextCommand::parse(char *com)
 	  DCCPP_INTERFACE.print("<a");
 	  DCCPP_INTERFACE.print(int(DCCpp::getCurrentMain()));
 	  DCCPP_INTERFACE.print(">");
+#ifdef USE_THROTTLES
 		if (DCCPP_INTERFACE.sendNewline())
+#endif
 			DCCPP_INTERFACE.println("");
 
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return true;
 
 	case 's':
@@ -483,7 +586,9 @@ bool TextCommand::parse(char *com)
 			DCCPP_INTERFACE.print("<p0>");
 		if (DCCppConfig::SignalEnablePinProg == UNDEFINED_PIN || digitalRead(DCCppConfig::SignalEnablePinProg) == HIGH)
 			DCCPP_INTERFACE.print("<p1>");
+#ifdef USE_THROTTLES
 		if (DCCPP_INTERFACE.sendNewline())
+#endif
 			DCCPP_INTERFACE.println("");
 
 	  for(int i=1;i<=MAX_MAIN_REGISTERS;i++){
@@ -498,21 +603,26 @@ bool TextCommand::parse(char *com)
 		  DCCPP_INTERFACE.print(- DCCpp::mainRegs.speedTable[i]);
 		  DCCPP_INTERFACE.print(" 0>");
 		}          
+#ifdef USE_THROTTLES
 		if (DCCPP_INTERFACE.sendNewline())
+#endif
 			DCCPP_INTERFACE.println("");
 	  }
-	  DCCPP_INTERFACE.print("<iDCCpp LIBRARY BASE STATION FOR ARDUINO ");
+//		DCCPP_INTERFACE.print("<iDCCpp LIBRARY BASE STATION FOR ARDUINO ");
+		DCCPP_INTERFACE.print("<iDCC++ BASE STATION FOR ARDUINO MEGA / L293D : BUILD ");
 	  //DCCPP_INTERFACE.print(ARDUINO_TYPE);
 	  //DCCPP_INTERFACE.print(" / ");
 	  //DCCPP_INTERFACE.print(MOTOR_SHIELD_NAME);
-	  DCCPP_INTERFACE.print(": V-");
-	  DCCPP_INTERFACE.print(VERSION);
-	  DCCPP_INTERFACE.print(" / ");
+	  ///DCCPP_INTERFACE.print(": V-");
+	  ///DCCPP_INTERFACE.print(VERSION);
+	  ///DCCPP_INTERFACE.print(" / ");
 	  DCCPP_INTERFACE.print(__DATE__);
 	  DCCPP_INTERFACE.print(" ");
 	  DCCPP_INTERFACE.print(__TIME__);
 	  DCCPP_INTERFACE.print(">");
+#ifdef USE_THROTTLES
 		if (DCCPP_INTERFACE.sendNewline())
+#endif
 			DCCPP_INTERFACE.println("");
 
 	  DCCPP_INTERFACE.print("<N ");
@@ -520,25 +630,41 @@ bool TextCommand::parse(char *com)
 		DCCPP_INTERFACE.print("ETHERNET :");
 		DCCPP_INTERFACE.print(Ethernet.localIP());
 		DCCPP_INTERFACE.print(">");
+#ifdef USE_THROTTLES
 		if (DCCPP_INTERFACE.sendNewline())
+#endif
 			DCCPP_INTERFACE.println("");
 #else
-	  DCCPP_INTERFACE.println("SERIAL>");
+#if defined(USE_WIFI)
+		DCCPP_INTERFACE.print("ETHERNET :");
+		DCCPP_INTERFACE.print(WiFi.localIP());
+		DCCPP_INTERFACE.print(">");
+#else
+		DCCPP_INTERFACE.print("SERIAL>");
+#endif
 #endif
 
 #ifdef DCCPP_PRINT_DCCPP
 #ifdef USE_TURNOUT
 	  Turnout::show();
+#else
+		DCCPP_INTERFACE.print("<X>");
 #endif
 #ifdef USE_OUTPUT
 	  Output::show();
+#else
+		DCCPP_INTERFACE.print("<X>");
 #endif
 #ifdef USE_SENSOR
 	  Sensor::show();
 #endif
 #endif
 
+		DCCPP_INTERFACE.println("");
+
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return true;
 
 #ifdef USE_EEPROM
@@ -569,7 +695,9 @@ bool TextCommand::parse(char *com)
 		if (DCCPP_INTERFACE.sendNewline())
 			DCCPP_INTERFACE.println("");
 
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return true;
 
 	case 'e':     
@@ -593,7 +721,9 @@ bool TextCommand::parse(char *com)
 		if (DCCPP_INTERFACE.sendNewline())
 			DCCPP_INTERFACE.println("");
 
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return true;
 #endif
 
@@ -615,7 +745,9 @@ bool TextCommand::parse(char *com)
 
 	  DCCPP_INTERFACE.println("");
 
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return true;
 
 ///          
@@ -643,7 +775,9 @@ bool TextCommand::parse(char *com)
 
 		DCCpp::setDebugDccMode();
 
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return true;
 
 	case 'M':       
@@ -672,7 +806,9 @@ bool TextCommand::parse(char *com)
 
 	  DCCpp::mainRegs.writeTextPacket(com+1);
 
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return true;
 
 	case 'P':       
@@ -701,7 +837,9 @@ bool TextCommand::parse(char *com)
 
 	  DCCpp::progRegs.writeTextPacket(com+1);
 
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return true;
 			
 #ifndef VISUALSTUDIO
@@ -730,10 +868,14 @@ bool TextCommand::parse(char *com)
 		DCCPP_INTERFACE.print((int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval));
 #endif
 		DCCPP_INTERFACE.print(">");
+#ifdef USE_THROTTLES
 		if (DCCPP_INTERFACE.sendNewline())
+#endif
 			DCCPP_INTERFACE.println("");
 
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return true;
 #endif
 
@@ -775,7 +917,9 @@ bool TextCommand::parse(char *com)
 	  }
 	  DCCPP_INTERFACE.println("");
 
+#ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
+#endif
 		return true;
 	} // switch
 

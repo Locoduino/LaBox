@@ -117,8 +117,10 @@ void RegisterList::loadPacket(int nReg, byte *b, int nBytes, int nRepeat, int pr
   maxLoadedReg=max(maxLoadedReg,nextReg);
   
 #ifdef DCCPP_DEBUG_MODE
+#ifdef DCCPP_DEBUG_VERBOSE_MODE
   if(printFlag)       // for debugging purposes
 		printPacket(nReg,b,nBytes,nRepeat);  
+#endif
 #endif
 
 } // RegisterList::loadPacket
@@ -151,7 +153,9 @@ void RegisterList::setThrottle(int nReg, int cab, int tSpeed, int tDirection) vo
 	DCCPP_INTERFACE.print(tSpeed); DCCPP_INTERFACE.print(" ");
 	DCCPP_INTERFACE.print(tDirection);
 	DCCPP_INTERFACE.print(">");
+#ifdef USE_THROTTLES
 	if (DCCPP_INTERFACE.sendNewline())
+#endif
 		DCCPP_INTERFACE.println("");
 #endif
 	speedTable[nReg] = tDirection == 1 ? tSpeed : -tSpeed;
@@ -205,7 +209,9 @@ void RegisterList::setFunction(int nReg, int cab, int fByte, int eByte) volatile
 	DCCPP_INTERFACE.print(fByte); DCCPP_INTERFACE.print(" ");
 	DCCPP_INTERFACE.print(eByte);
 	DCCPP_INTERFACE.print(">");
+#ifdef USE_THROTTLES
 	if (DCCPP_INTERFACE.sendNewline())
+#endif
 		DCCPP_INTERFACE.println("");
 #endif
 	/* NMRA DCC norm ask for two DCC packets instead of only one:
@@ -304,7 +310,9 @@ void RegisterList::writeTextPacket(int nReg, byte *b, int nBytes) volatile
 
 	if (nBytes<2 || nBytes>5) {    // invalid valid packet
 		DCCPP_INTERFACE.print("<mInvalid Packet>");
+#ifdef USE_THROTTLES
 		if (DCCPP_INTERFACE.sendNewline())
+#endif
 			DCCPP_INTERFACE.println("");
 		return;
 	}
@@ -436,7 +444,9 @@ int RegisterList::readCVraw(int cv, int callBack, int callBackSub) volatile
 	DCCPP_INTERFACE.print(" ");
 	DCCPP_INTERFACE.print(bValue);
 	DCCPP_INTERFACE.print(">");
+#ifdef USE_THROTTLES
 	if (DCCPP_INTERFACE.sendNewline())
+#endif
 		DCCPP_INTERFACE.println("");
 #endif
 
@@ -536,7 +546,9 @@ void RegisterList::writeCVByte(int cv, int bValue, int callBack, int callBackSub
 	DCCPP_INTERFACE.print(" ");
 	DCCPP_INTERFACE.print(bValue);
 	DCCPP_INTERFACE.print(">");
+#ifdef USE_THROTTLES
 	if (DCCPP_INTERFACE.sendNewline())
+#endif
 		DCCPP_INTERFACE.println("");
 #endif
 } // RegisterList::writeCVByte(ints)
@@ -607,7 +619,9 @@ void RegisterList::writeCVBit(int cv, int bNum, int bValue, int callBack, int ca
 	DCCPP_INTERFACE.print(" ");
 	DCCPP_INTERFACE.print(bValue);
 	DCCPP_INTERFACE.print(">");
+#ifdef USE_THROTTLES
 	if (DCCPP_INTERFACE.sendNewline())
+#endif
 		DCCPP_INTERFACE.println("");
 #endif
 } // RegisterList::writeCVBit(ints)
@@ -728,7 +742,9 @@ void RegisterList::printPacket(int nReg, byte *b, int nBytes, int nRepeat) volat
   DCCPP_INTERFACE.print(" / ");
   DCCPP_INTERFACE.print(nRepeat);
   DCCPP_INTERFACE.print(">");
+#ifdef USE_THROTTLES
 	if (DCCPP_INTERFACE.sendNewline())
+#endif
 		DCCPP_INTERFACE.println("");
 } // RegisterList::printPacket()
 #endif

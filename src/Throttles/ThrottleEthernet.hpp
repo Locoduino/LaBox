@@ -6,7 +6,7 @@
 #include "DCCpp.h"
 
 #if !defined(ARDUINO_ARCH_ESP32)
-#if defined(USE_THROTTLES) && defined(USE_ETHERNET)
+#if defined(USE_TEXTCOMMAND) && defined(USE_THROTTLES) && defined(USE_ETHERNET)
 
 #ifdef USE_ETHERNET_WIZNET_5100
 #define COMM_SHIELD_NAME      "ARDUINO-CC ETHERNET SHIELD (WIZNET 5100)"
@@ -28,7 +28,7 @@
 
 /** This is a class to handle an ethernet connection.
 */
-class ThrottleEthernet: public Throttle
+class ThrottleEthernet : public Throttle
 {
 private:
 	uint8_t ethernetIp[4];
@@ -42,11 +42,11 @@ public:
 	/** Creates a new instance of this interface.
 	@param inName	throttle new name.
 	*/
-	ThrottleEthernet(const char* inName, uint8_t* inMac, uint8_t* inIp, int inPort, EthernetProtocol inProtocol);
+	ThrottleEthernet(const String& inName, uint8_t* inMac, uint8_t* inIp, int inPort, EthernetProtocol inProtocol);
 
 	bool begin();
-	bool receiveMessages();
-	bool sendMessage(const char *);
+	bool loop();
+	bool sendMessage(const String& inMessage);
 	void end();
 	bool isConnected();
 	bool sendNewline();

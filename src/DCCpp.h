@@ -439,7 +439,7 @@ Main include file of the library.*/
 // The function DCCpp::showConfiguration()
 // is very heavy in program memory. So to avoid problems
 // you can make this function available by uncomment the next line, only when necessary.
-//#define DCCPP_PRINT_DCCPP
+#define DCCPP_PRINT_DCCPP
 #pragma warning (default : 4005)
 
 ///////////////////////////////////////////////////////
@@ -464,7 +464,8 @@ Main include file of the library.*/
 //#define USE_ETHERNET_WIZNET_5500
 //#define USE_ETHERNET_WIZNET_5200
 //#define USE_ETHERNET_ENC28J60
-#define USE_WIFI
+#define USE_WIFI_LOCALSSID
+//#define USE_WIFI_EXTERNSSID
 #define USE_LOCOMOTIVES
 #define USE_THROTTLES
 
@@ -489,8 +490,10 @@ Main include file of the library.*/
 		#define USE_ETHERNET_WIZNET_5200
     /**Comment this line to avoid using and compiling Ethernet shield using ENC28J60 chip.*/
     #define USE_ETHERNET_ENC28J60
-    /**Comment this line to avoid using and compiling Wifi communication.*/
-    #define USE_WIFI
+    /**Comment this line to avoid using and compiling Wifi communication using the Arduino as a local Wifi Access Point.*/
+    #define USE_WIFI_LOCALSSID
+    /**Comment this line to avoid using and compiling Wifi communication using an existing Access Point (ISP box for instance).*/
+    #define USE_WIFI_EXTERNSSID
     /**Comment this line to avoid using and compiling all the Locomotives class part.*/
     #define USE_LOCOMOTIVES
 
@@ -531,7 +534,11 @@ Main include file of the library.*/
 #define USE_ETHERNET
 #endif
 
-/////////////////////////////////////
+#if defined(USE_WIFI_LOCALSSID) || defined(USE_WIFI_EXTERNSSID)
+#define USE_WIFI
+#endif
+
+    /////////////////////////////////////
 
 #include "DCCpp_Uno.h"
 #include "PacketRegister.h"
@@ -542,6 +549,7 @@ Main include file of the library.*/
 #include "Locomotives/Locomotives.hpp"
 #endif
 #ifdef USE_THROTTLES
+#include "Throttles/Throttle.hpp"
 #include "Throttles/Throttles.hpp"
 #endif
 #ifdef USE_TURNOUT
