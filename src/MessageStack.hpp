@@ -18,6 +18,7 @@ class MessageStack
 {
 private:
 	char messages[MESSAGE_MAXNUMBER][MESSAGE_MAXSIZE];
+	byte peakCount;
 	SemaphoreHandle_t xSemaphore; // semaphore d'exclusion mutuelle
 
 	MessageStack();
@@ -58,7 +59,12 @@ public:
 	@return number of items in the stack.
 	*/
 	byte GetCount();
-  
+
+	/** Counts the number of item in the stack.
+	@return number of items in the stack.
+	*/
+	byte GetPeakCount() const {	return this->peakCount;	}
+
 #ifdef DCCPP_DEBUG_MODE
 #ifdef VISUALSTUDIO
 	/** Unit test function

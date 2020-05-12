@@ -8,13 +8,14 @@ description: <Throttle base class>
 #include "DCCpp.h"
 
 #if defined(USE_THROTTLES)
-Throttle::Throttle(const String& inName)
+Throttle::Throttle(const String& inName, unsigned int inTimeOutDelay)
 {
 	// 'static' data, not updated during the run.
 	this->name = inName;
-	this->printMemo = "";
-	this->commandString[0] = 0;
-
+	this->timeOutDelay = inTimeOutDelay;
+	this->dontReply = false;
+	this->pBuffer = NULL;
+	this->type = ThrottleType::SerialThrottle;
 	this->id = 0;
 
 	// Default start/end characters for DCC++ syntax commands
@@ -22,6 +23,10 @@ Throttle::Throttle(const String& inName)
 	this->endCommandCharacter = '>';
 
 	// Variable data
+	this->printMemo = "";
+	this->commandString[0] = 0;
+	this->contacted = false;
+	this->lastActivityDate = 0;
 	this->pNextThrottle = NULL;
 
 	Throttles::add(this);
@@ -63,30 +68,30 @@ bool Throttle::getCharacter(char inC, Throttle* inpThrottle)
 {
 	//Serial.println((int)inC);
 	if (inC == (char)inpThrottle->startCommandCharacter)                    // start of new command
+	{
+		inpThrottle->commandString[0] = 0;
+	}
+	else
+	{
+		if (inC == (char)inpThrottle->endCommandCharacter)               // end of new command
 		{
+#ifdef DCCPP_DEBUG_MODE
+			Serial.print(inpThrottle->id);
+			Serial.print(" From Throttle : ");
+			Serial.println(inpThrottle->commandString);
+#endif
+			inpThrottle->pushMessage(inpThrottle->commandString);
 			inpThrottle->commandString[0] = 0;
+			return true;
 		}
 		else
 		{
-			if (inC == (char)inpThrottle->endCommandCharacter)               // end of new command
-			{
-#ifdef DCCPP_DEBUG_MODE
-				Serial.print(inpThrottle->id);
-				Serial.print(" From WiThrottle : ");
-				Serial.println(inpThrottle->commandString);
-#endif
-				inpThrottle->pushMessage(inpThrottle->commandString);
-				inpThrottle->commandString[0] = 0;
-				return true;
-			}
-			else
-			{
-				if (inC > ' ' && strlen(inpThrottle->commandString) < MAX_COMMAND_LENGTH)    // if comamndString still has space, append character just read from network
-					sprintf(inpThrottle->commandString, "%s%c", inpThrottle->commandString, inC);     // otherwise, character is ignored (but continue to look for start or end characters)}
-			}
+			if (inC > ' ' && strlen(inpThrottle->commandString) < MAX_COMMAND_LENGTH)    // if comamndString still has space, append character just read from network
+				sprintf(inpThrottle->commandString, "%s%c", inpThrottle->commandString, inC);     // otherwise, character is ignored (but continue to look for start or end characters)}
 		}
+	}
 
-		return false;
+	return false;
 }
 
 void Throttle::setCommandCharacters(int inStartCharacter, int inEndCharacter)
@@ -95,9 +100,62 @@ void Throttle::setCommandCharacters(int inStartCharacter, int inEndCharacter)
 	this->endCommandCharacter = inEndCharacter;
 }
 
-bool Throttle::sendNewline()
+bool Throttle::sendNewline() const
 {
 	return true;
+}
+
+bool Throttle::processBuffer()
+{
+	bool ret = false;
+	if (this->pConverter != NULL)
+		ret = this->pConverter->processBuffer(this);
+	if (ret)
+	{
+		if (this->timeOutDelay != 0)
+			this->lastActivityDate = millis();
+	}
+	else
+	{
+		if (this->lastActivityDate != 0)
+		{
+			if (millis() - this->lastActivityDate > this->timeOutDelay)
+			{
+				if (this->pConverter != NULL)
+					this->pConverter->clientStop(this);
+				else
+					this->end();
+#ifdef DCCPP_DEBUG_MODE
+				Serial.print(this->id);
+				Serial.println(" disconnected !");
+				Throttles::printThrottles();
+#endif
+			}
+		}
+	}
+	return ret;
+}
+
+bool Throttle::pushMessage(const String& inpCommand)
+{
+	this->pushMessageInStack(this->id, inpCommand);
+	if (this->timeOutDelay != 0)
+		this->lastActivityDate = millis();
+	return true;
+}
+
+void Throttle::end()
+{
+	this->printMemo = "";
+	this->commandString[0] = 0;
+
+	this->startCommandCharacter = '<';
+	this->endCommandCharacter = '>';
+
+	this->contacted = false;
+	this->lastActivityDate = 0;
+	if (this->pBuffer != NULL)
+		this->pBuffer->clear();
 }
 
 // Classic print part
@@ -266,9 +324,9 @@ SERIAL_INTERFACE(Serial, Test);
 const char* ssidTest = "VIDEOFUTUR_C56165_2.4G";
 const char* passwordTest = "EenPghQD";
 // the media access control (ethernet hardware) address for the shield:
-uint8_t MacTest[] = { 0xBE, 0xEF, 0xBE, 0xEF, 0xBE, 0x80 };
+//uint8_t MacTest[] = { 0xBE, 0xEF, 0xBE, 0xEF, 0xBE, 0x80 };
 //the IP address for the shield:
-uint8_t IpTest[] = { 192, 168, 1, 100 };
+//uint8_t IpTest[] = { 192, 168, 1, 100 };
 
 void Throttle::test()
 {
@@ -280,7 +338,8 @@ void Throttle::test()
 	throttleEthernet.setId(9);
 #endif
 
-	ThrottleWifi throttleWifi("TestWifi 567", MacTest, IpTest, 2560, TCP);
+	ThrottleWifi throttleWifi("TestWifi 567", 2560);
+	throttleWifi.begin(TCP);
 	throttleWifi.setId(567);
 
 	Throttles::printThrottles();
@@ -312,12 +371,6 @@ void Throttle::test()
 	}
 }
 #endif
-
-bool Throttle::pushMessage(const String& inpCommand)
-{
-	this->pushMessageInStack(this->id, inpCommand);
-	return true;
-}
 
 #ifdef DCCPP_DEBUG_MODE
 void Throttle::printThrottle()

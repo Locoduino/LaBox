@@ -31,7 +31,7 @@
 class ThrottleEthernet : public Throttle
 {
 private:
-	uint8_t ethernetIp[4];
+	IPAddress ethernetIp;
 	uint8_t ethernetMac[6];
 	int port = 0;
 
@@ -44,12 +44,13 @@ public:
 	*/
 	ThrottleEthernet(const String& inName, uint8_t* inMac, uint8_t* inIp, int inPort, EthernetProtocol inProtocol);
 
-	bool begin();
+	bool begin(EthernetProtocol inProtocol = TCP);
 	bool loop();
 	bool sendMessage(const String& inMessage);
 	void end();
 	bool isConnected();
 	bool sendNewline();
+	IPAddress remoteIP();
 
 #ifdef DCCPP_DEBUG_MODE
 	/** Print the status of the Throttle.

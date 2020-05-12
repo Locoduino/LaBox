@@ -10,7 +10,8 @@
 
 #define HEARTBEATTIMEOUT 10
 #define WICOMMANDSIZE	30
-#define WIMAXTHROTLLESNUMBER	6
+#define WIMAXLOCOSNUMBER	6
+#define WI_TIMEOUT		60000		// if no activity during 1 minute, disconnect the throttle...
 
 // Define turnout object structures
 typedef struct
@@ -37,8 +38,8 @@ public:
 #endif
 
 	bool heartbeatEnable;
-	Locomotive locos[WIMAXTHROTLLESNUMBER];
-	unsigned long heartbeat[WIMAXTHROTLLESNUMBER];
+	Locomotive* pLocos[WIMAXLOCOSNUMBER];
+	unsigned long heartbeat[WIMAXLOCOSNUMBER];
 
 	/** Creates a new instance for only one register.
 	@param inName	throttle new name.

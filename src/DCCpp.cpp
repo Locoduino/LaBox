@@ -36,6 +36,20 @@ static bool first = true;
 
 void DCCpp::loop()
 {
+#ifdef USE_THROTTLES
+  Throttle* pCurr = Throttles::getFirst();
+  bool done = false;
+
+  while (pCurr != NULL)
+  {
+    TextCommand::pCurrentThrottle = pCurr;
+    done = pCurr->processBuffer();
+    pCurr = pCurr->pNextThrottle;
+  }
+
+  TextCommand::pCurrentThrottle = NULL;
+#endif
+
 #ifdef USE_TEXTCOMMAND
   TextCommand::process();              // check for, and process, and new serial commands
 #endif
@@ -171,9 +185,13 @@ void DCCpp::begin()
   if (EEStore::needsRefreshing())
     EEStore::store();
 #endif
+#if defined(ARDUINO_ARCH_ESP32)
   MessageStack::MessagesStack.begin(true);
+#else
+  MessageStack::MessagesStack.begin(false);
+#endif
 
-#ifdef USE_THROTTLES
+/*#ifdef USE_THROTTLES
   Throttle* pCurr = Throttles::getFirst();
 
   while (pCurr != NULL)
@@ -181,9 +199,10 @@ void DCCpp::begin()
     pCurr->begin();
     pCurr = pCurr->pNextThrottle;
   }
-#endif
+#endif*/
 
 #if defined(ARDUINO_ARCH_ESP32) && defined(USE_TEXTCOMMAND)
+  
 #ifdef DCCPP_DEBUG_MODE
   int core = xPortGetCoreID();
   Serial.print("Ino executing on core ");
@@ -394,16 +413,18 @@ bool DCCpp::setThrottle(volatile RegisterList *inpRegs, int nReg,  int inLocoId,
 
   if (panicStopped)
     val = 1;
-  else if (inNewSpeed > 0)
-    val = map(inNewSpeed, 0, inStepsNumber, 2, 127);
+  else if (inNewSpeed > 1)
+    val = map(inNewSpeed, 2, inStepsNumber, 2, 126);
 
 #ifdef DCCPP_DEBUG_MODE
-  Serial.print(F("DCCpp SetSpeed "));
+  Serial.print(F("DCCpp SetSpeed for loco "));
+  Serial.print(inLocoId);
+  Serial.print(F(" : "));
   Serial.print(inForward ? inNewSpeed : -inNewSpeed);
   Serial.print(F("/"));
   Serial.print(inStepsNumber);
-  Serial.print(F(" (in Dcc "));
-  Serial.print(val);
+//  Serial.print(F(" (in Dcc "));
+//  Serial.print(val);
   Serial.println(F(" )"));
 #endif
 
@@ -528,7 +549,7 @@ void DCCpp::setFunctions(volatile RegisterList *inpRegs, int nReg, int inLocoId,
   inStates.statesSent();
 
 #ifdef DCCPP_DEBUG_MODE
-  Serial.print(F("DCCpp SetFunctions for loco"));
+  Serial.print(F("DCCpp SetFunctions for loco "));
   Serial.print(inLocoId);
   Serial.print(" / Activated : ");
   inStates.printActivated();

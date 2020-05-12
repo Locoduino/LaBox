@@ -25,7 +25,7 @@ Locomotive::Locomotive(const String& inName, uint8_t inSpeedRegister, uint16_t i
 	// Variable data
 	this->currentSpeed = 0; // regular stop
 	this->direction = true;	// goes forward
-	this->tag = 0;
+	this->tag = -1;
 	this->pNextLocomotive = NULL;
 }
 
@@ -40,7 +40,7 @@ void Locomotive::initialize()
 	// Variable data
 	this->currentSpeed = 0; // regular stop
 	this->direction = true;	// goes forward
-	this->tag = 0;
+	this->tag = -1;
 	this->pNextLocomotive = NULL;
 	this->functions.clear();
 }
@@ -98,9 +98,10 @@ void Locomotive::printLocomotive()
 	Serial.print(this->speedMax);
 
 	Serial.print("      +/-speed:");
-	Serial.print(this->currentSpeed * (this->direction == true?1:-1));
+	Serial.print(this->currentSpeed * (this->direction == true ? 1 : -1));
 
-	Serial.println("");
+	Serial.print("      functions: ");
+	this->functions.printActivated();
 }
 #endif
 #endif

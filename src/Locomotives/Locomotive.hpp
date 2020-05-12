@@ -114,6 +114,7 @@ public:
 	/** Send a DCC command to stop this locomotive.
 	*/
 	void stop();
+
 	/* Send a DCC command to stop the locmotive IMMEDIATELY
 	*/
 	void emergencyStop();

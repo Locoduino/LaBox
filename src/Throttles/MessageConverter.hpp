@@ -23,7 +23,8 @@ public:
 
 	virtual void clientStart(Throttle* inpThrottle) {}
 	virtual void clientStop(Throttle* inpThrottle) {}
-	virtual bool convert(Throttle* inpThrottle, const String& inCommand) = 0;
+	virtual bool convert(Throttle* inpThrottle, const String& inCommand) { return false; }
+	virtual bool processBuffer(Throttle* inpThrottle) { return false; }
 	virtual void stayAlive(Throttle* inpThrottle) {}
 
 #ifdef DCCPP_DEBUG_MODE

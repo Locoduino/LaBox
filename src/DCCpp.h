@@ -565,6 +565,7 @@ Main include file of the library.*/
 #include "Sensor.h"
 #endif
 #ifdef USE_TEXTCOMMAND
+#include "MessageStack.hpp"          
 #include "TextCommand.h"
 #endif
 

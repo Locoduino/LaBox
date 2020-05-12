@@ -7,32 +7,21 @@ description: <Throttle Wifi class>
 #include "DCCpp.h"
 
 #if defined(USE_TEXTCOMMAND) && defined(USE_THROTTLES) && defined(USE_WIFI)
-ThrottleWifi::ThrottleWifi(const String& inName, uint8_t* inMac, uint8_t* inIp, int inPort, EthernetProtocol inProtocol) : Throttle(inName)
+
+IPAddress ThrottleWifi::wifiIp;
+WiFiUDP ThrottleWifi::_ClientUDP;
+
+ThrottleWifi::ThrottleWifi(const String& inName, int inPort) : Throttle(inName)
 {
-	for (int i = 0; i < 4; i++)
-	{
-		if (inIp != NULL)
-			this->wifiIp[i] = inIp[i];
-		else
-			this->wifiIp[i] = 0;
-	}
-
-	for (int i = 0; i < 6; i++)
-	{
-		if (inMac != NULL)
-			this->wifiIpMac[i] = inMac[i];
-		else
-			this->wifiIpMac[i] = 0;
-	}
-
 	this->port = inPort;
-	this->protocol = inProtocol;
-
-	this->pServer = new WiFiServer(inPort);
+	this->remoteIp = INADDR_NONE;
+	this->contacted = false;
+	this->type = ThrottleType::Wifi;
 }
 
 void ThrottleWifi::connectWifi(const char* inSsid, const char* inPassword)
 {
+	bool connected = false;
 	//DO NOT TOUCH
 	//  This is here to force the ESP32 to reset the WiFi and initialise correctly.
 	WiFi.mode(WIFI_STA);
@@ -44,86 +33,323 @@ void ThrottleWifi::connectWifi(const char* inSsid, const char* inPassword)
 	// End silly stuff !!!
 
 #ifdef USE_WIFI_LOCALSSID
-	WiFi.softAP(inSsid, inPassword);
-	IPAddress myIP = WiFi.softAPIP();
-	Serial.print("AP IP address: ");
-	Serial.println(myIP);
+	connected = WiFi.softAP(inSsid, inPassword);
 #else
 	WiFi.begin(inSsid, inPassword);
 
-	while (WiFi.status() != WL_CONNECTED) {
+	while (WiFi.status() != WL_CONNECTED) 
+	{
 		delay(500);
-#ifdef DCCPP_DEBUG_MODE
-		Serial.print(".");
-		Serial.print(WiFi.status());
-#endif
+	}
+	if (WiFi.status() == WL_CONNECTED)
+	{
+		connected = true;
 	}
 #endif
 
-#ifdef DCCPP_DEBUG_MODE
-	Serial.println("");
+#ifdef USE_WIFI_LOCALSSID
+	ThrottleWifi::wifiIp = WiFi.softAPIP();
+#else
+	ThrottleWifi::wifiIp = WiFi.localIP();
+#endif
 
-	Serial.print(inSsid);
-	Serial.println(F(" connected ! beginWifi achieved."));
+#ifdef DCCPP_DEBUG_MODE
+
+	if (connected)
+	{
+		Serial.print("Server IP address: ");
+		Serial.print(wifiIp);
+		Serial.print(" (");
+		Serial.print(inSsid);
+		Serial.println(F(") connected ! connectWifi achieved."));
+	}
+	else
+	{
+		Serial.print(" : ");
+		Serial.print(WiFi.status());
+		Serial.print(" on ");
+		Serial.print(inSsid);
+		Serial.println(F(" NOT CONNECTED. Restart Arduino !"));
+		while (true);
+	}
 #endif
 }
 
-bool ThrottleWifi::begin()
+bool ThrottleWifi::begin(EthernetProtocol inProtocol)
 {
-	Serial.println("begin");
-	this->pServer->begin();
+	this->protocol = inProtocol;
+
+	if (protocol == UDP)
+	{
+		this->pBuffer = new CircularBuffer(UDP_BUFFERSIZE);
+		this->pServer = NULL;
+
+		_ClientUDP.begin(this->wifiIp, this->port);
+	//	this->ClientUDP.begin(this->wifiIp, this->port);
+
+#if defined(ARDUINO_ARCH_ESP32)
+		this->pBuffer->begin(true);
+#else
+		this->pBuffer->begin(false);
+#endif
+
+		_ClientUDP.flush();
+		//this->ClientUDP.flush();
+	}
+	else
+	{
+		this->pBuffer = NULL;
+		this->pServer = new WiFiServer(this->port);
+		this->pServer->begin();
+	}
+
 	return true;
+}
+
+IPAddress ThrottleWifi::remoteIP()
+{
+	return this->remoteIp;
+}
+
+ThrottleWifi* ThrottleWifi::GetThrottle(IPAddress inRemoteIp, int inPort, EthernetProtocol inProtocol)
+{
+	// Try  to find for each client is this message
+	Throttle* pThrottle = Throttles::get(inRemoteIp);
+
+	if (pThrottle != NULL)
+	{
+		if (pThrottle->type == Wifi)
+		{
+			// If already mounted, use it !
+			return (ThrottleWifi*)pThrottle;
+		}
+	}
+
+	// If no client found, try to affect a new one in the list of free wifi clients.
+	Throttle* pCurr = Throttles::getFirst();
+
+	while (pCurr != NULL)
+	{
+		if (pCurr->type == Wifi)
+		{
+			if (pCurr->remoteIP() == INADDR_NONE)
+			{
+				ThrottleWifi* pWifi = (ThrottleWifi*)pCurr;
+				if (inPort == pWifi->port && pWifi->protocol == inProtocol && pWifi->contacted == false)
+				{
+					return pWifi;
+				}
+			}
+		}
+		pCurr = pCurr->pNextThrottle;
+	}
+
+	return NULL;
+}
+
+bool ThrottleWifi::readUdpPacket(ThrottleWifi *inpThrottle)
+{
+	bool added = false;
+	byte udp[THROTTLE_UDPBYTE_SIZE];
+	memset(udp, 0, THROTTLE_UDPBYTE_SIZE);
+	int len = _ClientUDP.read(udp, THROTTLE_UDPBYTE_SIZE);
+	added = len > 0;
+	if (added)
+	{
+		inpThrottle->pBuffer->PushBytes(udp, len);
+	}
+
+	return added;
 }
 
 bool ThrottleWifi::loop()
 {
 	bool added = false;
 
-	WiFiClient foundClient = this->pServer->available();
-
-	if (!this->client && foundClient) {
-		this->client = foundClient;
-		Serial.println("Client found");
-		if (this->protocol == EthernetProtocol::HTTP) {
-			this->pServer->println("HTTP/1.1 200 OK");
-			this->pServer->println("Content-Type: text/html");
-			this->pServer->println("Access-Control-Allow-Origin: *");
-			this->pServer->println("Connection: close");
-			this->pServer->println("");
-		}
-	}
-
-	if (this->client) 
+	if (this->protocol == UDP)
 	{
-		while (this->client.available()) 
-		{        // while there is data on the network
-			added = Throttle::getCharacter(this->client.read(), this);
+		int bufferSize = _ClientUDP.parsePacket();
+		if (bufferSize > 0)
+		{
+			ThrottleWifi* pWifi = GetThrottle(_ClientUDP.remoteIP(), _ClientUDP.remotePort(), UDP);
+
+			if (pWifi != NULL)
+			{
+				if (pWifi->contacted == false)
+				{
+					pWifi->contacted = true;
+					pWifi->setRemoteIP(_ClientUDP.remoteIP());
+					if (pWifi->pConverter != NULL)
+						pWifi->pConverter->clientStart(pWifi);
+#ifdef DCCPP_DEBUG_MODE
+					Throttles::printThrottles();
+#endif
+				}
+				added = readUdpPacket(pWifi);
+			}
+		}
+	}
+/*		//processing incoming packet, must be called before reading the buffer
+		if (this->ClientUDP.parsePacket() > 0)
+		{
+			ThrottleWifi* pWifi = GetThrottle(this->ClientUDP.remoteIP(), this->ClientUDP.remotePort(), UDP);
+
+			if (pWifi != NULL)
+			{
+				if (pWifi->contacted == false)
+				{
+					pWifi->contacted = true;
+					pWifi->setRemoteIP(pWifi->ClientUDP.remoteIP());
+					if (pWifi->pConverter != NULL)
+						pWifi->pConverter->clientStart(pWifi);
+#ifdef DCCPP_DEBUG_MODE
+					Throttles::printThrottles();
+#endif
+				}
+
+				Serial.println("Reading data");
+
+				byte udp[THROTTLE_UDPBYTE_SIZE];
+				memset(udp, 0, THROTTLE_UDPBYTE_SIZE);
+				int len = pWifi->ClientUDP.read(udp, THROTTLE_UDPBYTE_SIZE);
+				added = len > 0;
+				if (added)
+				{
+					pWifi->pBuffer->PushBytes(udp, len);
+				}
+			}
+		}
+	}
+	*/
+	else
+	{
+		WiFiClient foundClient = this->pServer->available();
+
+		ThrottleWifi* pWifi = this;
+
+		if (foundClient)
+		{
+			pWifi = GetThrottle(foundClient.remoteIP(), this->port, this->protocol);
+
+			if (pWifi != NULL)
+			{
+				if (pWifi->contacted == false)
+				{
+					pWifi->contacted = true;
+					pWifi->setRemoteIP(foundClient.remoteIP());
+					pWifi->client = foundClient;
+					if (pWifi->pConverter != NULL)
+						pWifi->pConverter->clientStart(pWifi);
+					if (this->protocol == HTTP) {
+						pWifi->pServer->println("HTTP/1.1 200 OK");
+						pWifi->pServer->println("Content-Type: text/html");
+						pWifi->pServer->println("Access-Control-Allow-Origin: *");
+						pWifi->pServer->println("Connection: close");
+						pWifi->pServer->println("");
+					}
+#ifdef DCCPP_DEBUG_MODE
+					Throttles::printThrottles();
+#endif
+				}
+			}
+			else
+				pWifi = this;
 		}
 
-		if (this->protocol == EthernetProtocol::HTTP)
-			this->client.stop();
-	}
+		if (pWifi->contacted && pWifi->client)
+		{
+			while (pWifi->client.available())
+			{        // while there is data on the network
+				added = Throttle::getCharacter(pWifi->client.read(), pWifi);
+			}
 
+			if (pWifi->protocol == EthernetProtocol::HTTP)
+				pWifi->client.stop();
+		}
+	}
 	return added;
 }
 
 bool ThrottleWifi::sendMessage(const String& inMessage)
 {
+	if (!this->dontReply)
+	{
+		size_t size = 0;
+		switch (this->protocol)
+		{
+		case TCP:		size = this->client.println(inMessage);	break;
+		case HTTP:	size = this->pServer->println(inMessage);	break;
+		case UDP:		return true;
+		}
+
 #ifdef DCCPP_DEBUG_MODE
-	Serial.print("-> ");
-	Serial.println(inMessage);
+		Serial.print(this->id);
+		Serial.print(" -> ");
+		Serial.print(inMessage);
+
+		if (size == 0)
+			Serial.println(" *** MESSAGE NOT SENT !");
+		else
+			Serial.println("");
 #endif
-	this->pServer->println(inMessage);
+
+	}
 	return true;
+}
+
+void ThrottleWifi::write(byte* inpData, int inLengthData)
+{
+	size_t size = 0;
+
+//	if (this->dontReply)
+//		return;
+	
+	_ClientUDP.beginPacket(this->remoteIp, this->port);
+	size = _ClientUDP.write(inpData, inLengthData);
+	_ClientUDP.endPacket();
+//	this->ClientUDP.beginPacket(this->remoteIp, this->port);
+//	size = this->ClientUDP.write(inpData, inLengthData);
+//	this->ClientUDP.endPacket();
+
+#ifdef DCCPP_DEBUG_MODE
+	if (size == 0)
+	{
+		Serial.print(this->remoteIp);
+		Serial.print(" -> ");
+		char val[10];
+		for (int i = 0; i < inLengthData; i++)
+		{
+			sprintf(val, "0x%02X ", inpData[i]);
+			Serial.print(val);
+		}
+
+		Serial.println(" *** BINARY NOT SENT !");
+	}
+#endif
+
+#ifdef DCCPP_DEBUG_VERBOSE_MODE
+	char val[10];
+	Serial.print(this->remoteIp);
+	Serial.print(" -> ");
+	for (int i = 0; i < inLengthData; i++)
+	{
+		sprintf(val, "0x%02X ", inpData[i]);
+		Serial.print(val);
+	}
+	Serial.println("");
+#endif
 }
 
 void ThrottleWifi::end()
 {
+	Throttle::end();
+
+	this->remoteIp = INADDR_NONE;
 }
 
 bool ThrottleWifi::isConnected()
 {
-	return WiFi.status() == WL_CONNECTED;
+	return WiFi.status() == WL_CONNECTED || this->contacted;
 }
 
 bool ThrottleWifi::sendNewline()
@@ -131,23 +357,51 @@ bool ThrottleWifi::sendNewline()
 	return false;
 }
 
+CircularBuffer* ThrottleWifi::getCircularBuffer() const
+{ 
+	return this->pBuffer; 
+}
+
+
 #ifdef DCCPP_DEBUG_MODE
 void ThrottleWifi::printThrottle()
 {
 	Serial.print(this->id);
-	Serial.print(" : ");
-	Serial.print("ThrottleWifi : ");
+	Serial.print(" : ThrottleWifi: ");
 	Serial.print(this->name);
+	Serial.print("  WifiPort: ");
+	Serial.print(this->port);
+	Serial.print("  WifiProtocol: ");
+	switch (this->protocol)
+	{
+	case HTTP: Serial.print("HTTP"); break;
+	case TCP: Serial.print("TCP"); break;
+	case UDP: Serial.print("UDP"); break;
+	}
+	if (this->timeOutDelay != 0)
+	{
+		Serial.print("  timeout: ");
+		Serial.print((int)this->timeOutDelay);
+	}
 	if (this->pConverter != NULL)
 	{
 		Serial.print(" (");
 		this->pConverter->printConverter();
 		Serial.print(") ");
 	}
+
+	if (this->protocol != UDP)
+	{
+		Serial.print(" start:");
+		Serial.print(this->startCommandCharacter, DEC);
+		Serial.print(" end:");
+		Serial.print(this->endCommandCharacter, DEC);
+	}
+
 	if (this->isConnected())
 	{
 		Serial.print(" ip:");
-		Serial.print(this->client.remoteIP());
+		Serial.print(this->remoteIP());
 	}
 	else
 	{

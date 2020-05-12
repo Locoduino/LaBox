@@ -137,6 +137,19 @@ int Locomotives::count()
 	return count;
 }
 
+/* Send a DCC command to stop the locmotive IMMEDIATELY
+	*/
+void Locomotives::emergencyStop()
+{
+	Locomotive* pCurr = pFirstLocomotive;
+
+	while (pCurr != NULL)
+	{
+		pCurr->emergencyStop();
+		pCurr = pCurr->pNextLocomotive;
+	}
+}
+
 #ifdef DCCPP_DEBUG_MODE
 /** Print the list of assigned locomotives.
 @remark Only available if DCCPP_DEBUG_MODE is defined.
@@ -144,7 +157,9 @@ int Locomotives::count()
 void Locomotives::printLocomotives()
 {
 	Locomotive* pCurr = pFirstLocomotive;
-	uint8_t count = 1;
+	uint8_t count = 0;
+
+	Serial.println("Locomotives ------------------");
 
 	while (pCurr != NULL)
 	{

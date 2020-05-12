@@ -11,7 +11,7 @@ description: <LaBox Wifi Controller sample>
 #endif
 
 const char* ssid     = "VIDEOFUTUR_C56165_2.4G";
-const char* password = "EenPghQD";
+const char* password = "*******";
 
 WiFiServer DCCPP_INTERFACE(2560);
 

@@ -172,8 +172,10 @@ void setup() {
   
   WiFi.softAP(ssid, password);
   myIP = WiFi.softAPIP();
-  Serial.print("AP IP address: ");
-  Serial.println(myIP);
+  Serial.print("Server IP address: ");
+  Serial.print(myIP);
+  Serial.print(":");
+  Serial.println(WTServer_Port);
   server.begin();
 
   //Serial.println("Server started");
@@ -290,7 +292,7 @@ int last;
           while (start < last) {  // traitement d'une commande à la fois
             finish = Data.indexOf('\n', start + 1);
             clientData = Data.substring(start + 1, finish);
-            Serial.print(i); Serial.print("-> ");Serial.println(clientData);
+            Serial.print(i); Serial.print(" <- ");Serial.println(clientData);
             start = finish;
             if (clientData.startsWith("*")) {               // est-ce *+ ?
               if (clientData.startsWith("*+")) {
@@ -303,6 +305,7 @@ int last;
             }
             else if (clientData.startsWith("N")) { // device Name, send heartbeat
             //Loco[i].LocoName = clientData.substring(1);     // on garde tout sauf le 'N' devant
+            Serial.print(i); Serial.println(" -> *" + String(heartbeatTimeout));
             client[i].println("*" + String(heartbeatTimeout) + "\n\n");
             }
             else if (clientData.startsWith("H")) {            // device ID
@@ -310,7 +313,7 @@ int last;
             }
             else if (clientData.startsWith("PPA")) {          // est-ce PPA0 (track off) ou PPA1 (track on) ou PPA2 (unknown)
               powerStatus = clientData.substring(3);          // a priori not suported by Withrottle
-              Serial.println("<" + powerStatus + ">");            // vers dcc++ <1> ou <0>
+              Serial.print(i); Serial.println(" -> " + powerStatus);            // vers dcc++ <1> ou <0>
               client[i].print("PPA" + powerStatus + "\n\n");
             }
             else if (clientData.startsWith("M")) { // creation, suppression, commande/action sur Withrottle
@@ -435,6 +438,7 @@ void throttleStart(int i) {
 //  client[i].println("");
 //  client[i].println("*" + String(heartbeatTimeout));
   alreadyConnected[i] = true;
+  Serial.println("-> Throttle start");
   turnPowerOn();
 }
 
@@ -452,6 +456,7 @@ void throttleStop(int i) {
 
 void locoAdd(String th, String actionKey, int i) { // th = T, S, 0 ou 1, actionkey = "S12" ou "L4550"  i= n° de client dans loop
   Loco[Throttle].LocoThrottle = actionKey;         // sauvegarde String adresse "S12" ou "L4550"
+  Serial.print(i); Serial.println(" -> MT+");
   if (Loco[Throttle].isWT) {
   client[i].print("MT+"+actionKey+"<;>\n\n");
   client[i].print("MTL"+actionKey+"<;>]\[Feux]\[]\[]\[]\[]\[]\[]\[]\[]\[]\[]\[]\[]\[]\[]\[]\[]\[]\[]\[]\[]\[]\[]\[]\[]\[]\[]\[]\[\n\n");
@@ -499,12 +504,13 @@ void locoAction(String ad, String th, String actionKey, int i) { // fonctions F0
   if (actionKey == "*") { // heartbeat
     actionKey = Loco[Throttle].LocoThrottle; // restaurer actionKey "S12" ou "L455"
   } //*
+  Serial.println("-> M" + th + "A");
   //if (ad != "F" && actionVal.startsWith("F")) { // inversion de l'état de la fonction F028 ou F128 en éliminant MTAF...
   if (actionKey.startsWith("F")) { // inversion de l'état de la fonction F028 ou F128
     //Loco[Throttle].LocoState[fKey] = actionVal.substring(1,2).toInt(); // etat de la fonction 0 ou 1
     fKey = actionKey.substring(2).toInt(); // numero de fonction dans la commande
     Loco[Throttle].LocoState[fKey] = invert(Loco[Throttle].LocoState[fKey]); // inversion
-    //Serial.println("->M" + th + "A" + Loco[Throttle].LocoThrottle + "<;>" + "F" + String(Loco[Throttle].LocoState[fKey]) + String(fKey));
+    //Serial.println("-> M" + th + "A" + Loco[Throttle].LocoThrottle + "<;>" + "F" + String(Loco[Throttle].LocoState[fKey]) + String(fKey));
     //client[i].println("M" + th + "A" + Loco[Throttle].LocoThrottle + "<;>" + "F1" + String(fKey));
     //client[i].println("M" + th + "A" + Loco[Throttle].LocoThrottle + "<;>" + "F0" + String(fKey));
     client[i].println("M" + th + "A" + Loco[Throttle].LocoThrottle + "<;>" + "F" + String(Loco[Throttle].LocoState[fKey]) + String(fKey));

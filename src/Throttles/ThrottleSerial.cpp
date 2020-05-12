@@ -12,9 +12,13 @@ ThrottleSerial::ThrottleSerial(const String& inName, SerialInterface* inpInterfa
 	this->pInterface = inpInterface;
 }
 
-bool ThrottleSerial::begin()
+bool ThrottleSerial::begin(EthernetProtocol inProtocol)
 {
 	return true;
+}
+
+void ThrottleSerial::end()
+{
 }
 
 bool ThrottleSerial::loop()
@@ -26,7 +30,7 @@ bool ThrottleSerial::loop()
 	{    // while there is data on the serial line
 		added = Throttle::getCharacter(this->pInterface->read(), this);
 	} // while
-
+	
 	return added;
 }
 
@@ -34,10 +38,6 @@ bool ThrottleSerial::sendMessage(const String& inMessage)
 {
 	this->pInterface->println(inMessage);
 	return true;
-}
-
-void ThrottleSerial::end()
-{
 }
 
 bool ThrottleSerial::isConnected()

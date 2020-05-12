@@ -27,12 +27,12 @@ Part of DCC++ BASE STATION for the Arduino
 #endif
 
 #ifdef USE_THROTTLES
- Throttle* TextCommand::pCurrentThrottle = NULL;
+Throttle* TextCommand::pCurrentThrottle = NULL;
 #endif
-  char TextCommand::commandString[MAX_COMMAND_LENGTH+1];
+char TextCommand::commandString[MAX_COMMAND_LENGTH+1];
  
-	void TextCommand::receiveCommands()
- {
+void TextCommand::receiveCommands()
+{
 #ifdef USE_THROTTLES
 	 Throttle* pCurr = Throttles::getFirst();
 
@@ -42,7 +42,8 @@ Part of DCC++ BASE STATION for the Arduino
 		 pCurr = pCurr->pNextThrottle;
 	 }
 #else
-		char c;
+
+	char c;
 
 #if defined(USE_ETHERNET)
 
@@ -91,7 +92,7 @@ Part of DCC++ BASE STATION for the Arduino
 
 #endif
 #endif
- }
+}
 
  void TextCommand::init(volatile RegisterList *_mRegs, volatile RegisterList *_pRegs, CurrentMonitor *_mMonitor){
    commandString[0] = 0;
@@ -608,14 +609,14 @@ bool TextCommand::parse(char *com)
 #endif
 			DCCPP_INTERFACE.println("");
 	  }
-//		DCCPP_INTERFACE.print("<iDCCpp LIBRARY BASE STATION FOR ARDUINO ");
-		DCCPP_INTERFACE.print("<iDCC++ BASE STATION FOR ARDUINO MEGA / L293D : BUILD ");
+		DCCPP_INTERFACE.print("<iDCCpp LIBRARY BASE STATION FOR ARDUINO ");
+		//DCCPP_INTERFACE.print("<iDCC++ BASE STATION FOR ARDUINO MEGA / L293D : BUILD ");
 	  //DCCPP_INTERFACE.print(ARDUINO_TYPE);
 	  //DCCPP_INTERFACE.print(" / ");
 	  //DCCPP_INTERFACE.print(MOTOR_SHIELD_NAME);
-	  ///DCCPP_INTERFACE.print(": V-");
-	  ///DCCPP_INTERFACE.print(VERSION);
-	  ///DCCPP_INTERFACE.print(" / ");
+	  DCCPP_INTERFACE.print(": V-");
+	  DCCPP_INTERFACE.print(VERSION);
+	  DCCPP_INTERFACE.print(" / ");
 	  DCCPP_INTERFACE.print(__DATE__);
 	  DCCPP_INTERFACE.print(" ");
 	  DCCPP_INTERFACE.print(__TIME__);

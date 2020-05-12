@@ -16,6 +16,8 @@ MessageStack::MessageStack()
   {
     this->messages[i][0] = 0;
   }
+
+	this->peakCount = 0;
 }
 
 void MessageStack::FreeMessage(byte inMessageIndex)
@@ -23,6 +25,8 @@ void MessageStack::FreeMessage(byte inMessageIndex)
 	START_SEMAPHORE()
   this->messages[inMessageIndex][0] = 0;
 	END_SEMAPHORE()
+
+	this->GetCount();	// update peakCount...
 }
 
 bool MessageStack::PushMessage(const char *inMessage)
@@ -32,6 +36,7 @@ bool MessageStack::PushMessage(const char *inMessage)
 		if (this->messages[i][0] == 0)
 		{
 			strncpy(this->messages[i], inMessage, MESSAGE_MAXSIZE);
+			this->GetCount();	// update peakCount...
 			ABORT_SEMAPHORE()
 			return true;
 		}
@@ -40,7 +45,9 @@ bool MessageStack::PushMessage(const char *inMessage)
 	Serial.println(F("Error : a message has been lost ! Stack is full !"));
 #endif
 	END_SEMAPHORE()
-  return false;
+
+	this->peakCount = MESSAGE_MAXNUMBER + 1;	// at least !
+	return false;
 }
 
 byte MessageStack::GetPendingMessageIndex()
@@ -78,7 +85,11 @@ byte MessageStack::GetCount()
       count++;
     }
 
-  END_SEMAPHORE()
+	END_SEMAPHORE()
+
+	if (count > this->peakCount)
+		this->peakCount = count;
+
   return count;
 }
 

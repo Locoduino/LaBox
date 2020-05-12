@@ -21,10 +21,10 @@ public:
 	*/
 	ThrottleSerial(const String& inName, SerialInterface* inpInterface);
 
-	bool begin();
+	bool begin(EthernetProtocol inProtocol);
+	void end();
 	bool loop();
 	bool sendMessage(const String& inMessage);
-	void end();
 	bool isConnected();
 
 #ifdef DCCPP_DEBUG_MODE

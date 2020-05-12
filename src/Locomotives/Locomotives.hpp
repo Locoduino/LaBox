@@ -50,6 +50,14 @@ public:
 	@return Number of locomotives.
 	*/
 	static int count();
+	/** Get the pointer of the first locomotive.
+	@return Start of the linked list of locomotives.
+	*/
+	static Locomotive *getFirstLocomotive() { return pFirstLocomotive; }
+
+	/* Send a DCC command to stop the locmotive IMMEDIATELY
+	*/
+	static void emergencyStop();
 
 #ifdef DCCPP_DEBUG_MODE
 	/** Print the list of assigned locomotives.

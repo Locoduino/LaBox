@@ -16,9 +16,10 @@ String MessageConverterWiThrottle::command;
 MessageConverterWiThrottle::MessageConverterWiThrottle()
 {
 	this->heartbeatEnable = false;
-	for (int i = 0; i < WIMAXTHROTLLESNUMBER; i++)
+	for (int i = 0; i < WIMAXLOCOSNUMBER; i++)
 	{
 		this->heartbeat[i] = 0;
+		this->pLocos[i] = NULL;
 	}
 
 #ifdef USE_TURNOUT
@@ -60,37 +61,34 @@ void MessageConverterWiThrottle::clientStart(Throttle* inpThrottle)
 #endif
 
 	inpThrottle->setCommandCharacters('\0', 10);
-
-	Throttles::printThrottles();
+	inpThrottle->setTimeOutDelay(WI_TIMEOUT);
 }
 
 void MessageConverterWiThrottle::clientStop(Throttle* inpThrottle)
 {
 #ifdef DCCPP_DEBUG_MODE
 	Serial.print("Converter : client ");
-	Serial.print(inpThrottle->getName());
+	Serial.print(inpThrottle->getId());
 	Serial.println(" disconnected");
 #endif
 
 	inpThrottle->end();
-	heartbeatEnable = false;
-	for (int i = 0; i < WIMAXTHROTLLESNUMBER; i++)
+	this->heartbeatEnable = false;
+	for (int i = 0; i < WIMAXLOCOSNUMBER; i++)
 	{
-		heartbeat[i] = 0;
-		locos[i].initialize();
+		this->heartbeat[i] = 0;
+		this->pLocos[i] = NULL;
 	}
-
-	Throttles::printThrottles();
 }
 
 void MessageConverterWiThrottle::stayAlive(Throttle* inpThrottle)
 {
-		checkHeartbeat(inpThrottle);
+	this->checkHeartbeat(inpThrottle);
 }
 
 bool MessageConverterWiThrottle::convert(Throttle* inpThrottle, const String& inCommand)
 {
-#ifdef DCCPP_DEBUG_MODE
+#ifdef DCCPP_DEBUG_VERBOSE_MODE
 	Serial.print("Command to convert: ");
 	Serial.println(inCommand);
 #endif
@@ -176,7 +174,7 @@ bool MessageConverterWiThrottle::convert(Throttle* inpThrottle, const String& in
 		case 'A':
 			if (locoNumber == -1)
 			{
-				for (int i = 0; i < WIMAXTHROTLLESNUMBER; i++)
+				for (int i = 0; i < WIMAXLOCOSNUMBER; i++)
 					this->locoAction(inpThrottle, i, locoDescriptor, actionKey, actionVal);
 			}
 			else
@@ -197,53 +195,58 @@ bool MessageConverterWiThrottle::convert(Throttle* inpThrottle, const String& in
 
 void MessageConverterWiThrottle::locoAction(Throttle* inpThrottle, int inLocoNumber, const String& inLocoDescriptor, const String& inActionKey, const String& inActionVal) // fonctions F0 à F28 et autres fonctions S, L ou qV, qR, R, V F ..
 {
+	Locomotive* pLoco = this->pLocos[inLocoNumber];
+
+	if (pLoco == NULL)
+		return;
+
 	if (inActionVal[0] == 'F')
 	{
 		uint8_t function = (uint8_t)inActionVal.substring(2).toInt(); // numero de fonction dans la commande
 		bool activate = inActionVal[1] == '1';
 
-		this->locos[inLocoNumber].setDCCFunction(function, activate);
+		pLoco->setDCCFunction(function, activate);
 		return;
 	}
 
 	if (inActionVal.startsWith("qV")) // ask for current speed  // actionKey remplace LocoThrottle[Throttle]
 	{
-		inpThrottle->println("M" + inLocoDescriptor + "A" + inActionKey + "<;>" + "V" + String(this->locos[inLocoNumber].getSpeed()) + "\n\n");
+		inpThrottle->println("M" + inLocoDescriptor + "A" + inActionKey + "<;>" + "V" + String(pLoco->getSpeed()));
 		return;
 	} //qV
 
 	if (inActionVal.startsWith("V")) // sets the speed (velocity)
 	{
 		int speed = inActionVal.substring(1).toInt(); //  vitesse
-		this->locos[inLocoNumber].setDCCSpeed(speed);
+		pLoco->setDCCSpeed(speed);
 		return;
 	} //V
 
 	if (inActionVal.startsWith("qR")) // ask for current direction
 	{ 
-		inpThrottle->println("M" + inLocoDescriptor + "A" + inActionKey + "<;>" + "R" + (this->locos[inLocoNumber].isDirectionForward()?"1":"0") + "\n\n");
+		inpThrottle->println("M" + inLocoDescriptor + "A" + inActionKey + "<;>" + "R" + (pLoco->isDirectionForward()?"1":"0"));
 	} //qR
 
 	if (inActionVal.startsWith("R"))   // set direction.
 	{
 		int dir = inActionVal.substring(1).toInt();
-		this->locos[inLocoNumber].setDCCDirection(dir > 0);  // arret loco obligatoire (mais le curseur de WT ne revient pas à 0 !!)
+		pLoco->setDCCDirection(dir > 0);  // arret loco obligatoire (mais le curseur de WT ne revient pas à 0 !!)
 		return;
 	} //R
 
 	if (inActionVal.startsWith("X"))   // emergency STOP : set speed to 1
 	{
-		this->locos[inLocoNumber].emergencyStop();
+		pLoco->emergencyStop();
 	} //X
 
 	if (inActionVal.startsWith("I"))  // IDLE : set speed to 0
 	{
-		this->locos[inLocoNumber].stop();
+		pLoco->stop();
 	} //I
 
 	if (inActionVal.startsWith("Q")) // the loco QUIT, set speed to 0
 	{  
-		this->locos[inLocoNumber].setDCCSpeed(0);
+		pLoco->setDCCSpeed(0);
 	} //Q
 }
 
@@ -251,27 +254,27 @@ void MessageConverterWiThrottle::checkHeartbeat(Throttle* inpThrottle)
 {
 	if (heartbeatEnable)
 	{
-		for (int i = 0; i < WIMAXTHROTLLESNUMBER; i++)
+		for (int locoNumber = 0; locoNumber < WIMAXLOCOSNUMBER; locoNumber++)
 		{
-			if (this->locos[i].getAddress() != 0)
+			if (pLocos[locoNumber] == NULL)
+				continue;
+
+			if (heartbeat[locoNumber] > 0 && millis() > heartbeat[locoNumber] + HEARTBEATTIMEOUT * 1000)
 			{
-				if (heartbeat[i] > 0 && millis() > heartbeat[i] + HEARTBEATTIMEOUT * 1000)
+				Serial.print("Too long heartbeat delay for the loco ");
+				Serial.println(pLocos[locoNumber]->getAddress());
+				pLocos[locoNumber]->setSpeed(0);
+				heartbeat[locoNumber] = 0;
+				String buff = "MTA";
+				buff += pLocos[locoNumber]->getAddress();
+				buff += "<;>V0";
+				inpThrottle->println(buff);
+			}
+			else
+			{
+				if (heartbeat[locoNumber] == 0)
 				{
-					Serial.print("Too long heartbeat delay for the loco " );
-					Serial.println(this->locos[i].getAddress());
-					this->locos[i].setSpeed(0);
-					heartbeat[i] = 0;
-					String buff = "MTA";
-					buff += this->locos[i].getAddress();
-					buff += "<;>V0";
-					inpThrottle->println(buff);
-				}
-				else
-				{
-					if (heartbeat[i] == 0)
-					{
-						heartbeat[i] = millis();
-					}
+					heartbeat[locoNumber] = millis();
 				}
 			}
 		}
@@ -280,49 +283,57 @@ void MessageConverterWiThrottle::checkHeartbeat(Throttle* inpThrottle)
 
 void MessageConverterWiThrottle::locoAdd(Throttle* inpThrottle, int inLocoNumber, String th, String actionKey)
 {
-	this->locos[inLocoNumber].setAddress((uint16_t) actionKey.substring(1).toInt());
+	uint16_t locoAddress = (uint16_t)actionKey.substring(1).toInt();
+	Locomotive* pLoco = Locomotives::get(locoAddress);
+
+	if (pLoco == NULL)
+		pLoco = Locomotives::add("Loco", locoAddress, 128);
+
 	inpThrottle->println("M" + th + "+" + actionKey + "<;>");
 	for (int fKey = 0; fKey < 29; fKey++) 
 	{
-		this->locos[inLocoNumber].functions.inactivate(fKey);
+		pLoco->functions.inactivate(fKey);
 		inpThrottle->println("M" + th + "A" + actionKey + "<;>F0" + fKey);
 	}
-	this->locos[inLocoNumber].setSpeed(0);
-	this->locos[inLocoNumber].setDirection(true);
+	if (pLoco->tag < 0)
+	{	// Real new loco !
+		pLoco->setSpeed(0);
+		pLoco->setDirection(true);
+		pLoco->tag = inLocoNumber;
+	}
 	inpThrottle->println("M" + th + "+" + actionKey + "<;>V0");
 	inpThrottle->println("M" + th + "+" + actionKey + "<;>R1");
 	inpThrottle->println("M" + th + "+" + actionKey + "<;>s1");
 
 #ifdef DCCPP_DEBUG_MODE
-	inpThrottle->printThrottle();
+	Locomotives::printLocomotives();
 #endif
+	this->pLocos[inLocoNumber] = pLoco;
 	heartbeat[inLocoNumber] = millis();
 }
 
 void MessageConverterWiThrottle::locoRelease(Throttle* inpThrottle, int inLocoNumber, String th, String actionKey)
 {
-	int address = this->locos[inLocoNumber].getAddress();	
+	Locomotive* pLoco = this->pLocos[inLocoNumber];
+
+	if (pLoco == NULL)
+		return;
+
+	this->pLocos[inLocoNumber] = NULL;
 	heartbeat[inLocoNumber] = 0;
-	this->locos[inLocoNumber].initialize();
+
+	pLoco->tag = -1;
+
+	//	pLoco->initialize();
 	inpThrottle->println("M" + th + "-" + actionKey + "<;>");
 
 #ifdef DCCPP_DEBUG_MODE
-	inpThrottle->printThrottle();
+	Locomotives::printLocomotives();
 #endif
 }
 
-#ifdef DCCPP_DEBUG_MODE
-void MessageConverterWiThrottle::printConverter()
-{
-	Serial.print("WiThrottle converter : locos ");
-	for (int i = 0; i < WIMAXTHROTLLESNUMBER; i++)
-	{
-			Serial.print(this->locos[i].getAddress());
-			Serial.print("/");
-	}
-}
 
-void MessageConverterWiThrottle::accessoryToggle(int aAddr, String aStatus) 
+void MessageConverterWiThrottle::accessoryToggle(int aAddr, String aStatus)
 {
 	/*
 	int newStat;
@@ -374,5 +385,10 @@ void MessageConverterWiThrottle::accessoryToggle(int aAddr, String aStatus)
 	*/
 }
 
+#ifdef DCCPP_DEBUG_MODE
+void MessageConverterWiThrottle::printConverter()
+{
+	Serial.print("WiThrottle converter");
+}
 #endif
 #endif

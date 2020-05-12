@@ -8,7 +8,7 @@ description: <Throttle Ethernet class>
 
 #if !defined(ARDUINO_ARCH_ESP32)
 #if defined(USE_TEXTCOMMAND) && defined(USE_THROTTLES) && defined(USE_ETHERNET)
-ThrottleEthernet::ThrottleEthernet(const String& inName, uint8_t* inMac, uint8_t* inIp, int inPort, enum EthernetProtocol inProtocol) : Throttle(inName)
+ThrottleEthernet::ThrottleEthernet(const String& inName, uint8_t* inMac, uint8_t* inIp, int inPort, EthernetProtocol inProtocol) : Throttle(inName)
 {
 	for (int i = 0; i < 4; i++)
 	{
@@ -28,11 +28,12 @@ ThrottleEthernet::ThrottleEthernet(const String& inName, uint8_t* inMac, uint8_t
 
 	this->port = inPort;
 	this->protocol = inProtocol;
+	this->type = Ethernet;
 
 	this->pServer = new EthernetServer(inPort);
 }
 
-bool ThrottleEthernet::begin()
+bool ThrottleEthernet::begin(EthernetProtocol inProtocol)
 {
 
 	if (this->ethernetIp[0] == 0)
@@ -42,6 +43,11 @@ bool ThrottleEthernet::begin()
 
 	this->pServer->begin();
 	return true;
+}
+
+IPAddress ThrottleEthernet::remoteIP()
+{
+	return  Ethernet.remoteIP();
 }
 
 bool ThrottleEthernet::loop()

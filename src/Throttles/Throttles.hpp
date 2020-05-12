@@ -40,6 +40,11 @@ public:
 	@return The found throttle or NULL if not found.
 	*/
 	static Throttle* get(const String& inName);
+	/** Get a particular throttle.
+	@param inRemoteIP		remote ip address to find.
+	@return The found throttle or NULL if not found.
+	*/
+	static Throttle* get(IPAddress inRemoteIP);
 	/** Removes a particular throttle.
 	@param inName	The name of the throttle.
 	*/

@@ -48,6 +48,22 @@ Throttle* Throttles::get(const String& inName)
 	return NULL;
 }
 
+Throttle* Throttles::get(IPAddress inRemoteIP)
+{
+	Throttle* pCurr = pFirstThrottle;
+
+	while (pCurr != NULL)
+	{
+		if (pCurr->remoteIP() == inRemoteIP)
+		{
+			return pCurr;
+		}
+		pCurr = pCurr->pNextThrottle;
+	}
+
+	return NULL;
+}
+
 bool Throttles::add(Throttle *inpThrottle)
 {
 	if (inpThrottle != NULL)
@@ -137,6 +153,8 @@ int Throttles::count()
 void Throttles::printThrottles()
 {
 	Throttle* pCurr = pFirstThrottle;
+
+	Serial.println("Throttles ------------------");
 
 	while (pCurr != NULL)
 	{

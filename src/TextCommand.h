@@ -19,7 +19,6 @@ Part of DCC++ BASE STATION for the Arduino
 
 #include "PacketRegister.h"
 #include "CurrentMonitor.h"
-#include "MessageStack.hpp"
 
 #define  MAX_COMMAND_LENGTH         30
 
