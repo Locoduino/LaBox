@@ -85,7 +85,6 @@ bool ThrottleWifi::begin(EthernetProtocol inProtocol)
 		this->pServer = NULL;
 
 		_ClientUDP.begin(this->wifiIp, this->port);
-	//	this->ClientUDP.begin(this->wifiIp, this->port);
 
 #if defined(ARDUINO_ARCH_ESP32)
 		this->pBuffer->begin(true);
@@ -94,7 +93,6 @@ bool ThrottleWifi::begin(EthernetProtocol inProtocol)
 #endif
 
 		_ClientUDP.flush();
-		//this->ClientUDP.flush();
 	}
 	else
 	{
@@ -189,44 +187,11 @@ bool ThrottleWifi::loop()
 			}
 		}
 	}
-/*		//processing incoming packet, must be called before reading the buffer
-		if (this->ClientUDP.parsePacket() > 0)
-		{
-			ThrottleWifi* pWifi = GetThrottle(this->ClientUDP.remoteIP(), this->ClientUDP.remotePort(), UDP);
-
-			if (pWifi != NULL)
-			{
-				if (pWifi->contacted == false)
-				{
-					pWifi->contacted = true;
-					pWifi->setRemoteIP(pWifi->ClientUDP.remoteIP());
-					if (pWifi->pConverter != NULL)
-						pWifi->pConverter->clientStart(pWifi);
-#ifdef DCCPP_DEBUG_MODE
-					Throttles::printThrottles();
-#endif
-				}
-
-				Serial.println("Reading data");
-
-				byte udp[THROTTLE_UDPBYTE_SIZE];
-				memset(udp, 0, THROTTLE_UDPBYTE_SIZE);
-				int len = pWifi->ClientUDP.read(udp, THROTTLE_UDPBYTE_SIZE);
-				added = len > 0;
-				if (added)
-				{
-					pWifi->pBuffer->PushBytes(udp, len);
-				}
-			}
-		}
-	}
-	*/
 	else
 	{
 		WiFiClient foundClient = this->pServer->available();
 
 		ThrottleWifi* pWifi = this;
-
 		if (foundClient)
 		{
 			pWifi = GetThrottle(foundClient.remoteIP(), this->port, this->protocol);
@@ -240,13 +205,6 @@ bool ThrottleWifi::loop()
 					pWifi->client = foundClient;
 					if (pWifi->pConverter != NULL)
 						pWifi->pConverter->clientStart(pWifi);
-					if (this->protocol == HTTP) {
-						pWifi->pServer->println("HTTP/1.1 200 OK");
-						pWifi->pServer->println("Content-Type: text/html");
-						pWifi->pServer->println("Access-Control-Allow-Origin: *");
-						pWifi->pServer->println("Connection: close");
-						pWifi->pServer->println("");
-					}
 #ifdef DCCPP_DEBUG_MODE
 					Throttles::printThrottles();
 #endif
@@ -256,17 +214,36 @@ bool ThrottleWifi::loop()
 				pWifi = this;
 		}
 
-		if (pWifi->contacted && pWifi->client)
+		if (pWifi->protocol == HTTP) 
 		{
-			while (pWifi->client.available())
-			{        // while there is data on the network
-				added = Throttle::getCharacter(pWifi->client.read(), pWifi);
-			}
+			if (pWifi != NULL)
+			{
+				pWifi->pServer->println("HTTP/1.1 200 OK");
+				pWifi->pServer->println("Content-Type: text/html");
+				pWifi->pServer->println("Access-Control-Allow-Origin: *");
+				pWifi->pServer->println("Connection: close");
+				pWifi->pServer->println("");
 
-			if (pWifi->protocol == EthernetProtocol::HTTP)
-				pWifi->client.stop();
+				while (foundClient.available())
+				{        // while there is data on the network
+					added = Throttle::getCharacter(foundClient.read(), pWifi);
+				}
+
+				foundClient.stop();
+			}
+		}
+		else
+		{
+			if (pWifi->contacted && pWifi->client)
+			{
+				while (pWifi->client.available())
+				{        // while there is data on the network
+					added = Throttle::getCharacter(pWifi->client.read(), pWifi);
+				}
+			}
 		}
 	}
+
 	return added;
 }
 
@@ -307,9 +284,6 @@ void ThrottleWifi::write(byte* inpData, int inLengthData)
 	_ClientUDP.beginPacket(this->remoteIp, this->port);
 	size = _ClientUDP.write(inpData, inLengthData);
 	_ClientUDP.endPacket();
-//	this->ClientUDP.beginPacket(this->remoteIp, this->port);
-//	size = this->ClientUDP.write(inpData, inLengthData);
-//	this->ClientUDP.endPacket();
 
 #ifdef DCCPP_DEBUG_MODE
 	if (size == 0)

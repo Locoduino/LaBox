@@ -47,34 +47,38 @@ public:
 	//********************************************************************************
 	// Functions to update the Locomotive instance data. DONT SEND ANY ORDER TO DCCpp !
 
-	/** Sets the locomotive DCC address
+	/** Set the locomotive DCC address
 	@param inAddress	Locomotive new DCC address.
 	*/
 	void setAddress(uint16_t inAddress) { this->address = inAddress; }
-	/** Gets the locomotive DCC address.
+	/** Get the locomotive DCC address.
 	@return	Locomotive DCC address.
 	*/
 	uint16_t getAddress() const { return this->address; }
-	/** Sets the locomotive name
+	/** Set the locomotive name
 	@param inName	Locomotive new name.
 	*/
 	void setName(const String& inName) { this->name = inName; }
-	/** Gets the locomotive name.
+	/** Get the locomotive name.
 	@return	Locomotive name.
 	*/
 	const String& getName() const { return this->name; }
+	/** Get the locomotive speed register number.
+	@return	Locomotive register number. 0 if no register allocated for this loco.
+	*/
+	uint8_t getSpeedRegister() const { return this->speedRegisterNumber; }
 
-	/** Sets the locomotive max speed : 14, 28 or 128.
+	/** Set the locomotive max speed : 14, 28 or 128.
 	@param inSpeedMax	Locomotive max speed steps, default is 128.
 	@remark	any other value than 14, 28 or 128 will result in a 128 speed steps value.
 	*/
 	void setSpeedMax(uint8_t inSpeedMax) { if (inSpeedMax == 14 || inSpeedMax == 28 || inSpeedMax == 128) this->speedMax = inSpeedMax; else this->speedMax = 128; }
-	/** Gets the locomotive max speed : 14, 28 or 128.
+	/** Get the locomotive max speed : 14, 28 or 128.
 	@return	Locomotive max speed steps : 14, 28 or 128.
 	*/
 	uint8_t getSpeedMax() const { return this->speedMax; }
 
-	/** Sets the locomotive current speed.
+	/** Set the locomotive current speed.
 	@param inSpeed	Locomotive new speed.
 	@remark	For 128 steps max, 0 is stop, 1 is emergency stop...
 	*/
@@ -84,12 +88,12 @@ public:
 		this->currentSpeed = speed;
 	}
 
-	/** Gets the locomotive current speed.
+	/** Get the locomotive current speed.
 	@return	Locomotive current speed.
 	*/
 	uint8_t getSpeed() const {	return this->currentSpeed; }
 
-	/** Sets the locomotive direction.
+	/** Set the locomotive direction.
 	@param inForward	True if the locomotive must go forward.
 	*/
 	void setDirection(bool inForward) {		this->direction = inForward;	}
@@ -98,14 +102,14 @@ public:
 	*/
 	bool isDirectionForward() const {		return this->direction;	}
 
-	/** Sets the given function to the given state.
+	/** Set the given function to the given state.
 	*/
 	void setFunction(uint8_t inFunction, bool inActivate);
 
 	//********************************************************************************
 	// Functions to update the Locomotive data AND send DCCpp corresponding orders !
 
-	/** Sets the locomotive current speed.
+	/** Set the locomotive current speed.
 	@param inSpeed	Locomotive new speed.
 	@remark	For 128 steps max, 0 is stop, 1 is emergency stop...
 	*/
@@ -119,12 +123,12 @@ public:
 	*/
 	void emergencyStop();
 
-	/** Sets the locomotive direction.
+	/** Set the locomotive direction.
 	@param inForward	True if the locomotive must go forward.
 	*/
 	void setDCCDirection(bool inForward);
 
-	/** Sets the given function to the given state.
+	/** Set the given function to the given state.
 	*/
 	void setDCCFunction(uint8_t inFunction, bool inActivate);
 

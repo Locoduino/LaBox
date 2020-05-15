@@ -25,7 +25,7 @@ const char* password = "";
 //uint8_t wifiMac[] = { 0xBE, 0xEF, 0xBE, 0xEF, 0xBE, 0x80 };
 //the IP address for the shield:
 //uint8_t wifiIp[] = { 192, 168, 1, 100 };
-int dccPPPort = 10000;
+int dccPPPort = 2560;
 int wifiPort = 44444;
 
 // SERIAL
@@ -56,7 +56,7 @@ void setup()
 
   ThrottleWifi::connectWifi(ssid, password);
   
-  throttleWifi0.begin(TCP);
+  throttleWifi0.begin(HTTP);
   
   throttleWifi1.setConverter(&converter1);
   throttleWifi1.begin(UDP);

@@ -73,6 +73,15 @@ bool Throttle::getCharacter(char inC, Throttle* inpThrottle)
 	}
 	else
 	{
+#ifdef DCCPP_DEBUG_MODE
+		if (inpThrottle->endCommandCharacter > 31 && inC <= 13)		// message, not command !
+		{
+			Serial.print(inpThrottle->id);
+			Serial.print(" Message From Throttle : ");
+			Serial.println(inpThrottle->commandString);
+		}
+#endif
+
 		if (inC == (char)inpThrottle->endCommandCharacter)               // end of new command
 		{
 #ifdef DCCPP_DEBUG_MODE

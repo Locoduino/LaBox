@@ -79,8 +79,6 @@ Locomotive* Locomotives::add(const String& inName, uint16_t inAddress, uint8_t i
 		}
 	}
 
-	Registers::freeRegister(speedReg);
-
 	return NULL;
 }
 
@@ -103,6 +101,8 @@ void Locomotives::remove(uint16_t inAddress)
 			{
 				pPrev->pNextLocomotive = pCurr->pNextLocomotive;
 			}
+
+			Registers::freeRegister(pCurr->getSpeedRegister());
 
 			delete pCurr;
 			return;

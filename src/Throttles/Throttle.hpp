@@ -149,7 +149,6 @@ protected:
 #include "ThrottleSerial.hpp"
 #include "ThrottleEthernet.hpp"
 #include "ThrottleWifi.hpp"
-#include "ThrottleWifiAPClient.hpp"		 
 
 #endif
 #endif
