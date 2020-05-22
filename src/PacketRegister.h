@@ -71,8 +71,8 @@ struct RegisterList{
 
 #ifdef USE_TEXTCOMMAND
   int readCV(char *) volatile;
-  void writeCVByte(char *) volatile;
-  void writeCVBit(char *) volatile;
+  bool writeCVByte(char *) volatile;
+  bool writeCVBit(char *) volatile;
 
   int readCVmain(char *) volatile;
   void writeCVByteMain(char *) volatile;
@@ -87,8 +87,8 @@ struct RegisterList{
   void writeTextPacket(int nReg, byte *b, int nBytes) volatile;
   int readCV(int cv, int callBack, int callBackSub) volatile;
   int readCVmain(int cv, int callBack, int callBackSub) volatile;
-  void writeCVByte(int cv, int bValue, int callBack, int callBackSub) volatile;	// prog track
-  void writeCVBit(int cv, int bNum, int bValue, int callBack, int callBackSub) volatile;	// prog track
+  bool writeCVByte(int cv, int bValue, int callBack, int callBackSub) volatile;	// prog track
+  bool writeCVBit(int cv, int bNum, int bValue, int callBack, int callBackSub) volatile;	// prog track
   void writeCVByteMain(int cab, int cv, int bvalue) volatile;
   void writeCVBitMain(int cab, int cv, int bNum, int bValue) volatile;
 

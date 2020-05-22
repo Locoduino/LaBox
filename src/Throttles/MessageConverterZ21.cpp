@@ -228,6 +228,19 @@ void notifyHWInfo(Throttle* inpThrottle)
 	notify(HEADER_LAN_GET_HWINFO, replyBuffer, 8, true, inpThrottle);
 }
 
+void notifyCvNACK(Throttle* inpThrottle, byte incvMSB, byte incvLSB)
+{
+	notify(HEADER_LAN_XPRESS_NET, LAN_X_HEADER_CV_NACK, LAN_X_DB0_CV_NACK, replyBuffer, 0, false, inpThrottle);
+}
+
+void notifyCvRead(Throttle* inpThrottle, byte incvMSB, byte incvLSB, int inValue)
+{
+	replyBuffer[0] = incvMSB;	// cv address msb
+	replyBuffer[1] = incvLSB; // cv address lsb
+	replyBuffer[2] = inValue; // cv value
+	notify(HEADER_LAN_XPRESS_NET, LAN_X_HEADER_CV_RESULT, 0x14, replyBuffer, 3, false, inpThrottle);
+}
+
 void MessageConverterZ21::setSpeed(Throttle* inpThrottle, byte inNbSteps, byte inDB1, byte inDB2, byte inDB3)
 {
 	CircularBuffer* pBuffer = inpThrottle->getCircularBuffer();
@@ -290,6 +303,40 @@ void MessageConverterZ21::setFunction(Throttle* inpThrottle, byte inDB1, byte in
 	pLoco->setDCCFunction(function, activeFlag);
 	if ((this->broadcastFlags & BROADCAST_BASE) != 0)
 		notifyLocoInfo(inpThrottle, inDB1, inDB2);
+}
+
+void MessageConverterZ21::cvReadProg(Throttle* inpThrottle, byte inDB1, byte inDB2)
+{
+	int cvAddress = ((inDB1 & 0x3F) << 8) + inDB2;
+	
+#ifdef DCCPP_DEBUG_MODE
+	Serial.print("Throttle ");
+	Serial.print(inpThrottle->getId());
+	Serial.print(" : ");
+#endif
+
+	int val = DCCpp::readCvProg(cvAddress);
+	if (val == -1)
+		notifyCvNACK(inpThrottle, inDB1, inDB2);
+	else
+		notifyCvRead(inpThrottle, inDB1, inDB2, val);
+}
+
+void MessageConverterZ21::cvWriteProg(Throttle* inpThrottle, byte inDB1, byte inDB2, byte inDB3)
+{
+	int cvAddress = ((inDB1 & 0x3F) << 8) + inDB2;
+
+#ifdef DCCPP_DEBUG_MODE
+	Serial.print("Throttle ");
+	Serial.print(inpThrottle->getId());
+	Serial.print(" : ");
+#endif
+
+	bool ret = DCCpp::writeCvProg(cvAddress, inDB3);
+	if (!ret)
+		notifyCvNACK(inpThrottle, inDB1, inDB2);
+	else
+		notifyCvRead(inpThrottle, inDB1, inDB2, inDB3);
 }
 
 bool MessageConverterZ21::processBuffer(Throttle* inpThrottle)
@@ -442,7 +489,20 @@ bool MessageConverterZ21::processBuffer(Throttle* inpThrottle)
 			done = true;
 			break;
 		case LAN_X_HEADER_CV_READ:
+#ifdef DCCPP_DEBUG_VERBOSE_MODE
+			Serial.print(" CV READ ");
+#endif
+			// DB0 should be 0x11
+			cvReadProg(inpThrottle, DB[2], DB[3]);
+			done = true;
+			break;
 		case LAN_X_HEADER_CV_WRITE:
+#ifdef DCCPP_DEBUG_VERBOSE_MODE
+			Serial.print(" CV WRITE ");
+#endif
+			notifyFirmwareVersion(inpThrottle);
+			done = true;
+			break;
 		case LAN_X_HEADER_SET_TURNOUT:
 		case LAN_X_HEADER_CV_POM:
 		case 0x22:

@@ -26,6 +26,7 @@ public:
 	virtual bool convert(Throttle* inpThrottle, const String& inCommand) { return false; }
 	virtual bool processBuffer(Throttle* inpThrottle) { return false; }
 	virtual void stayAlive(Throttle* inpThrottle) {}
+	virtual EthernetProtocol getProtocol() { return TCP; }
 
 #ifdef DCCPP_DEBUG_MODE
 	/** Print the status of the Converter.

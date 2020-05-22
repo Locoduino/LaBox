@@ -63,6 +63,11 @@
 #define LAN_X_HEADER_LOCO_INFO	0xEF
 #define LAN_X_HEADER_TURNOUT_INFO 0x43
 #define LAN_X_HEADER_FIRMWARE_VERSION 0xF3
+#define LAN_X_HEADER_CV_NACK 0x61
+#define LAN_X_HEADER_CV_RESULT 0x64
+
+#define LAN_X_DB0_CV_NACK_SC 0x12
+#define LAN_X_DB0_CV_NACK 0x13
 
 // Broadcast flags
 
@@ -97,9 +102,12 @@ public:
 	void clientStop(Throttle* inpThrottle);
 	bool processBuffer(Throttle* inpThrottle);
 	void stayAlive(Throttle* inpThrottle);
+	EthernetProtocol getProtocol() { return UDP; }
 
 	void setSpeed(Throttle* inpThrottle, byte inNbSteps, byte inDB1, byte inDB2, byte inDB3);
 	void setFunction(Throttle* inpThrottle, byte inDB1, byte inDB2, byte inDB3);
+	void cvReadProg(Throttle* inpThrottle, byte inDB1, byte inDB2);
+	void cvWriteProg(Throttle* inpThrottle, byte inDB1, byte inDB2, byte inDB3);
 
 #ifdef DCCPP_DEBUG_MODE
 	/** Print the status of the Converter.

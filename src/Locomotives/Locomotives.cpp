@@ -8,6 +8,11 @@ description: <FunctionsState class>
 #include "DCCpp.h"
 
 #ifdef USE_LOCOMOTIVES
+
+notifySpeedDirType Locomotives::notifySpeedDir = NULL;
+notifyFunctionType Locomotives::notifyFunction = NULL;
+notifyEmergencyStopType Locomotives::notifyEmergencyStop = NULL;
+
 Locomotive* Locomotives::pFirstLocomotive = NULL;
 
 Locomotive* Locomotives::get(uint16_t inAddress)

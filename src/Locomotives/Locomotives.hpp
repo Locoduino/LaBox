@@ -9,6 +9,10 @@
 #include "Locomotive.hpp"
 #include "Registers.hpp"
 
+typedef void (*notifySpeedDirType)(uint16_t inLocoAddress, uint8_t inSpeed, bool inIsForward);
+typedef void (*notifyFunctionType)(uint16_t inLocoAddress, uint8_t inFunction, bool inIsActivated);
+typedef void (*notifyEmergencyStopType)(uint16_t inLocoAddress, bool inIsActivated);
+
 /**	This is the static class for assigned locomotive list.
 */
 class Locomotives
@@ -17,6 +21,11 @@ private:
 	static Locomotive* pFirstLocomotive;	/**< Address of the first object of this class. NULL means empty list of Locomotives. Do not change it !*/
 
 public:
+
+	static notifySpeedDirType notifySpeedDir;
+	static notifyFunctionType notifyFunction;
+	static notifyEmergencyStopType notifyEmergencyStop;
+
 	/** Get a particular Locomotive.
 	@param inAddress	The DCC id (1-65535) of the locomotive.
 	@return The found locomotive or NULL if not found.

@@ -50,6 +50,7 @@ public:
 	void clientStop(Throttle* inpThrottle);
 	bool convert(Throttle* inpThrottle, const String& inCommand);
 	void stayAlive(Throttle* inpThrottle);
+	EthernetProtocol getProtocol() { return TCP; }
 
 	void locoAdd(Throttle* inpThrottle, int inLocoNumber, String th, String actionKey);
 	void locoRelease(Throttle* inpThrottle, int inLocoNumber, String th, String actionKey);

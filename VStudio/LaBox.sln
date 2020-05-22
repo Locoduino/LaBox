@@ -7,12 +7,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ArduiEmulatorLib", "..\..\.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LaBox", "LaBox.vcxproj", "{7B26BA45-2AF4-4EB1-8780-D28E09B51759}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DIO2", "..\..\DIO2\VStudio\DIO2.vcxproj", "{CC4048D1-7AC0-4D3D-98A3-2922D996B5AB}"
-	ProjectSection(ProjectDependencies) = postProject
-		{2CEDFF9D-11AC-46B3-92B0-8B43CBCCFFAC} = {2CEDFF9D-11AC-46B3-92B0-8B43CBCCFFAC}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LaBoxTestExe", "LaBoxTestExe.vcxproj", "{9696B190-8A31-45BA-A43E-0287102EF438}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{44E3B4B0-2430-4BE4-946B-14FF532C3EA8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,12 +35,6 @@ Global
 		{7B26BA45-2AF4-4EB1-8780-D28E09B51759}.Release|x64.Build.0 = Release|x64
 		{7B26BA45-2AF4-4EB1-8780-D28E09B51759}.Release|x86.ActiveCfg = Release|Win32
 		{7B26BA45-2AF4-4EB1-8780-D28E09B51759}.Release|x86.Build.0 = Release|Win32
-		{CC4048D1-7AC0-4D3D-98A3-2922D996B5AB}.Debug|x64.ActiveCfg = Debug|x64
-		{CC4048D1-7AC0-4D3D-98A3-2922D996B5AB}.Debug|x64.Build.0 = Debug|x64
-		{CC4048D1-7AC0-4D3D-98A3-2922D996B5AB}.Debug|x86.ActiveCfg = Debug|x64
-		{CC4048D1-7AC0-4D3D-98A3-2922D996B5AB}.Release|x64.ActiveCfg = Release|x64
-		{CC4048D1-7AC0-4D3D-98A3-2922D996B5AB}.Release|x64.Build.0 = Release|x64
-		{CC4048D1-7AC0-4D3D-98A3-2922D996B5AB}.Release|x86.ActiveCfg = Release|x64
 		{9696B190-8A31-45BA-A43E-0287102EF438}.Debug|x64.ActiveCfg = Debug|x64
 		{9696B190-8A31-45BA-A43E-0287102EF438}.Debug|x64.Build.0 = Debug|x64
 		{9696B190-8A31-45BA-A43E-0287102EF438}.Debug|x86.ActiveCfg = Debug|Win32

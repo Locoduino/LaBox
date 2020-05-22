@@ -19,7 +19,7 @@ ThrottleWifi::ThrottleWifi(const String& inName, int inPort) : Throttle(inName)
 	this->type = ThrottleType::Wifi;
 }
 
-void ThrottleWifi::connectWifi(const char* inSsid, const char* inPassword)
+void ThrottleWifi::connectWifi(const char* inSsid, const char* inPassword, IPAddress inIp, IPAddress inGateway, IPAddress insubnet, IPAddress inDns)
 {
 	bool connected = false;
 	//DO NOT TOUCH
@@ -35,11 +35,28 @@ void ThrottleWifi::connectWifi(const char* inSsid, const char* inPassword)
 #ifdef USE_WIFI_LOCALSSID
 	connected = WiFi.softAP(inSsid, inPassword);
 #else
+	if (!(inIp == INADDR_NONE))
+	{
+		// Force ip if necessary
+		WiFi.config(inIp, inGateway, insubnet, inDns);
+	}
 	WiFi.begin(inSsid, inPassword);
 
-	while (WiFi.status() != WL_CONNECTED) 
+#ifdef DCCPP_DEBUG_MODE
+	int count = 0;
+#endif
+	while (WiFi.status() != WL_CONNECTED)
 	{
 		delay(500);
+#ifdef DCCPP_DEBUG_MODE
+		Serial.print(".");
+		count++;
+		if (count > 60)
+		{
+			Serial.println("");
+			count = 0;
+		}
+#endif
 	}
 	if (WiFi.status() == WL_CONNECTED)
 	{
@@ -102,6 +119,12 @@ bool ThrottleWifi::begin(EthernetProtocol inProtocol)
 	}
 
 	return true;
+}
+
+bool ThrottleWifi::begin(MessageConverter *apConverter)
+{
+	this->setConverter(apConverter);
+	return this->begin(apConverter->getProtocol());
 }
 
 IPAddress ThrottleWifi::remoteIP()

@@ -57,6 +57,8 @@ void Locomotive::setDCCSpeed(uint8_t speed)
 {
 	this->setSpeed(speed);
 	DCCpp::setSpeedMain(this->speedRegisterNumber, this->address, this->getSpeedMax(), this->currentSpeed, this->direction);
+	if (Locomotives::notifySpeedDir != NULL)
+		Locomotives::notifySpeedDir(this->address, speed, this->direction);
 }
 
 void Locomotive::setDCCDirection(bool inForward)
@@ -65,6 +67,8 @@ void Locomotive::setDCCDirection(bool inForward)
 	{
 		this->setDirection(inForward);
 		DCCpp::setSpeedMain(this->speedRegisterNumber, this->address, this->getSpeedMax(), 0, this->direction);
+		if (Locomotives::notifySpeedDir != NULL)
+			Locomotives::notifySpeedDir(this->address, 0, this->direction);
 	}
 }
 
@@ -72,18 +76,24 @@ void Locomotive::stop()
 {
 	this->setSpeed(0);
 	DCCpp::setSpeedMain(this->speedRegisterNumber, this->address, this->getSpeedMax(), this->currentSpeed, this->direction);
+	if (Locomotives::notifySpeedDir != NULL)
+		Locomotives::notifySpeedDir(this->address, this->currentSpeed, this->direction);
 }
 
 void Locomotive::emergencyStop()
 {
 	this->setSpeed(1);
 	DCCpp::setSpeedMain(this->speedRegisterNumber, this->address, this->getSpeedMax(), this->currentSpeed, this->direction);
+	if (Locomotives::notifyEmergencyStop!= NULL)
+		Locomotives::notifyEmergencyStop(this->address, true);
 }
 
 void Locomotive::setDCCFunction(uint8_t inFunction, bool inActivate)
 {
 	this->setFunction(inFunction, inActivate);
 	DCCpp::setFunctionsMain(0, this->address, this->functions);
+	if (Locomotives::notifyFunction != NULL)
+		Locomotives::notifyFunction(this->address, inFunction, inActivate);
 }
 
 #ifdef DCCPP_DEBUG_MODE

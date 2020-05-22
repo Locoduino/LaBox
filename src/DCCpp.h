@@ -468,6 +468,7 @@ Main include file of the library.*/
 //#define USE_WIFI_EXTERNSSID
 #define USE_LOCOMOTIVES
 #define USE_THROTTLES
+#define USE_HMI
 
 #ifdef DOXYGEN_SPECIFIC
     // DO NOT CHANGE THESE LINES IN THIS BLOCK 'DOXYGEN_SPECIFIC' : Only here for documentation !
@@ -567,6 +568,10 @@ Main include file of the library.*/
 #ifdef USE_TEXTCOMMAND
 #include "MessageStack.hpp"          
 #include "TextCommand.h"
+#endif
+
+#ifdef USE_HMI
+#include "Hmi/hmi.h"
 #endif
 
 #include "DCCpp.hpp"

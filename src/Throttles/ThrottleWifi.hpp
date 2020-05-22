@@ -20,6 +20,7 @@ class ThrottleWifi : public Throttle
 private:
 	static IPAddress wifiIp;
 	static WiFiUDP _ClientUDP;
+	static bool socketsStarted;
 
 
 	int port = 0;
@@ -32,7 +33,7 @@ private:
 	WiFiUDP ClientUDP;
 
 public:
-	static void connectWifi(const char* inSsid, const char* inPassword);
+	static void connectWifi(const char* inSsid, const char* inPassword, IPAddress inIp = INADDR_NONE, IPAddress inGateway = INADDR_NONE, IPAddress insubnet = INADDR_NONE, IPAddress inDns = INADDR_NONE);
 	static ThrottleWifi* GetThrottle(IPAddress inRemoteIp, int inPort, EthernetProtocol inProtocol);
 
 	/** Creates a new instance of this wifi class.
@@ -41,6 +42,7 @@ public:
 	ThrottleWifi(const String& inName, int inPort);
 
 	bool begin(EthernetProtocol inProtocol = TCP);
+	bool begin(MessageConverter *apConverter);
 	bool loop();
 	bool sendMessage(const String& inMessage);
 	void end();

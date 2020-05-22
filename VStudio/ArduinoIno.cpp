@@ -5,6 +5,7 @@
 
 #include "Arduino.h"
 
+//#include "../examples/Autotest/Autotest.ino"
 //#include "../examples/WifiDcc/WifiDcc.ino"
 //#include "../examples/SerialDcc/SerialDcc.ino"
 #include "../examples/LaBox/LaBox.ino"

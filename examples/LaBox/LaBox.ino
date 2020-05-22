@@ -13,18 +13,20 @@ description: <LaBox Wifi Controller sample>
 // WIFI
 
 #ifdef USE_WIFI_EXTERNSSID
-const char* ssid = "VIDEOFUTUR_C56165_2.4G";
-const char* password = "EenPghQD";
+const char* ssid = "Nokia 8";
+const char* password = "thpVertSaintDenis";
+
+IPAddress ip      (192,   168,  43,  100);   // fix IP of the server in client mode
+IPAddress gateway (192,   168,  43,  9);     // WiFi router's IP. If you are in AP mode, it's the ESP IP. If you are in client, it's your own gateway
+IPAddress subnet  (255,   255,  255,  0);    // Subnet mask
+IPAddress dns     (192,   168,  43,  9);     // DNS server, generally, the WiFi access point is a DNS server, but we can define another one.
+
 #endif
 #ifdef USE_WIFI_LOCALSSID
 const char* ssid = "LaBoxServer";
 const char* password = "";
 #endif
 
-// the media access control (ethernet hardware) address for the shield:
-//uint8_t wifiMac[] = { 0xBE, 0xEF, 0xBE, 0xEF, 0xBE, 0x80 };
-//the IP address for the shield:
-//uint8_t wifiIp[] = { 192, 168, 1, 100 };
 int dccPPPort = 2560;
 int wifiPort = 44444;
 
@@ -54,31 +56,31 @@ void setup()
   Serial.begin(115200);
   Serial.println("LaBox 0.5");
 
-  ThrottleWifi::connectWifi(ssid, password);
-  
+  ThrottleWifi::connectWifi(ssid, password);//, ip, gateway, subnet, dns);
+
+  // For DCCpp syntax applications like DCCpp cab or RTDrive+
   throttleWifi0.begin(HTTP);
-  
-  throttleWifi1.setConverter(&converter1);
-  throttleWifi1.begin(UDP);
-  throttleWifi2.setConverter(&converter2);
-  throttleWifi2.begin(UDP);
-  throttleWifi3.setConverter(&converter3);
-  throttleWifi3.begin(UDP);
-  
-  throttleWifi4.setConverter(&converterWT1);
-  throttleWifi4.begin(TCP);
-  throttleWifi5.setConverter(&converterWT2);
-  throttleWifi5.begin(TCP);
-  throttleWifi6.setConverter(&converterWT3);
-  throttleWifi6.begin(TCP);
+
+  // Z21 applications
+  throttleWifi1.begin(&converter1);
+  throttleWifi2.begin(&converter2);
+  throttleWifi3.begin(&converter3);
+
+  // WiThrottle protocol (WiThrotlle and Engine Driver apps)
+  throttleWifi4.begin(&converterWT1);
+  throttleWifi5.begin(&converterWT2);
+  throttleWifi6.begin(&converterWT3);
 
   DCCpp::begin();
   /* Configuration for ESP32, can be adapted...
   DIR -> GPIO_32
   PWM -> EN
   MAX471 -> GPIO_36 (A0)
+
+  Config TPC:
+  TPCINT2, TPCD5, TPCA1
   */
-  DCCpp::beginMain(UNDEFINED_PIN, 32, 34, A0);  
+  DCCpp::beginMain(UNDEFINED_PIN, 22, 4, 33);  
 }
 
 void loop()

@@ -503,9 +503,10 @@ int RegisterList::readCVmain(char *s) volatile
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void RegisterList::writeCVByte(int cv, int bValue, int callBack, int callBackSub) volatile 
+bool RegisterList::writeCVByte(int cv, int bValue, int callBack, int callBackSub) volatile 
 {
 	byte bWrite[4];
+	bool ok = false;
 	int ret, base;
 
 	cv--;                              // actual CV addresses are cv-1 (0-1023)
@@ -532,8 +533,8 @@ void RegisterList::writeCVByte(int cv, int bValue, int callBack, int callBackSub
 
 		ret = RegisterList::checkAcknowlegde(DCCppConfig::CurrentMonitorProg, base);
 
-		if (ret == 0)    // verify unsuccessful
-			bValue = -1;
+		if (ret != 0)    // verify successful
+			ok = true;
 	}
 
 #if defined(USE_TEXTCOMMAND)
@@ -546,15 +547,23 @@ void RegisterList::writeCVByte(int cv, int bValue, int callBack, int callBackSub
 	DCCPP_INTERFACE.print(" ");
 	DCCPP_INTERFACE.print(bValue);
 	DCCPP_INTERFACE.print(">");
+
+	if (ok)
+		DCCPP_INTERFACE.print("ok");
+	else
+		DCCPP_INTERFACE.print("fail");
+
 #ifdef USE_THROTTLES
 	if (DCCPP_INTERFACE.sendNewline())
 #endif
 		DCCPP_INTERFACE.println("");
 #endif
+
+	return ok;
 } // RegisterList::writeCVByte(ints)
 
 #ifdef USE_TEXTCOMMAND
-void RegisterList::writeCVByte(char *s) volatile
+bool RegisterList::writeCVByte(char *s) volatile
 {
 	int bValue, cv, callBack, callBackSub;
 
@@ -563,18 +572,19 @@ void RegisterList::writeCVByte(char *s) volatile
 #ifdef DCCPP_DEBUG_MODE
 		Serial.println(F("W Syntax error"));
 #endif
-		return;
+		return false;
 	}
 
-	this->writeCVByte(cv, bValue, callBack, callBackSub);
+	return this->writeCVByte(cv, bValue, callBack, callBackSub);
 } // RegisterList::writeCVByte(string)
 #endif
 
   ///////////////////////////////////////////////////////////////////////////////
 
-void RegisterList::writeCVBit(int cv, int bNum, int bValue, int callBack, int callBackSub) volatile 
+bool RegisterList::writeCVBit(int cv, int bNum, int bValue, int callBack, int callBackSub) volatile 
 {
 	byte bWrite[4];
+	bool ok = false;
 	int ret, base;
 
 	cv--;                              // actual CV addresses are cv-1 (0-1023)
@@ -603,8 +613,8 @@ void RegisterList::writeCVBit(int cv, int bNum, int bValue, int callBack, int ca
 
 		ret = RegisterList::checkAcknowlegde(DCCppConfig::CurrentMonitorProg, base);
 
-		if (ret == 0)    // verify unsuccessful
-			bValue = -1;
+		if (ret != 0)    // verify successful
+			ok = true;
 	}
 
 #if defined(USE_TEXTCOMMAND)
@@ -619,15 +629,23 @@ void RegisterList::writeCVBit(int cv, int bNum, int bValue, int callBack, int ca
 	DCCPP_INTERFACE.print(" ");
 	DCCPP_INTERFACE.print(bValue);
 	DCCPP_INTERFACE.print(">");
+
+	if (ok)
+		DCCPP_INTERFACE.print("ok");
+	else
+		DCCPP_INTERFACE.print("fail");
+
 #ifdef USE_THROTTLES
 	if (DCCPP_INTERFACE.sendNewline())
 #endif
 		DCCPP_INTERFACE.println("");
 #endif
+
+	return ok;
 } // RegisterList::writeCVBit(ints)
 
 #ifdef USE_TEXTCOMMAND
-void RegisterList::writeCVBit(char *s) volatile
+bool RegisterList::writeCVBit(char *s) volatile
 {
   int bNum, bValue, cv, callBack, callBackSub;
 
@@ -636,10 +654,10 @@ void RegisterList::writeCVBit(char *s) volatile
 #ifdef DCCPP_DEBUG_MODE
 	  Serial.println(F("W Syntax error"));
 #endif
-	  return;
+	  return false;
   }
 
-  this->writeCVBit(cv, bNum, bValue, callBack, callBackSub);
+  return this->writeCVBit(cv, bNum, bValue, callBack, callBackSub);
 } // RegisterList::writeCVBit(string)
 #endif
 

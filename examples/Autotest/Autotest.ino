@@ -65,9 +65,9 @@ void setup()
 
 	new StateMachineItem(0, "t 1 3 0 1", "ON");				// On register 1, set direction to forward on cab 3
 	new StateMachineItem(0, "f 3 144", "Light on");			// Light FL (F0) on
-	new StateMachineItem(3000, "t 1 3 50 1", "Forward");	// On register 1, go forward at speed 30 on cab 3
+	new StateMachineItem(3000, "t 1 3 50 1", "Forward");	// On register 1, go forward at speed 30 on cab 3 for 3s
 	new StateMachineItem(1000, "t 1 3 0 1", "Stop");		// Stop cab 3 after 1 second
-	new StateMachineItem(2000, "", "Wait");					// Wait complete stop
+	new StateMachineItem(2000, "", "Wait");					// Wait complete stop 2s
 	new StateMachineItem(1000, "t 1 3 0 0", "To bwd");		// On register 1, set direction to backward on cab 3
 	new StateMachineItem(3000, "t 1 3 50 0", "Backward");	// On register 1, go backward at speed 30 on cab 3
 	new StateMachineItem(1000, "t 1 3 0 0", "Stop");		// Stop cab 3 after 1 second
