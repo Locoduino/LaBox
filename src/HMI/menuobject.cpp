@@ -43,7 +43,7 @@ menuObject::menuObject(Adafruit_SSD1306* screen, menuObject* p, const char* titl
   }
   if(parent)
   {
-    _DEBUG_LEVEL1_PRINT("menuObject: Add child to my parent : ");_DEBUG_LEVEL1_PRINT(parent->caption);_DEBUG_LEVEL1_PRINT("/");_DEBUG_LEVEL1_PRINTLN(caption);
+    _HMIDEBUG_LEVEL1_PRINT("menuObject: Add child to my parent : ");_HMIDEBUG_LEVEL1_PRINT(parent->caption);_HMIDEBUG_LEVEL1_PRINT("/");_HMIDEBUG_LEVEL1_PRINTLN(caption);
     parent->addChild( (menuObject*) this);
   }
 }
@@ -62,8 +62,8 @@ void menuObject::addChild(menuObject* sub)
         subMenu[nbSubMenu++] = sub;
       }else
       {
-        _DEBUG_CRITICAL_PRINT("Critical error, you want add to much sub menus ! Menu  ");_DEBUG_CRITICAL_PRINT(caption);
-        _DEBUG_CRITICAL_PRINT(", sub menu ");_DEBUG_CRITICAL_PRINTLN(sub->caption);        
+        _HMIDEBUG_CRITICAL_PRINT("Critical error, you want add to much sub menus ! Menu  ");_HMIDEBUG_CRITICAL_PRINT(caption);
+        _HMIDEBUG_CRITICAL_PRINT(", sub menu ");_HMIDEBUG_CRITICAL_PRINTLN(sub->caption);        
       }
     }
 }
@@ -75,7 +75,7 @@ void menuObject::addChild(menuObject* sub)
 */
 void menuObject::begin()
 {
-  _DEBUG_FCT_PRINTLN("menuObject::begin.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("menuObject::begin.. Begin"); 
   resetMenu();
   // Recursive call
   for(int i=0; i < nbSubMenu; i++)
@@ -90,7 +90,7 @@ void menuObject::begin()
   { 
     endObject = new menuObject(display, this, TXT_MenuBack, MENUTYPECOMEBCK) ;             
   }
-  _DEBUG_FCT_PRINTLN("menuObject::begin.. End"); 
+  _HMIDEBUG_FCT_PRINTLN("menuObject::begin.. End"); 
 }
 /*!
     @brief  update, call to refresh screen
@@ -100,7 +100,7 @@ void menuObject::begin()
 */
 void menuObject::update()
 {
-  _DEBUG_FCT_PRINTLN("menuObject::update.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("menuObject::update.. Begin"); 
  display->clearDisplay();
   display->setTextSize(1);
   display->setTextColor(WHITE);
@@ -123,8 +123,8 @@ void menuObject::update()
   {
       ListIndexMaxVisible = nbSubMenu;
   }
-  //_DEBUG_LEVEL1_PRINT("firstListIndex : ");_DEBUG_LEVEL1_PRINT(firstListIndex);_DEBUG_LEVEL1_PRINT(", ListIndexMaxVisible : ");_DEBUG_LEVEL1_PRINT(ListIndexMaxVisible);
-  //_DEBUG_LEVEL1_PRINT(", SelectListIndex : ");_DEBUG_LEVEL1_PRINT(SelectListIndex);_DEBUG_LEVEL1_PRINT(", nbSubMenu : ");_DEBUG_LEVEL1_PRINTLN(nbSubMenu);
+  //_HMIDEBUG_LEVEL1_PRINT("firstListIndex : ");_HMIDEBUG_LEVEL1_PRINT(firstListIndex);_HMIDEBUG_LEVEL1_PRINT(", ListIndexMaxVisible : ");_HMIDEBUG_LEVEL1_PRINT(ListIndexMaxVisible);
+  //_HMIDEBUG_LEVEL1_PRINT(", SelectListIndex : ");_HMIDEBUG_LEVEL1_PRINT(SelectListIndex);_HMIDEBUG_LEVEL1_PRINT(", nbSubMenu : ");_HMIDEBUG_LEVEL1_PRINTLN(nbSubMenu);
   for(int i=firstListIndex; i < ListIndexMaxVisible; i++) 
   {
     if(subMenu[i])
@@ -145,7 +145,7 @@ void menuObject::update()
   }
   display->display();
 
-  _DEBUG_FCT_PRINTLN("menuObject::update.. End"); 
+  _HMIDEBUG_FCT_PRINTLN("menuObject::update.. End"); 
 }
 /*!
     @brief  resetMenu, 
@@ -155,7 +155,7 @@ void menuObject::update()
 */
 void menuObject::resetMenu()
 {
-  _DEBUG_FCT_PRINTLN("menuObject::resetMenu.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("menuObject::resetMenu.. Begin"); 
   // Recursive call
   for(int i=0; i < nbSubMenu; i++)
   {
@@ -173,7 +173,7 @@ void menuObject::resetMenu()
   selectedMenu            = subMenu[firstListIndex];
   SelectListIndex = 0 ;
 
-  _DEBUG_FCT_PRINTLN("menuObject::resetMenu.. End"); 
+  _HMIDEBUG_FCT_PRINTLN("menuObject::resetMenu.. End"); 
 }
 /*!
     @brief  eventUp, Notification of a button event
@@ -183,11 +183,11 @@ void menuObject::resetMenu()
 */
 void menuObject::eventUp()
 {
-  _DEBUG_FCT_PRINTLN("menuObject::eventUp.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("menuObject::eventUp.. Begin"); 
   if(SelectListIndex > 0) SelectListIndex--;
   selectedMenu = subMenu[SelectListIndex];
 
-  _DEBUG_FCT_PRINTLN("menuObject::eventUp.. End");   
+  _HMIDEBUG_FCT_PRINTLN("menuObject::eventUp.. End");   
 }
 /*!
     @brief  eventDown, Notification of a button event
@@ -197,11 +197,11 @@ void menuObject::eventUp()
 */
 void menuObject::eventDown()
 {
-  _DEBUG_FCT_PRINTLN("menuObject::eventDown.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("menuObject::eventDown.. Begin"); 
   if(SelectListIndex < nbSubMenu-1) SelectListIndex++;
   selectedMenu = subMenu[SelectListIndex];
 
-  _DEBUG_FCT_PRINTLN("menuObject::eventDown.. End");   
+  _HMIDEBUG_FCT_PRINTLN("menuObject::eventDown.. End");   
 }
 /*!
     @brief  eventSelect, Notification of a button event
@@ -211,7 +211,7 @@ void menuObject::eventDown()
 */
 int menuObject::eventSelect()
 {
-  _DEBUG_FCT_PRINTLN("menuObject::eventSelect.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("menuObject::eventSelect.. Begin"); 
 
   switch(selectedMenu->value)
   {
@@ -224,6 +224,6 @@ int menuObject::eventSelect()
     default :
       return MENUCHOSEN ;         // It's user selection like Yes or No for exemple
   }
-  _DEBUG_FCT_PRINTLN("menuObject::eventSelect.. End"); 
+  _HMIDEBUG_FCT_PRINTLN("menuObject::eventSelect.. End"); 
   return 0;
 }

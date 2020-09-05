@@ -2,9 +2,8 @@
 
 CircularBuffer::CircularBuffer(int inSize)
 {
-	this->buffer = new byte[inSize];
+	this->buffer = NULL;
 	this->size = inSize;
-	this->clear();
 }
 
 void CircularBuffer::begin(bool inMultiThread)
@@ -13,42 +12,99 @@ void CircularBuffer::begin(bool inMultiThread)
 	{
 		this->xSemaphore = xSemaphoreCreateMutex();
 	}
+	this->buffer = new byte[this->size];
+	this->clear();
+}
+
+bool CircularBuffer::CheckIfBeginDone()
+{
+#ifdef DCCPP_DEBUG_MODE
+	if (this->buffer == NULL)
+	{
+		Serial.println(F("Error : CircularBuffer missing begin !"));
+		return false;
+	}
+#endif
+	return true;
 }
 
 void CircularBuffer::end()
 {
+	START_SEMAPHORE()
+	if (!this->CheckIfBeginDone()) return;
+
 	delete[] this->buffer;
 	this->buffer = NULL;	// to be sure to crash at any attemps to use it !
+	END_SEMAPHORE()
 }
 
 void CircularBuffer::clear()
 {
+	if (!this->CheckIfBeginDone()) return;
+
+	START_SEMAPHORE()
 	memset(this->buffer, 0, this->size);
 
 	this->full = false;
 	this->head = this->tail = 0;
 	this->peakCount = 0;
+	END_SEMAPHORE()
+}
+
+bool CircularBuffer::PushByte(byte inpData)
+{
+	if (!this->CheckIfBeginDone()) return false;
+
+	bool ok = true;
+	START_SEMAPHORE()
+
+	if (!this->full)
+	{
+		this->buffer[this->head] = inpData;
+		this->head++;
+		this->full = this->head == this->tail;
+
+		if (this->full)
+		{
+			ok = false;
+			this->peakCount = this->size + 1;	// maximum size !
+		}
+	}
+
+#ifdef DCCPP_DEBUG_MODE
+	if (!ok)
+	{
+		Serial.println(F("Error : the byte has been lost ! Buffer is full !"));
+	}
+#endif
+
+	END_SEMAPHORE()
+
+	this->GetCount();	// update peakCount...
+	return ok;
 }
 
 bool CircularBuffer::PushBytes(byte* inpData, int inDataLength)
 {
+	if (!this->CheckIfBeginDone()) return false;
+
 	bool ok = true;
+	START_SEMAPHORE()
 	if (!this->full)
 	{
-		START_SEMAPHORE()
-			for (int i = 0; i < inDataLength; i++)
-			{
-				this->buffer[this->head] = inpData[i];
-				this->head = (this->head + 1) % this->size;
-				this->full = this->head == this->tail;
+		for (int i = 0; i < inDataLength; i++)
+		{
+			this->buffer[this->head] = inpData[i];
+			this->head = (this->head + 1) % this->size;
+			this->full = this->head == this->tail;
 
-				if (this->full)
-				{
-					ok = false;
-					this->peakCount = this->size + (inDataLength - i);	// maximum size !
-					break;
-				}
+			if (this->full)
+			{
+				ok = false;
+				this->peakCount = this->size + (inDataLength - i);	// maximum size !
+				break;
 			}
+		}
 	}
 
 #ifdef DCCPP_DEBUG_MODE
@@ -65,6 +121,8 @@ bool CircularBuffer::PushBytes(byte* inpData, int inDataLength)
 
 byte CircularBuffer::GetByte()
 {
+	if (!this->CheckIfBeginDone()) return 0;
+
 	byte value = 0;
 	if (this->isEmpty())
 		return 0;
@@ -80,6 +138,8 @@ byte CircularBuffer::GetByte()
 
 int16_t CircularBuffer::GetInt16()
 {
+	if (!this->CheckIfBeginDone()) return 0;
+
 	if (this->isEmpty() || this->GetCount() < 2)
 		return 0;
 
@@ -91,6 +151,8 @@ int16_t CircularBuffer::GetInt16()
 
 int32_t CircularBuffer::GetInt32()
 {
+	if (!this->CheckIfBeginDone()) return 0;
+
 	if (this->isEmpty() || this->GetCount() < 4)
 		return 0;
 
@@ -104,6 +166,8 @@ int32_t CircularBuffer::GetInt32()
 
 bool CircularBuffer::GetBytes(byte* inpData, int inDataLength)
 {
+	if (!this->CheckIfBeginDone()) return false;
+
 	if (this->GetCount() < inDataLength)
 		return false;
 
@@ -144,7 +208,9 @@ void CircularBuffer::GetBytes(byte* pBuffer, int inPos, byte* inpData, int inDat
 
 int CircularBuffer::GetCount()
 {
-  int usedSize = 0;
+	if (!this->CheckIfBeginDone()) return 0;
+
+	int usedSize = 0;
 
 	usedSize = this->size;
 
@@ -174,6 +240,8 @@ const char textSymb[] = "/*-+&$!:;,";
 void CircularBuffer::Test()
 {
 	CircularBuffer test(20);
+
+	test.begin(false);
 
 	Serial.println("After all initialized");
 	test.printCircularBuffer();
@@ -280,6 +348,8 @@ void CircularBuffer::Test()
 
 void CircularBuffer::printCircularBuffer()
 {
+	if (!this->CheckIfBeginDone()) return;
+
 	if (this->full)
 		Serial.println("FULL !");
 	for (int i = 0; i < this->size; i++)

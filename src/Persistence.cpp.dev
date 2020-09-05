@@ -6,10 +6,22 @@ description: <Persistence>
 
 #include "Arduino.h"
 #include "Persistence.h"
+#include "FS.h"
+#include "SPIFFS.h"
 
 PersistenceFile::PersistenceFile()
 {
 	this->pFirstObject = NULL;
+}
+
+bool PersistenceFile::begin()
+{
+	if (!SPIFFS.begin(true)) {
+		Serial.println("SPIFFS Mount Failed");
+		return false;
+	}
+
+	return true;
 }
 
 PersistenceObject* PersistenceFile::getFirst()
@@ -17,8 +29,13 @@ PersistenceObject* PersistenceFile::getFirst()
 	return this->pFirstObject;
 }
 
-bool PersistenceFile::write()
+bool PersistenceFile::write(const String& inFilename)
 {
+	this->File = SPIFFS.open(inFilename, FILE_WRITE);
+	if (!this->File) {
+		Serial.println("- failed to open file for writing");
+		return false;
+	}
 	PersistenceObject* pCurr = this->pFirstObject;
 
 	while (pCurr != NULL)
@@ -32,7 +49,7 @@ bool PersistenceFile::write()
 	return true;
 }
 
-bool PersistenceFile::read()
+bool PersistenceFile::read(const String& inFilename)
 {
 	PersistenceObject* pCurr = this->pFirstObject;
 

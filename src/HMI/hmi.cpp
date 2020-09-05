@@ -37,7 +37,11 @@ hmi::hmi(TwoWire *twi) : Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT, twi, -1)
 */
 void hmi::begin()
 {
-  _DEBUG_FCT_PRINTLN("hmi::begin().. Begin");
+  _HMIDEBUG_FCT_PRINTLN("hmi::begin().. Begin");
+
+  if (CurrentInterface == NULL) CurrentInterface = this;
+
+  this->executionCore = xPortGetCoreID();
 
   BtnUp = new OneButton(PIN_BTN_BTNUP, true);
   BtnDown = new OneButton(PIN_BTN_BTNDWN, true);
@@ -49,7 +53,7 @@ void hmi::begin()
   _HMIEvent = noEvent;
   // Init Display
   if (!Adafruit_SSD1306::begin(SSD1306_SWITCHCAPVCC, HMI_I2C_ADDR)) {
-    _DEBUG_FCT_PRINTLN("SSD1306 allocation failed");
+    _HMIDEBUG_FCT_PRINTLN("SSD1306 allocation failed");
   }
   //display.setFont(&FreeSerif9pt7b);       // !!!!!!!!! A vérifier
   clearDisplay();
@@ -70,7 +74,7 @@ void hmi::begin()
   // Make menu
   menu = new MenuManagement(this);
   menu->begin();
-  _DEBUG_FCT_PRINTLN("hmi::begin().. End");
+  _HMIDEBUG_FCT_PRINTLN("hmi::begin().. End");
 }
 /*!
     @brief  update, call to refresh screen
@@ -80,7 +84,14 @@ void hmi::begin()
 */
 void hmi::update()
 {
-  _DEBUG_FCT_PRINTLN("hmi::update().. Begin");
+  int core = xPortGetCoreID();
+  if (core != this->executionCore)
+    return;
+
+  _HMIDEBUG_FCT_PRINTLN("hmi::update().. Begin");
+
+  HmiInterfaceLoop();
+
   // Update button state
   BtnUp->tick();
   BtnDown->tick();
@@ -93,9 +104,9 @@ void hmi::update()
     millisRefreshData = millis();
   }
   // Evolve the main state machine
-  stateMachine() ;
+  stateMachine();
 
-  _DEBUG_FCT_PRINTLN("hmi::update().. End");
+  _HMIDEBUG_FCT_PRINTLN("hmi::update().. End");
 }
 /*!
     @brief  stateMachine
@@ -106,11 +117,15 @@ void hmi::update()
 */
 void hmi::stateMachine()
 {
-  _DEBUG_FCT_PRINTLN("hmi::stateMachine().. Begin");
+  int core = xPortGetCoreID();
+  if (core != this->executionCore)
+    return;
+
+  _HMIDEBUG_FCT_PRINTLN("hmi::stateMachine().. Begin");
   // Time out in menu, back to dashboard
   if (_HMIState == StateParametersMenu && (millis() - millisParamsMenu > HMI_TimeOutMenu) )
   {
-    _DEBUG_SM_PRINTLN("Timeout Parameters Menu");
+    _HMIDEBUG_SM_PRINTLN("Timeout Parameters Menu");
     _HMIState = StateExitMenu;
   }
 // ---------------- Main State Diagramm - https://plantuml.com/fr/ -------------------------
@@ -131,7 +146,7 @@ void hmi::stateMachine()
 //    StateParametersMenu --> StateDashboard: Time Out or\n exit item
 //  @enduml
   //------------------------------- Event management ------------------------------------
-  _DEBUG_SM_PRINT("_HMIEvent : ");_DEBUG_SM_PRINTLN(_HMIEvent);
+  _HMIDEBUG_SM_PRINT("_HMIEvent : ");_HMIDEBUG_SM_PRINTLN(_HMIEvent);
   switch(_HMIEvent)
   {
     // <<<<<<<<<<<< Up button pressed >>>>>>>>>>>>>>>>
@@ -184,7 +199,7 @@ void hmi::stateMachine()
     break;
     default:;
   }
-  _DEBUG_SM_PRINT("_HMIState : ");_DEBUG_SM_PRINTLN(_HMIState);
+  _HMIDEBUG_SM_PRINT("_HMIState : ");_HMIDEBUG_SM_PRINTLN(_HMIState);
   //----------- Action to be executed according to the state machine -----------------
   switch (_HMIState)
   {
@@ -236,7 +251,7 @@ void hmi::stateMachine()
     break;
     default:;
   } 
-  _DEBUG_FCT_PRINTLN("hmi::stateMachine().. End");
+  _HMIDEBUG_FCT_PRINTLN("hmi::stateMachine().. End");
 }
 
 /*!
@@ -248,10 +263,14 @@ void hmi::stateMachine()
 */
 void hmi::dashboard()
 {
-  _DEBUG_FCT_PRINTLN("hmi::Dashboard().. Begin");
+  _HMIDEBUG_FCT_PRINTLN("hmi::Dashboard().. Begin");
   static int toggleEffect = 0;
   static int toggleData = 0;
   int effect;
+
+  int core = xPortGetCoreID();
+  if (core != this->executionCore)
+    return;
 
   // --------------- Icons blinking effect -----------------------
   switch (laBoxState)
@@ -291,6 +310,7 @@ void hmi::dashboard()
     println(message);
   }
 
+  _HMIDEBUG_FCT_PRINTLN("hmi::Dashboard().. toggleEffect");
   if (toggleEffect)
   {
     switch (laBoxState)
@@ -310,7 +330,7 @@ void hmi::dashboard()
     }
   }
   display();
-  _DEBUG_FCT_PRINTLN("hmi::Dashboard().. End");
+  _HMIDEBUG_FCT_PRINTLN("hmi::Dashboard().. End");
 }
 /*!
     @brief  dashboard3TrainsView
@@ -321,7 +341,11 @@ void hmi::dashboard()
 */
 void hmi::dashboard3TrainsView()
 {
-    _DEBUG_FCT_PRINTLN("hmi::dashboard3TrainsView().. Begin");
+  int core = xPortGetCoreID();
+  if (core != this->executionCore)
+    return;
+
+  _HMIDEBUG_FCT_PRINTLN("hmi::dashboard3TrainsView().. Begin");
     clearDisplay();
     setTextSize(1);
     // Draw tab with 3 columns
@@ -342,7 +366,7 @@ void hmi::dashboard3TrainsView()
     _HMIEvent = noEvent;
     
     display();
-    _DEBUG_FCT_PRINTLN("hmi::dashboard3TrainsView().. End");
+    _HMIDEBUG_FCT_PRINTLN("hmi::dashboard3TrainsView().. End");
 }
 /*!
     @brief  dashboard2TrainsView
@@ -353,7 +377,11 @@ void hmi::dashboard3TrainsView()
 */
 void hmi::dashboard2TrainsView()
 {
-    _DEBUG_FCT_PRINTLN("hmi::dashboard2TrainsView().. Begin");
+  int core = xPortGetCoreID();
+  if (core != this->executionCore)
+    return;
+
+  _HMIDEBUG_FCT_PRINTLN("hmi::dashboard2TrainsView().. Begin");
     clearDisplay();
 
     // Draw tab with 3 columns
@@ -373,7 +401,7 @@ void hmi::dashboard2TrainsView()
     _HMIEvent = noEvent;
     
     display();
-    _DEBUG_FCT_PRINTLN("hmi::dashboard2TrainsView().. End");
+    _HMIDEBUG_FCT_PRINTLN("hmi::dashboard2TrainsView().. End");
 }
 /*!
     @brief  dashboard1TrainView
@@ -384,7 +412,11 @@ void hmi::dashboard2TrainsView()
 */
 void hmi::dashboard1TrainView()
 {
-    _DEBUG_FCT_PRINTLN("hmi::dashboard1TrainView().. Begin");
+  int core = xPortGetCoreID();
+  if (core != this->executionCore)
+    return;
+
+  _HMIDEBUG_FCT_PRINTLN("hmi::dashboard1TrainView().. Begin");
     if(tabTrains[0].addr > 0)
       {        
         clearDisplay();
@@ -393,7 +425,7 @@ void hmi::dashboard1TrainView()
       }
     _HMIEvent = noEvent;
     
-    _DEBUG_FCT_PRINTLN("hmi::dashboard1TrainView().. End");
+    _HMIDEBUG_FCT_PRINTLN("hmi::dashboard1TrainView().. End");
 }
 /*!
     @brief  ParametersMenu
@@ -404,7 +436,11 @@ void hmi::dashboard1TrainView()
 */
 void hmi::ParametersMenu()
 {
-  _DEBUG_FCT_PRINTLN("hmi::ParametersMenu().. Begin");
+  int core = xPortGetCoreID();
+  if (core != this->executionCore)
+    return;
+
+  _HMIDEBUG_FCT_PRINTLN("hmi::ParametersMenu().. Begin");
   
   // Transmission of events to menus
   switch(_HMIEvent)
@@ -422,7 +458,7 @@ void hmi::ParametersMenu()
   // If an event has been processed, we must delete it.
   _HMIEvent = noEvent;
   menu->update();
-  _DEBUG_FCT_PRINTLN("hmi::ParametersMenu().. End");
+  _HMIDEBUG_FCT_PRINTLN("hmi::ParametersMenu().. End");
 }
 /*!
     @brief  BrowseEventLst
@@ -433,7 +469,11 @@ void hmi::ParametersMenu()
 */
 void hmi::BrowseEventLst()
 {
-  _DEBUG_FCT_PRINTLN("hmi::BrowseEventLst().. Begin");
+  int core = xPortGetCoreID();
+  if (core != this->executionCore)
+    return;
+
+  _HMIDEBUG_FCT_PRINTLN("hmi::BrowseEventLst().. Begin");
   static int firtIdToShow  = 0;
   // Transmission of events to menus
   switch(_HMIEvent)
@@ -463,7 +503,7 @@ void hmi::BrowseEventLst()
     println(message);
   }
   display();
-  _DEBUG_FCT_PRINTLN("hmi::BrowseEventLst().. End");
+  _HMIDEBUG_FCT_PRINTLN("hmi::BrowseEventLst().. End");
 }
 /*!
     @brief  addMessage, add a message to the HMI stack.
@@ -487,8 +527,12 @@ void hmi::addNotification(uint8_t order)
 */
 void hmi::addNotification(int addr, uint8_t order, uint8_t value, bool functionState)
 {
-  _DEBUG_FCT_PRINTLN("hmi::addNotification().. Begin");
-  _DEBUG_PARAMS_PRINT("hmi::addNotification, addr :  ");_DEBUG_PARAMS_PRINT(addr); _DEBUG_PARAMS_PRINT(", order : ");_DEBUG_PARAMS_PRINT(order);_DEBUG_PARAMS_PRINT(", value : ");_DEBUG_PARAMS_PRINTLN(value);
+  int core = xPortGetCoreID();
+  if (core != this->executionCore)
+    return;
+
+  _HMIDEBUG_FCT_PRINTLN("hmi::addNotification().. Begin");
+  _HMIDEBUG_PARAMS_PRINT("hmi::addNotification, addr :  ");_HMIDEBUG_PARAMS_PRINT(addr); _HMIDEBUG_PARAMS_PRINT(", order : ");_HMIDEBUG_PARAMS_PRINT(order);_HMIDEBUG_PARAMS_PRINT(", value : ");_HMIDEBUG_PARAMS_PRINTLN(value);
   memset(message, 0, LineCarNbMax);
 
   switch (order)
@@ -588,7 +632,7 @@ void hmi::addNotification(int addr, uint8_t order, uint8_t value, bool functionS
       default:;
     }
   }
-  _DEBUG_FCT_PRINTLN("hmi::addNotification().. End");
+  _HMIDEBUG_FCT_PRINTLN("hmi::addNotification().. End");
 }
 /*!
     @brief  setTrainState, update information in train object
@@ -601,8 +645,12 @@ void hmi::addNotification(int addr, uint8_t order, uint8_t value, bool functionS
 */ 
 void hmi::setTrainState(int addr, uint8_t order, uint8_t value, bool state)
 {
-  _DEBUG_FCT_PRINTLN("hmi::setTrainState().. Begin");  
-  _DEBUG_PARAMS_PRINT("hmi::setTrainState, addr :  ");_DEBUG_PARAMS_PRINT(addr); _DEBUG_PARAMS_PRINT(", order : ");_DEBUG_PARAMS_PRINT(order);_DEBUG_PARAMS_PRINT(", value : ");_DEBUG_PARAMS_PRINTLN(value);
+  int core = xPortGetCoreID();
+  if (core != this->executionCore)
+    return;
+
+  _HMIDEBUG_FCT_PRINTLN("hmi::setTrainState().. Begin");
+  _HMIDEBUG_PARAMS_PRINT("hmi::setTrainState, addr :  ");_HMIDEBUG_PARAMS_PRINT(addr); _HMIDEBUG_PARAMS_PRINT(", order : ");_HMIDEBUG_PARAMS_PRINT(order);_HMIDEBUG_PARAMS_PRINT(", value : ");_HMIDEBUG_PARAMS_PRINTLN(value);
   int i = 0;
   // Search train in train tab
   while(i < HMI_NbMemorisedTrain)
@@ -627,10 +675,10 @@ void hmi::setTrainState(int addr, uint8_t order, uint8_t value, bool state)
       i--; // We remove one to place on the last index of the table
     default :
 
-#ifdef _DEBUG_LEVEL3_PRINTLN
+#ifdef _HMIDEBUG_LEVEL3_PRINTLN
       for(int z=0; z < HMI_NbMemorisedTrain;z++)
       { // Stack shift to update the updated object at the very top
-        _DEBUG_LEVEL3_PRINT("Fonction setTrainState, Tableau de train : "); _DEBUG_LEVEL3_PRINT(z);_DEBUG_LEVEL3_PRINT(", Valeur addr : "); _DEBUG_LEVEL3_PRINTLN(tabTrains[z].addr );
+        _HMIDEBUG_LEVEL3_PRINT("Fonction setTrainState, Tableau de train : "); _HMIDEBUG_LEVEL3_PRINT(z);_HMIDEBUG_LEVEL3_PRINT(", Valeur addr : "); _HMIDEBUG_LEVEL3_PRINTLN(tabTrains[z].addr );
       }
 #endif  
       // Reorder train tab, this order became the first, the last is erased
@@ -640,14 +688,14 @@ void hmi::setTrainState(int addr, uint8_t order, uint8_t value, bool state)
       }
       // Update information
       tabTrains[0].setInfo(addr, order, value);
-#ifdef _DEBUG_LEVEL3_PRINTLN
+#ifdef _HMIDEBUG_LEVEL3_PRINTLN
       for(int z=0; z < HMI_NbMemorisedTrain;z++)
       { // Stack shift to update the updated object at the very top
-        _DEBUG_LEVEL3_PRINT("Fonction setTrainState, Nouveau Tableau de train : "); _DEBUG_LEVEL3_PRINT(z);_DEBUG_LEVEL3_PRINT(", Valeur addr : "); _DEBUG_LEVEL3_PRINTLN(tabTrains[z].addr );
+        _HMIDEBUG_LEVEL3_PRINT("Fonction setTrainState, Nouveau Tableau de train : "); _HMIDEBUG_LEVEL3_PRINT(z);_HMIDEBUG_LEVEL3_PRINT(", Valeur addr : "); _HMIDEBUG_LEVEL3_PRINTLN(tabTrains[z].addr );
       }
 #endif  
   }
-  _DEBUG_FCT_PRINTLN("hmi::setTrainState().. End");  
+  _HMIDEBUG_FCT_PRINTLN("hmi::setTrainState().. End");  
 }
 /*!
     @brief  addMessage, add a message to the HMI stack.
@@ -656,16 +704,16 @@ void hmi::setTrainState(int addr, uint8_t order, uint8_t value, bool state)
     @return None (void).
     @note
 */
-void hmi::addNotification(char* msg)
+void hmi::addNotification(const char* msg)
 {
-  _DEBUG_FCT_PRINTLN("hmi::addNotification().. Begin");  
+  _HMIDEBUG_FCT_PRINTLN("hmi::addNotification().. Begin");  
   if (msg)
   {
     memset(message, 0, LineCarNbMax);
     memcpy(message, msg, HMI_MessageSize - 1);
     pushMessageOnStack(message, strlen(message) );
   }
-  _DEBUG_FCT_PRINTLN("hmi::addNotification().. End");  
+  _HMIDEBUG_FCT_PRINTLN("hmi::addNotification().. End");  
 }
 /*!
     @brief  readVoltage
@@ -676,12 +724,12 @@ void hmi::addNotification(char* msg)
 */
 void hmi::readVoltage()
 {
-  _DEBUG_FCT_PRINTLN("hmi::readVoltage().. Begin");  
+  _HMIDEBUG_FCT_PRINTLN("hmi::readVoltage().. Begin");  
   voltage = analogRead(PIN_VOLTAGE_MES) * HMI_VoltageK ;
-#ifdef _DEBUG_SIMUL
+#ifdef _HMIDEBUG_SIMUL
   voltage = ((float)random(175, 185)) / 10;
 #endif
-  _DEBUG_FCT_PRINTLN("hmi::readVoltage().. End");  
+  _HMIDEBUG_FCT_PRINTLN("hmi::readVoltage().. End");  
 }
 /*!
     @brief  readCurrent
@@ -692,13 +740,13 @@ void hmi::readVoltage()
 */
 void hmi::readCurrent()
 {
-  _DEBUG_FCT_PRINTLN("hmi::readCurrent().. Begin");  
+  _HMIDEBUG_FCT_PRINTLN("hmi::readCurrent().. Begin");  
   
   current = analogRead(PIN_CURRENT_MES) * HMI_CurrentK ;
-#ifdef _DEBUG_SIMUL
+#ifdef _HMIDEBUG_SIMUL
   current = ((float)random(0, 410)) / 100;
 #endif  
-  _DEBUG_FCT_PRINTLN("hmi::readCurrent().. End");  
+  _HMIDEBUG_FCT_PRINTLN("hmi::readCurrent().. End");  
 }
 /*!
     @brief  BtnUPpressed
@@ -709,7 +757,7 @@ void hmi::readCurrent()
 */
 void hmi::BtnUpPressed()
 {
-  _DEBUG_SM_PRINTLN("hmi::BtnUP Pressed"); 
+  _HMIDEBUG_SM_PRINTLN("hmi::BtnUP Pressed"); 
   _HMIEvent = eventUp;
 }
 /*!
@@ -721,7 +769,7 @@ void hmi::BtnUpPressed()
 */
 void hmi::BtnDownPressed()
 {
-  _DEBUG_SM_PRINTLN("hmi::BtnDown Pressed");  
+  _HMIDEBUG_SM_PRINTLN("hmi::BtnDown Pressed");  
   _HMIEvent = eventDown;
 } 
 /*!
@@ -733,7 +781,7 @@ void hmi::BtnDownPressed()
 */
 void hmi::BtnSelectPressed()
 {
-  _DEBUG_SM_PRINTLN("hmi::BtnSelect Pressed"); 
+  _HMIDEBUG_SM_PRINTLN("hmi::BtnSelect Pressed"); 
   _HMIEvent = eventSel;
 
 }
@@ -746,9 +794,9 @@ void hmi::BtnSelectPressed()
     @return None (void).
     @note
 */
-void hmi::pushMessageOnStack(char *msg, uint8_t len)
+void hmi::pushMessageOnStack(const char *msg, uint8_t len)
 {
-  _DEBUG_FCT_PRINTLN("hmi::pushMessageOnStack().. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("hmi::pushMessageOnStack().. Begin"); 
   if (msg)
   {
     // Stack shifting
@@ -760,7 +808,7 @@ void hmi::pushMessageOnStack(char *msg, uint8_t len)
     memset(messageStack[0], 0, HMI_MessageSize);
     memcpy(messageStack[0], msg, HMI_MessageSize - 1);
   }
-  _DEBUG_FCT_PRINTLN("hmi::pushMessageOnStack().. End"); 
+  _HMIDEBUG_FCT_PRINTLN("hmi::pushMessageOnStack().. End"); 
 }
 /*!
     @brief  needToRefreshDisplay
@@ -769,14 +817,14 @@ void hmi::pushMessageOnStack(char *msg, uint8_t len)
     @note
 */
 bool hmi::needToRefreshDisplay(){
-  _DEBUG_FCT_PRINTLN("hmi::needToRefreshDisplay().. Begin");
+  _HMIDEBUG_FCT_PRINTLN("hmi::needToRefreshDisplay().. Begin");
   if ( (millis() - millisRefreshDisplay) > HMI_DisplayRefesh)
   {
     millisRefreshDisplay = millis();
     return true;
   }else
     return false;
-  _DEBUG_FCT_PRINTLN("hmi::needToRefreshDisplay().. End"); 
+  _HMIDEBUG_FCT_PRINTLN("hmi::needToRefreshDisplay().. End"); 
 }
 /*!
     @brief  showWifiWaiting
@@ -786,7 +834,7 @@ bool hmi::needToRefreshDisplay(){
 */
 void hmi::showWifiWaiting()
 {
-  _DEBUG_FCT_PRINTLN("hmi::showWifiWaiting().. Begin");
+  _HMIDEBUG_FCT_PRINTLN("hmi::showWifiWaiting().. Begin");
   millisWifiEffect      = millis();
   int circleNumber ;
   
@@ -815,6 +863,6 @@ void hmi::showWifiWaiting()
   display();
   
 
-  _DEBUG_FCT_PRINTLN("hmi::showWifiWaiting().. End");
+  _HMIDEBUG_FCT_PRINTLN("hmi::showWifiWaiting().. End");
   
 }

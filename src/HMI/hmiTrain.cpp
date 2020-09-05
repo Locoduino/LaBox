@@ -68,8 +68,8 @@ void hmiTrain::update()
 */
 void hmiTrain::setInfo(int _addr, uint8_t _order, uint8_t _value)
 {
-  _DEBUG_FCT_PRINTLN("hmiTrain::setInfo.. Begin"); 
-  _DEBUG_PARAMS_PRINT("hmiTrain::setInfo, addr :  ");_DEBUG_PARAMS_PRINT(_addr); _DEBUG_PARAMS_PRINT(", order : ");_DEBUG_PARAMS_PRINT(_order);_DEBUG_PARAMS_PRINT(", value : ");_DEBUG_PARAMS_PRINTLN(_value);
+  _HMIDEBUG_FCT_PRINTLN("hmiTrain::setInfo.. Begin"); 
+  _HMIDEBUG_PARAMS_PRINT("hmiTrain::setInfo, addr :  ");_HMIDEBUG_PARAMS_PRINT(_addr); _HMIDEBUG_PARAMS_PRINT(", order : ");_HMIDEBUG_PARAMS_PRINT(_order);_HMIDEBUG_PARAMS_PRINT(", value : ");_HMIDEBUG_PARAMS_PRINTLN(_value);
   addr    = _addr ; 
   switch(_order)
   {
@@ -87,13 +87,13 @@ void hmiTrain::setInfo(int _addr, uint8_t _order, uint8_t _value)
       {
         function[_value] = function[_value] ? false : true ;
         if(_value!=0 ) lastFunction = _value ;   //   Exception for function 0 (lights)
-        //_DEBUG_LEVEL1_PRINT("setInfo, reception commande function n°");_DEBUG_LEVEL1_PRINT(_value);_DEBUG_LEVEL1_PRINT(", nouvelle valeur : ");_DEBUG_LEVEL1_PRINTLN(function[_value] ? "True" : "False");
+        //_HMIDEBUG_LEVEL1_PRINT("setInfo, reception commande function n°");_HMIDEBUG_LEVEL1_PRINT(_value);_HMIDEBUG_LEVEL1_PRINT(", nouvelle valeur : ");_HMIDEBUG_LEVEL1_PRINTLN(function[_value] ? "True" : "False");
       }
     break;
     default :;
   }
-  //_DEBUG_FCT_PRINT(">> hmiTrain::setInfo, speed" );_DEBUG_FCT_PRINTLN(speed );
-  _DEBUG_FCT_PRINTLN("hmiTrain::setInfo.. End"); 
+  //_HMIDEBUG_FCT_PRINT(">> hmiTrain::setInfo, speed" );_HMIDEBUG_FCT_PRINTLN(speed );
+  _HMIDEBUG_FCT_PRINTLN("hmiTrain::setInfo.. End"); 
 }
 /*!
     @brief  dashboard
@@ -104,8 +104,8 @@ void hmiTrain::setInfo(int _addr, uint8_t _order, uint8_t _value)
 */
 void hmiTrain::dashboard(int pos_x1, int pos_y1, int pos_x2, int pos_y2)
 {
-  _DEBUG_FCT_PRINTLN("hmiTrain::dashboard.. Begin"); 
-  _DEBUG_PARAMS_PRINT("hmiTrain::dashboard, x1 :  ");_DEBUG_PARAMS_PRINT(pos_x1); _DEBUG_PARAMS_PRINT(", y1 : ");_DEBUG_PARAMS_PRINT(pos_y1);_DEBUG_PARAMS_PRINT(", x2 : ");_DEBUG_PARAMS_PRINT(pos_x2);_DEBUG_PARAMS_PRINT(", y2 : ");_DEBUG_PARAMS_PRINTLN(pos_y2);
+  _HMIDEBUG_FCT_PRINTLN("hmiTrain::dashboard.. Begin"); 
+  _HMIDEBUG_PARAMS_PRINT("hmiTrain::dashboard, x1 :  ");_HMIDEBUG_PARAMS_PRINT(pos_x1); _HMIDEBUG_PARAMS_PRINT(", y1 : ");_HMIDEBUG_PARAMS_PRINT(pos_y1);_HMIDEBUG_PARAMS_PRINT(", x2 : ");_HMIDEBUG_PARAMS_PRINT(pos_x2);_HMIDEBUG_PARAMS_PRINT(", y2 : ");_HMIDEBUG_PARAMS_PRINTLN(pos_y2);
   //-------------------- Barres graph -------------------------
   int offsetYBarresGraph = 22 ;
   int offsetXBarresGraph = 3 ;
@@ -128,7 +128,7 @@ void hmiTrain::dashboard(int pos_x1, int pos_y1, int pos_x2, int pos_y2)
     step++;
 
   }
-  _DEBUG_LEVEL2_PRINT("hmiTrain::dashboard, speed :  ");_DEBUG_LEVEL2_PRINT(speed);_DEBUG_LEVEL2_PRINT(", ratioSpeed : ");_DEBUG_LEVEL2_PRINTLN(ratioSpeed);
+  _HMIDEBUG_LEVEL2_PRINT("hmiTrain::dashboard, speed :  ");_HMIDEBUG_LEVEL2_PRINT(speed);_HMIDEBUG_LEVEL2_PRINT(", ratioSpeed : ");_HMIDEBUG_LEVEL2_PRINTLN(ratioSpeed);
   //-------------------- Train Address -------------------------
   display->setCursor( pos_x1+8, pos_y2-11);
   sprintf(message, "%04d", addr);
@@ -165,7 +165,7 @@ void hmiTrain::dashboard(int pos_x1, int pos_y1, int pos_x2, int pos_y2)
     drawLightSymbol(center_x, center_y, 6);
   }
   //--------------------------------------------------------------
-  _DEBUG_FCT_PRINTLN("hmiTrain::dashboard.. End"); 
+  _HMIDEBUG_FCT_PRINTLN("hmiTrain::dashboard.. End"); 
 }
 /*!
     @brief  dashboard1T
@@ -176,7 +176,7 @@ void hmiTrain::dashboard(int pos_x1, int pos_y1, int pos_x2, int pos_y2)
 */
 void hmiTrain::dashboard1T()
 {
-  _DEBUG_FCT_PRINTLN("hmiTrain::dashboard1T.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("hmiTrain::dashboard1T.. Begin"); 
   display->setTextSize(1);
   //-------------------- Barres graph -------------------------
   int offsetYBarresGraph = 46 ;
@@ -199,7 +199,7 @@ void hmiTrain::dashboard1T()
     x += HMITrain_RectWidth+HMITrain_RectSpace ;
     step++;
   }
-  _DEBUG_LEVEL2_PRINT("hmiTrain::dashboard1T, speed :  ");_DEBUG_LEVEL2_PRINT(speed);_DEBUG_LEVEL2_PRINT(", ratioSpeed : ");_DEBUG_LEVEL2_PRINTLN(ratioSpeed);_DEBUG_LEVEL2_PRINT(", nbStep : ");_DEBUG_LEVEL2_PRINTLN(nbStep);
+  _HMIDEBUG_LEVEL2_PRINT("hmiTrain::dashboard1T, speed :  ");_HMIDEBUG_LEVEL2_PRINT(speed);_HMIDEBUG_LEVEL2_PRINT(", ratioSpeed : ");_HMIDEBUG_LEVEL2_PRINTLN(ratioSpeed);_HMIDEBUG_LEVEL2_PRINT(", nbStep : ");_HMIDEBUG_LEVEL2_PRINTLN(nbStep);
   //-------------------- Train Address -------------------------
   display->setTextSize(2);
   display->setCursor(43, 50);
@@ -250,7 +250,7 @@ void hmiTrain::dashboard1T()
     drawFunctionSymbol(23,34, lastFunction);  //  Affiche le numéro de la fonction appelée
   
   //--------------------------------------------------------------
-  _DEBUG_FCT_PRINTLN("hmiTrain::dashboard1T.. End"); 
+  _HMIDEBUG_FCT_PRINTLN("hmiTrain::dashboard1T.. End"); 
 }
 /*!
     @brief  drawLightSymbol
@@ -262,7 +262,7 @@ void hmiTrain::dashboard1T()
 */
 void hmiTrain::drawLightSymbol(int pos_x, int pos_y, int starSize)
 {
-  _DEBUG_FCT_PRINTLN("hmiTrain::drawLightSymbol().. Begin");
+  _HMIDEBUG_FCT_PRINTLN("hmiTrain::drawLightSymbol().. Begin");
 
   if(starSize<6) starSize = 6; // 6 minimum
   
@@ -276,7 +276,7 @@ void hmiTrain::drawLightSymbol(int pos_x, int pos_y, int starSize)
                         WHITE); 
                         
   }
-  _DEBUG_FCT_PRINTLN("hmiTrain::drawLightSymbol().. End"); 
+  _HMIDEBUG_FCT_PRINTLN("hmiTrain::drawLightSymbol().. End"); 
 }
 /*!
     @brief  drawFunctionSymbol
@@ -289,7 +289,7 @@ void hmiTrain::drawLightSymbol(int pos_x, int pos_y, int starSize)
 */
 void hmiTrain::drawFunctionSymbol(int pos_x, int pos_y, int functionNumber)
 {
-  _DEBUG_FCT_PRINTLN("hmiTrain::drawFunctionSymbol().. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("hmiTrain::drawFunctionSymbol().. Begin"); 
   display->setTextSize(1);
   display->setCursor(pos_x+3, pos_y+3);
   sprintf(message, "%d", functionNumber);
@@ -303,7 +303,7 @@ void hmiTrain::drawFunctionSymbol(int pos_x, int pos_y, int functionNumber)
                       width,    
                       13,       // height
                       WHITE);
-  _DEBUG_FCT_PRINTLN("hmiTrain::drawFunctionSymbol().. End"); 
+  _HMIDEBUG_FCT_PRINTLN("hmiTrain::drawFunctionSymbol().. End"); 
 }
 /*!
     @brief  operator=
@@ -314,7 +314,7 @@ void hmiTrain::drawFunctionSymbol(int pos_x, int pos_y, int functionNumber)
 */
 hmiTrain & hmiTrain::operator=(const hmiTrain & _hmiTrain)
 {
-  _DEBUG_FCT_PRINTLN("hmiTrain::operator=.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("hmiTrain::operator=.. Begin"); 
   if(&_hmiTrain && &_hmiTrain != this)
   {
     display = _hmiTrain.display ;
@@ -326,6 +326,6 @@ hmiTrain & hmiTrain::operator=(const hmiTrain & _hmiTrain)
       function[i] = _hmiTrain.function[i];
     }
   }
-  _DEBUG_FCT_PRINTLN("hmiTrain::operator=.. End"); 
+  _HMIDEBUG_FCT_PRINTLN("hmiTrain::operator=.. End"); 
   return *this;
 }

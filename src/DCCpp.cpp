@@ -21,6 +21,7 @@ bool DCCpp::panicStopped;
 byte DCCpp::ackThreshold = 0;
 bool DCCpp::IsPowerOnMain = false;
 bool DCCpp::IsPowerOnProg = false;
+bool DCCpp::powerOnAtFirstClient = true;
 
 #if defined(ARDUINO_ARCH_ESP32) && defined(USE_TEXTCOMMAND)
 TaskHandle_t Task1;
@@ -343,6 +344,8 @@ void DCCpp::panicStop(bool inStop)
     powerOff();
   else
     powerOn();
+  if (hmi::CurrentInterface != NULL)
+    hmi::CurrentInterface->DCCEmergencyStop();
 }
 
 void DCCpp::powerOn(bool inMain, bool inProg)
@@ -364,12 +367,18 @@ void DCCpp::powerOn(bool inMain, bool inProg)
 
   if (done)
   {
+    if (hmi::CurrentInterface != NULL)
+    {
+      hmi::CurrentInterface->DCCOn();
+    }
     DCCPP_INTERFACE.print("<p1>");
 #ifdef USE_THROTTLES
     if (DCCPP_INTERFACE.sendNewline())
 #endif
       DCCPP_INTERFACE.println("");
   }
+
+  DCCpp::powerOnAtFirstClient = false;
 }
 
 void DCCpp::powerOff(bool inMain, bool inProg)
@@ -390,6 +399,8 @@ void DCCpp::powerOff(bool inMain, bool inProg)
 
   if (done)
   {
+    if (hmi::CurrentInterface != NULL)
+      hmi::CurrentInterface->DCCOff();
     DCCPP_INTERFACE.print("<p0>");
 #ifdef USE_THROTTLES
     if (DCCPP_INTERFACE.sendNewline())
@@ -428,6 +439,11 @@ bool DCCpp::setThrottle(volatile RegisterList *inpRegs, int nReg,  int inLocoId,
   Serial.println(F(" )"));
 #endif
 
+  if (hmi::CurrentInterface != NULL)
+  {
+    hmi::CurrentInterface->ChangeDirection(inLocoId, inForward);
+    hmi::CurrentInterface->ChangeSpeed(inLocoId, inNewSpeed);
+  }
   inpRegs->setThrottle(nReg, inLocoId, val, inForward);
 
   return true;
@@ -458,6 +474,14 @@ void DCCpp::setFunctions(volatile RegisterList *inpRegs, int nReg, int inLocoId,
 
   for (byte func = 0; func <= 28; func++)
   {
+    if (inStates.isActivationChanged(func))
+    {
+      if (hmi::CurrentInterface != NULL)
+      {
+        hmi::CurrentInterface->ChangeFunction(inLocoId, func, inStates.isActivated(func));
+      }
+    }
+
     if (func <= 4)
     {
       /*
@@ -577,6 +601,42 @@ int DCCpp::identifyLocoId(volatile RegisterList *inReg)
     id = inReg->readCV(1, 100, 200);
   }
   return (id);
+}
+
+int DCCpp::readCvMain(int inCvId, int callBack, int callBackSub)
+{
+  int cvValue;
+  cvValue = mainRegs.readCVmain(inCvId, callBack, callBackSub);
+  if (hmi::CurrentInterface != NULL)
+    hmi::CurrentInterface->ReadCV(true, inCvId, cvValue, cvValue != -1);
+
+  return cvValue;
+}
+
+bool DCCpp::writeCvMain(int inCvId, byte cvValue, int callBack, int callBackSub)
+{ 
+  bool ret = writeCv(&(mainRegs), inCvId, cvValue, callBack, callBackSub);
+  if (hmi::CurrentInterface != NULL)
+    hmi::CurrentInterface->WriteCV(true, inCvId, cvValue, ret);
+  return ret;
+}
+
+int DCCpp::readCvProg(int inCvId, int callBack, int callBackSub) 
+{ 
+  int cvValue;
+  cvValue = progRegs.readCV(inCvId, callBack, callBackSub);
+  if (hmi::CurrentInterface != NULL)
+    hmi::CurrentInterface->ReadCV(false, inCvId, cvValue, cvValue != -1);
+
+  return cvValue;
+}
+
+bool DCCpp::writeCvProg(int inCvId, byte cvValue, int callBack, int callBackSub) 
+{ 
+  bool ret = writeCv(&(progRegs), inCvId, cvValue, callBack, callBackSub);
+  if (hmi::CurrentInterface != NULL)
+    hmi::CurrentInterface->WriteCV(false, inCvId, cvValue, ret);
+  return ret;
 }
 
 bool DCCpp::writeCv(volatile RegisterList *inReg, int inCv, byte inValue, int callBack, int callBackSub)

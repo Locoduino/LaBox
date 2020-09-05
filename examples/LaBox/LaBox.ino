@@ -13,8 +13,8 @@ description: <LaBox Wifi Controller sample>
 // WIFI
 
 #ifdef USE_WIFI_EXTERNSSID
-const char* ssid = "Nokia 8";
-const char* password = "thpVertSaintDenis";
+const char* ssid = "*****";
+const char* password = "*****";
 
 IPAddress ip      (192,   168,  43,  100);   // fix IP of the server in client mode
 IPAddress gateway (192,   168,  43,  9);     // WiFi router's IP. If you are in AP mode, it's the ESP IP. If you are in client, it's your own gateway
@@ -23,9 +23,13 @@ IPAddress dns     (192,   168,  43,  9);     // DNS server, generally, the WiFi 
 
 #endif
 #ifdef USE_WIFI_LOCALSSID
-const char* ssid = "LaBoxServer";
+const char* ssid = "Locoduino LaBox";
 const char* password = "";
 #endif
+
+//--------------------------- HMI client -------------------------------------
+hmi boxHMI(&Wire);
+//----------------------------------------------------------------------------
 
 int dccPPPort = 2560;
 int wifiPort = 44444;
@@ -54,8 +58,12 @@ MessageConverterWiThrottle converterWT3;
 void setup()
 {
   Serial.begin(115200);
-  Serial.println("LaBox 0.5");
+  Serial.println("LaBox 0.6");
 
+  //----------- Start HMI -------------
+  boxHMI.begin();
+  
+  //----------- Start Wifi
   ThrottleWifi::connectWifi(ssid, password);//, ip, gateway, subnet, dns);
 
   // For DCCpp syntax applications like DCCpp cab or RTDrive+
@@ -85,5 +93,6 @@ void setup()
 
 void loop()
 {
+  boxHMI.update();
   DCCpp::loop();
 }

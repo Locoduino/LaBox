@@ -88,12 +88,12 @@ Serveur DHCP ou adressage IP statique */
 */
 void MenuManagement::begin()
 {
-  _DEBUG_FCT_PRINTLN("MenuManagement::begin.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("MenuManagement::begin.. Begin"); 
 
   baseMenu->begin();    // Recursive call, all sub menu will execute this fonction
 
   resetMenu();
-  _DEBUG_FCT_PRINTLN("MenuManagement::begin.. End");   
+  _HMIDEBUG_FCT_PRINTLN("MenuManagement::begin.. End");   
 }
   
 /*!
@@ -104,13 +104,13 @@ void MenuManagement::begin()
 */
 void MenuManagement::update()
 {
-  _DEBUG_FCT_PRINTLN("MenuManagement::update.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("MenuManagement::update.. Begin"); 
 
   if(activeMenu == 0) activeMenu = baseMenu;
   
   activeMenu->update();
 
-  _DEBUG_FCT_PRINTLN("MenuManagement::update.. End");   
+  _HMIDEBUG_FCT_PRINTLN("MenuManagement::update.. End");   
 }
 /*!
     @brief  BtnUpPressed
@@ -120,13 +120,13 @@ void MenuManagement::update()
 */
 void MenuManagement::BtnUpPressed()
 {
-  _DEBUG_FCT_PRINTLN("MenuManagement::BtnUpPressed.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("MenuManagement::BtnUpPressed.. Begin"); 
 
   activeMenu->eventUp();
   // Return value is important to know witch action has been Selected
 
 
-  _DEBUG_FCT_PRINTLN("MenuManagement::BtnUpPressed.. End"); 
+  _HMIDEBUG_FCT_PRINTLN("MenuManagement::BtnUpPressed.. End"); 
 }
 /*!
     @brief  BtnDownPressed
@@ -136,11 +136,11 @@ void MenuManagement::BtnUpPressed()
 */
 void MenuManagement::BtnDownPressed()
 {
-  _DEBUG_FCT_PRINTLN("MenuManagement::BtnDownPressed.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("MenuManagement::BtnDownPressed.. Begin"); 
 
   activeMenu->eventDown();
 
-  _DEBUG_FCT_PRINTLN("MenuManagement::BtnDownPressed.. End");   
+  _HMIDEBUG_FCT_PRINTLN("MenuManagement::BtnDownPressed.. End");   
 }
 /*!
     @brief  BtnSelectPressed
@@ -150,13 +150,13 @@ void MenuManagement::BtnDownPressed()
 */
 void MenuManagement::BtnSelectPressed()
 {
-  _DEBUG_FCT_PRINTLN("MenuManagement::BtnSelectPressed.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("MenuManagement::BtnSelectPressed.. Begin"); 
 
   int status = activeMenu->eventSelect();
   switch(status)
   {
     case MENUEXIT :
-      _DEBUG_LEVEL1_PRINT("Exit menu ");_DEBUG_LEVEL1_PRINTLN(activeMenu->caption);
+      _HMIDEBUG_LEVEL1_PRINT("Exit menu ");_HMIDEBUG_LEVEL1_PRINTLN(activeMenu->caption);
       if(activeMenu->parent)
       {
         activeMenu->resetMenu();
@@ -167,52 +167,52 @@ void MenuManagement::BtnSelectPressed()
       }
     break;
     case MENUCHANGETOCHILD :
-      _DEBUG_LEVEL1_PRINT("Change menu from ");_DEBUG_LEVEL1_PRINT(activeMenu->caption);
-      _DEBUG_LEVEL1_PRINT(" to ");_DEBUG_LEVEL1_PRINTLN(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
+      _HMIDEBUG_LEVEL1_PRINT("Change menu from ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->caption);
+      _HMIDEBUG_LEVEL1_PRINT(" to ");_HMIDEBUG_LEVEL1_PRINTLN(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
       activeMenu = activeMenu->subMenu[activeMenu->SelectListIndex];
       activeMenu->parent->resetMenu();
 
     break;
     case MENUCHOSEN :
-      _DEBUG_LEVEL1_PRINT("Menu choice ");_DEBUG_LEVEL1_PRINT(activeMenu->caption);_DEBUG_LEVEL1_PRINT(" has been made : ");
-      _DEBUG_LEVEL1_PRINTLN(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
+      _HMIDEBUG_LEVEL1_PRINT("Menu choice ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->caption);_HMIDEBUG_LEVEL1_PRINT(" has been made : ");
+      _HMIDEBUG_LEVEL1_PRINTLN(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
       activeMenu = activeMenu->subMenu[activeMenu->SelectListIndex];
       if(activeMenu == language)
       {
-        _DEBUG_LEVEL1_PRINT("Choice menu found for ");_DEBUG_CRITICAL_PRINT(activeMenu->caption);
-        _DEBUG_LEVEL1_PRINT(": Choice is ");_DEBUG_CRITICAL_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
-        _DEBUG_LEVEL1_PRINT(" (value : ");_DEBUG_CRITICAL_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->value);_DEBUG_LEVEL1_PRINTLN(")");
+        _HMIDEBUG_LEVEL1_PRINT("Choice menu found for ");_HMIDEBUG_CRITICAL_PRINT(activeMenu->caption);
+        _HMIDEBUG_LEVEL1_PRINT(": Choice is ");_HMIDEBUG_CRITICAL_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
+        _HMIDEBUG_LEVEL1_PRINT(" (value : ");_HMIDEBUG_CRITICAL_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->value);_HMIDEBUG_LEVEL1_PRINTLN(")");
 
       }else
       {
         if(activeMenu == onOffLine)
         {
-          _DEBUG_LEVEL1_PRINT("Choice menu found for ");_DEBUG_LEVEL1_PRINT(activeMenu->caption);
-          _DEBUG_LEVEL1_PRINT(": Choice is ");_DEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
-          _DEBUG_LEVEL1_PRINT(" (value : ");_DEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->value);_DEBUG_LEVEL1_PRINTLN(")");        
+          _HMIDEBUG_LEVEL1_PRINT("Choice menu found for ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->caption);
+          _HMIDEBUG_LEVEL1_PRINT(": Choice is ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
+          _HMIDEBUG_LEVEL1_PRINT(" (value : ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->value);_HMIDEBUG_LEVEL1_PRINTLN(")");        
         }else
         {
           if(activeMenu == wifiActivate)
           {
-            _DEBUG_LEVEL1_PRINT("Choice menu found for ");_DEBUG_LEVEL1_PRINT(activeMenu->caption);
-            _DEBUG_LEVEL1_PRINT(": Choice is ");_DEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
-            _DEBUG_LEVEL1_PRINT(" (value : ");_DEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->value);_DEBUG_LEVEL1_PRINTLN(")");
+            _HMIDEBUG_LEVEL1_PRINT("Choice menu found for ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->caption);
+            _HMIDEBUG_LEVEL1_PRINT(": Choice is ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
+            _HMIDEBUG_LEVEL1_PRINT(" (value : ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->value);_HMIDEBUG_LEVEL1_PRINTLN(")");
           }else
           {
             if(activeMenu == resetConfirm)
             {
-              _DEBUG_LEVEL1_PRINT("Choice menu found for ");_DEBUG_LEVEL1_PRINT(activeMenu->caption);
-              _DEBUG_LEVEL1_PRINT(": Choice is ");_DEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
-              _DEBUG_LEVEL1_PRINT(" (value : ");_DEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->value);_DEBUG_LEVEL1_PRINTLN(")");
+              _HMIDEBUG_LEVEL1_PRINT("Choice menu found for ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->caption);
+              _HMIDEBUG_LEVEL1_PRINT(": Choice is ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
+              _HMIDEBUG_LEVEL1_PRINT(" (value : ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->value);_HMIDEBUG_LEVEL1_PRINTLN(")");
               // !! Only for ESP !!
               ESP.restart();
             }else
             {
               if(activeMenu == factoryResetConfirm)
               {
-                _DEBUG_LEVEL1_PRINT("Choice menu found for ");_DEBUG_LEVEL1_PRINT(activeMenu->caption);
-                _DEBUG_LEVEL1_PRINT(": Choice is ");_DEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
-                _DEBUG_LEVEL1_PRINT(" (value : ");_DEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->value);_DEBUG_LEVEL1_PRINTLN(")");
+                _HMIDEBUG_LEVEL1_PRINT("Choice menu found for ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->caption);
+                _HMIDEBUG_LEVEL1_PRINT(": Choice is ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
+                _HMIDEBUG_LEVEL1_PRINT(" (value : ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->value);_HMIDEBUG_LEVEL1_PRINTLN(")");
                 // Restore default setting
 
                 // !! Only for ESP !!
@@ -221,9 +221,9 @@ void MenuManagement::BtnSelectPressed()
               {
                 if(activeMenu == lstEvent)
                 {
-                  _DEBUG_LEVEL1_PRINT("Choice menu found for ");_DEBUG_LEVEL1_PRINT(activeMenu->caption);
-                  //_DEBUG_LEVEL1_PRINT(": Choice is ");_DEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
-                  //_DEBUG_LEVEL1_PRINT(" (value : ");_DEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->value);_DEBUG_LEVEL1_PRINTLN(")");
+                  _HMIDEBUG_LEVEL1_PRINT("Choice menu found for ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->caption);
+                  //_HMIDEBUG_LEVEL1_PRINT(": Choice is ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
+                  //_HMIDEBUG_LEVEL1_PRINT(" (value : ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->value);_HMIDEBUG_LEVEL1_PRINTLN(")");
                   // Restore default setting
                   _HMIState = StateBrowseEventLst ;
                   baseMenu->resetMenu();
@@ -231,9 +231,9 @@ void MenuManagement::BtnSelectPressed()
                 {
                   if(activeMenu == V1Train)
                   {
-                    _DEBUG_LEVEL1_PRINT("Choice menu found for ");_DEBUG_LEVEL1_PRINT(activeMenu->caption);
-                    //_DEBUG_LEVEL1_PRINT(": Choice is ");_DEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
-                    //_DEBUG_LEVEL1_PRINT(" (value : ");_DEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->value);_DEBUG_LEVEL1_PRINTLN(")");
+                    _HMIDEBUG_LEVEL1_PRINT("Choice menu found for ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->caption);
+                    //_HMIDEBUG_LEVEL1_PRINT(": Choice is ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
+                    //_HMIDEBUG_LEVEL1_PRINT(" (value : ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->value);_HMIDEBUG_LEVEL1_PRINTLN(")");
                     // Restore default setting
                     ((hmi*) display)->nbTrainToView = 1 ;
                     _HMIState = StateExitMenu;
@@ -241,9 +241,9 @@ void MenuManagement::BtnSelectPressed()
                   {
                     if(activeMenu == V2Trains)
                     {
-                      _DEBUG_LEVEL1_PRINT("Choice menu found for ");_DEBUG_LEVEL1_PRINT(activeMenu->caption);
-                      //_DEBUG_LEVEL1_PRINT(": Choice is ");_DEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
-                      //_DEBUG_LEVEL1_PRINT(" (value : ");_DEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->value);_DEBUG_LEVEL1_PRINTLN(")");
+                      _HMIDEBUG_LEVEL1_PRINT("Choice menu found for ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->caption);
+                      //_HMIDEBUG_LEVEL1_PRINT(": Choice is ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
+                      //_HMIDEBUG_LEVEL1_PRINT(" (value : ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->value);_HMIDEBUG_LEVEL1_PRINTLN(")");
                       // Restore default setting
                       ((hmi*) display)->nbTrainToView = 2 ;
                       _HMIState = StateExitMenu;
@@ -251,15 +251,15 @@ void MenuManagement::BtnSelectPressed()
                     {
                       if(activeMenu == V3Trains)
                       {
-                        _DEBUG_LEVEL1_PRINT("Choice menu found for ");_DEBUG_LEVEL1_PRINT(activeMenu->caption);
-                        //_DEBUG_LEVEL1_PRINT(": Choice is ");_DEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
-                        //_DEBUG_LEVEL1_PRINT(" (value : ");_DEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->value);_DEBUG_LEVEL1_PRINTLN(")");
+                        _HMIDEBUG_LEVEL1_PRINT("Choice menu found for ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->caption);
+                        //_HMIDEBUG_LEVEL1_PRINT(": Choice is ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
+                        //_HMIDEBUG_LEVEL1_PRINT(" (value : ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->value);_HMIDEBUG_LEVEL1_PRINTLN(")");
                         // Restore default setting
                         ((hmi*) display)->nbTrainToView = 3 ;
                         _HMIState = StateExitMenu;
                       }else
                       {
-                        _DEBUG_CRITICAL_PRINT("Critical error, no choice menu found for ");_DEBUG_CRITICAL_PRINTLN(activeMenu->caption);
+                        _HMIDEBUG_CRITICAL_PRINT("Critical error, no choice menu found for ");_HMIDEBUG_CRITICAL_PRINTLN(activeMenu->caption);
                       }
                     }
                   }
@@ -274,7 +274,7 @@ void MenuManagement::BtnSelectPressed()
       _HMIEvent = noEvent;
     break;
   }
-  _DEBUG_FCT_PRINTLN("MenuManagement::BtnSelectPressed.. End");   
+  _HMIDEBUG_FCT_PRINTLN("MenuManagement::BtnSelectPressed.. End");   
 }
 /*!
     @brief  resetMenu
@@ -284,11 +284,11 @@ void MenuManagement::BtnSelectPressed()
 */
 void MenuManagement::resetMenu()
 {
-  _DEBUG_FCT_PRINTLN("MenuManagement::resetMenu.. Begin"); 
-  _DEBUG_LEVEL1_PRINTLN("Menu Reset");
+  _HMIDEBUG_FCT_PRINTLN("MenuManagement::resetMenu.. Begin"); 
+  _HMIDEBUG_LEVEL1_PRINTLN("Menu Reset");
 
   baseMenu->resetMenu();  // Recursive call, all sub menu will execute this fonction
 
   activeMenu = baseMenu;
-  _DEBUG_FCT_PRINTLN("MenuManagement::resetMenu.. End");   
+  _HMIDEBUG_FCT_PRINTLN("MenuManagement::resetMenu.. End");   
 }

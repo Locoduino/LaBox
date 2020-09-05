@@ -38,12 +38,18 @@ public:
 	*/
 	void clear();
 
+	/** Add one byte in the buffer.
+	@param inpData	byte to add.
+	@return true if the byte have been pushed. false if the byte are lost due to max size reached...
+	*/
+	bool PushByte(byte inpData);
+
 	/** Add some bytes in the buffer.
 	@param inpData	pointer to bytes to add.
 	@param inDataLength	number of bytes to add.
-  @return true if all bytes have been pushed. false if one or more bytes are lost due to max size reached...
+	@return true if all bytes have been pushed. false if one or more bytes are lost due to max size reached...
 	*/
-	bool PushBytes(byte *inpData, int inDataLength);
+	bool PushBytes(byte* inpData, int inDataLength);
 
 	/** Get the next byte from the buffer.
 	@return first available byte, or 0.
@@ -109,6 +115,8 @@ public:
 		//If tail is ahead the head by 1, we are full
 		return this->full;
 	}
+
+	bool CheckIfBeginDone();
 
 #ifdef DCCPP_DEBUG_MODE
 #ifdef VISUALSTUDIO

@@ -12,13 +12,14 @@
 #include "Adafruit_SSD1306.h"
 #include "OneButton.h"
 #include "hmiConfig.h"
+#include "hmiInterface.hpp"
 
 #include "hmiTrain.h"
 #include "globals.h"
 
 class MenuManagement;
 
-class hmi : public  Adafruit_SSD1306 
+class hmi : public Adafruit_SSD1306, public HmiInterface
 {
   public:
     //----- Members
@@ -30,11 +31,12 @@ class hmi : public  Adafruit_SSD1306
     float voltage;
     float current;
     int   nbTrainToView ;
+    int executionCore;
     
     //----- functions
     void addNotification(int addr, uint8_t order, uint8_t value, bool functionState=false);
     void addNotification(uint8_t order);
-    void addNotification(char* msg);
+    void addNotification(const char* msg);
     void readVoltage();
     void readCurrent();
 
@@ -57,7 +59,7 @@ class hmi : public  Adafruit_SSD1306
   
     //----- functions
     void stateMachine();
-    void pushMessageOnStack(char *msg, uint8_t len);
+    void pushMessageOnStack(const char *msg, uint8_t len);
     void setTrainState(int addr, uint8_t order, uint8_t value, bool state=false);
     void dashboard();
     void showWifiWaiting();
@@ -71,6 +73,10 @@ class hmi : public  Adafruit_SSD1306
     static void BtnDownPressed();
     static void BtnSelectPressed();
     
+    // HmiInterface
+
+    void HmiInterfaceLoop();
+    void HmiInterfaceUpdateDrawing();
 };
 
 

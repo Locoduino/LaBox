@@ -113,6 +113,7 @@
 #define TXT_WifiWaiting         "Connexion WiFi..."
 #define TXT_noWifi              " !! No WiFi !!"
 #define TXT_WifiOk              "...Wifi ok..."
+#define TXT_BoxAddr             "Box address :"
 //#define TXT_LanguageRequest    "Choix de la Langue"
 
     // Message by language : English

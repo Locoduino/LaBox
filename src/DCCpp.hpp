@@ -30,6 +30,7 @@ class DCCpp
 		static CurrentMonitor progMonitor;
 		static bool IsPowerOnMain;
 		static bool IsPowerOnProg;
+		static bool powerOnAtFirstClient;
 	
 	public:
 		// begins
@@ -192,7 +193,7 @@ class DCCpp
 		@param callBackSub	a second arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs (e.g. DCC++ Interface) that call this function. Default 200
 		@return CV value: the CV value or -1 if the value cannot be read.
 		*/
-		static inline int readCvMain(int inCvId, int callBack = 100, int callBackSub = 200) { return mainRegs.readCVmain(inCvId, callBack, callBackSub); }
+		static int readCvMain(int inCvId, int callBack = 100, int callBackSub = 200);
 
 		/** Write the given CV on the main track.
 		Be sure there is only one loco on the track before calling this function !
@@ -201,7 +202,7 @@ class DCCpp
 		@param callBack		an arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs that call this function. Default 100.
 		@param callBackSub	a second arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs (e.g. DCC++ Interface) that call this function. Default 200
 		*/
-		static inline void writeCvMain(int inCvId, byte inValue, int callBack = 100, int callBackSub = 200) { writeCv(&(mainRegs), inCvId, inValue, callBack, callBackSub); }
+		static bool writeCvMain(int inCvId, byte inValue, int callBack = 100, int callBackSub = 200);
 
 #ifdef USE_LOCOMOTIVES
 		/** Set the functions states of the given decoder on the main track.
@@ -234,7 +235,7 @@ class DCCpp
 		@param callBackSub	a second arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs (e.g. DCC++ Interface) that call this function. Default 200
 		@return CV value: the CV value or -1 if the value cannot be read.
 		*/
-		static inline int readCvProg(int inCvId, int callBack = 100, int callBackSub = 200) { return progRegs.readCV(inCvId, callBack, callBackSub); }
+		static int readCvProg(int inCvId, int callBack = 100, int callBackSub = 200);
 
 		/** Write the given CV on the programming track.
 		@param inCvId	CV id from 0 to 255.
@@ -242,7 +243,7 @@ class DCCpp
 		@param callBack		an arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs that call this function. Default 100.
 		@param callBackSub	a second arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs (e.g. DCC++ Interface) that call this function. Default 200
 		*/
-		static inline bool writeCvProg(int inCvId, byte inValue, int callBack = 100, int callBackSub = 200) { return writeCv(&(progRegs), inCvId, inValue, callBack, callBackSub); }
+		static bool writeCvProg(int inCvId, byte inValue, int callBack = 100, int callBackSub = 200);
 
 #ifdef USE_LOCOMOTIVES
 		/** Set the functions states of the given decoder on the programming track.

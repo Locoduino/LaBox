@@ -36,10 +36,10 @@ menuSetValue::menuSetValue(Adafruit_SSD1306* screen, menuObject* p, const char* 
 */
 void menuSetValue::begin()
 {
-  _DEBUG_FCT_PRINTLN("menuSetValue::begin.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("menuSetValue::begin.. Begin"); 
 
 
-  _DEBUG_FCT_PRINTLN("menuSetValue::begin.. End"); 
+  _HMIDEBUG_FCT_PRINTLN("menuSetValue::begin.. End"); 
 }
 /*!
     @brief  update, call to refresh screen
@@ -49,10 +49,10 @@ void menuSetValue::begin()
 */
 void menuSetValue::update()
 {
-  _DEBUG_FCT_PRINTLN("menuSetValue::update.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("menuSetValue::update.. Begin"); 
 
 
-  _DEBUG_FCT_PRINTLN("menuSetValue::update.. End"); 
+  _HMIDEBUG_FCT_PRINTLN("menuSetValue::update.. End"); 
 }
 /*!
     @brief  resetMenu, 
@@ -62,12 +62,12 @@ void menuSetValue::update()
 */
 void menuSetValue::resetMenu()
 {
-  _DEBUG_FCT_PRINTLN("menuSetValue::resetMenu.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("menuSetValue::resetMenu.. Begin"); 
   menuObject::resetMenu();
 
 
 
-  _DEBUG_FCT_PRINTLN("menuSetValue::resetMenu.. End"); 
+  _HMIDEBUG_FCT_PRINTLN("menuSetValue::resetMenu.. End"); 
 }
 /*!
     @brief  eventUp, Notification of a button event
@@ -77,10 +77,10 @@ void menuSetValue::resetMenu()
 */
 void menuSetValue::eventUp()
 {
-  _DEBUG_FCT_PRINTLN("menuSetValue::eventUp.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("menuSetValue::eventUp.. Begin"); 
   menuObject::eventUp();
 
-  _DEBUG_FCT_PRINTLN("menuSetValue::eventUp.. End");   
+  _HMIDEBUG_FCT_PRINTLN("menuSetValue::eventUp.. End");   
 }
 /*!
     @brief  eventDown, Notification of a button event
@@ -90,10 +90,10 @@ void menuSetValue::eventUp()
 */
 void menuSetValue::eventDown()
 {
-  _DEBUG_FCT_PRINTLN("menuSetValue::eventDown.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("menuSetValue::eventDown.. Begin"); 
   menuObject::eventDown();
 
-  _DEBUG_FCT_PRINTLN("menuSetValue::eventDown.. End");   
+  _HMIDEBUG_FCT_PRINTLN("menuSetValue::eventDown.. End");   
 }
 /*!
     @brief  eventSelect, Notification of a button event
@@ -103,8 +103,8 @@ void menuSetValue::eventDown()
 */
 int menuSetValue::eventSelect()
 {
-  _DEBUG_FCT_PRINTLN("menuSetValue::eventSelect.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("menuSetValue::eventSelect.. Begin"); 
   menuObject::eventSelect();
-  _DEBUG_FCT_PRINTLN("menuSetValue::eventSelect.. End");  
+  _HMIDEBUG_FCT_PRINTLN("menuSetValue::eventSelect.. End");  
   return 0;
 }

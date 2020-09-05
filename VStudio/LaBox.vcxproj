@@ -110,7 +110,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);VISUALSTUDIO;DCCPP_PRINT_DCCPP;DCCPP_DEBUG_MODE;_CRT_SECURE_NO_WARNINGS;ARDUINO=10812</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VisualStudioDir)\..\Arduino\ArduiEmulatorWin\ArduiEmulatorLib;../../DIO2/VStudio/; ../src;../vstudio</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VisualStudioDir)\..\Arduino\ArduiEmulatorWin\ArduiEmulatorLib;../src;../vstudio;../src/hmi;../../DIO2/VStudio/</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessKeepComments>false</PreprocessKeepComments>
@@ -162,6 +162,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\src\CircularBuffer.hpp" />
+    <ClInclude Include="..\src\HmiInterface.hpp" />
     <ClInclude Include="..\src\HMI\globals.h" />
     <ClInclude Include="..\src\HMI\hmi.h" />
     <ClInclude Include="..\src\HMI\hmiConfig.h" />
@@ -171,12 +172,12 @@
     <ClInclude Include="..\src\HMI\menumanagement.h" />
     <ClInclude Include="..\src\HMI\menuobject.h" />
     <ClInclude Include="..\src\HMI\menusetvalue.h" />
+    <ClInclude Include="..\src\LaBox.h" />
     <ClInclude Include="..\src\Locomotives\FunctionsState.hpp" />
     <ClInclude Include="..\src\Locomotives\Locomotive.hpp" />
     <ClInclude Include="..\src\Locomotives\Locomotives.hpp" />
     <ClInclude Include="..\src\Locomotives\Registers.hpp" />
     <ClInclude Include="..\src\MessageStack.hpp" />
-    <ClInclude Include="..\src\Persistence.h" />
     <ClInclude Include="..\src\Throttles\MessageConverter.hpp" />
     <ClInclude Include="..\src\Throttles\MessageConverterWiThrottle.hpp" />
     <ClInclude Include="..\src\Throttles\MessageConverterZ21.hpp" />
@@ -208,7 +209,9 @@
     <ClCompile Include="..\src\CircularBuffer.cpp" />
     <ClCompile Include="..\src\DccSignalESP32.cpp" />
     <ClCompile Include="..\src\DccSignalUno.cpp" />
+    <ClCompile Include="..\src\HmiInterfaceBase.cpp" />
     <ClCompile Include="..\src\HMI\hmi.cpp" />
+    <ClCompile Include="..\src\HMI\HmiInterface.cpp" />
     <ClCompile Include="..\src\HMI\hmiTrain.cpp" />
     <ClCompile Include="..\src\HMI\menuinformation.cpp" />
     <ClCompile Include="..\src\HMI\menumanagement.cpp" />
@@ -219,7 +222,6 @@
     <ClCompile Include="..\src\Locomotives\Locomotives.cpp" />
     <ClCompile Include="..\src\Locomotives\Registers.cpp" />
     <ClCompile Include="..\src\MessageStack.cpp" />
-    <ClCompile Include="..\src\Persistence.cpp" />
     <ClCompile Include="..\src\Throttles\MessageConverter.cpp" />
     <ClCompile Include="..\src\Throttles\MessageConverterWiThrottle.cpp" />
     <ClCompile Include="..\src\Throttles\MessageConverterZ21.cpp" />

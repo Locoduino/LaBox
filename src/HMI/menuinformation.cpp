@@ -32,10 +32,10 @@ menuInformation::menuInformation(Adafruit_SSD1306* screen, menuObject* p, const 
 */
 void menuInformation::eventUp()
 {
-  _DEBUG_FCT_PRINTLN("menuInformation::eventUp.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("menuInformation::eventUp.. Begin"); 
   menuObject::eventUp();
 
-  _DEBUG_FCT_PRINTLN("menuInformation::eventUp.. End");   
+  _HMIDEBUG_FCT_PRINTLN("menuInformation::eventUp.. End");   
 }
 /*!
     @brief  eventDown, Notification of a button event
@@ -45,10 +45,10 @@ void menuInformation::eventUp()
 */
 void menuInformation::eventDown()
 {
-  _DEBUG_FCT_PRINTLN("menuInformation::eventDown.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("menuInformation::eventDown.. Begin"); 
   menuObject::eventDown();
 
-  _DEBUG_FCT_PRINTLN("menuInformation::eventDown.. End");   
+  _HMIDEBUG_FCT_PRINTLN("menuInformation::eventDown.. End");   
 }
 /*!
     @brief  eventSelect, Notification of a button event
@@ -58,10 +58,10 @@ void menuInformation::eventDown()
 */
 int menuInformation::eventSelect()
 {
-  _DEBUG_FCT_PRINTLN("menuInformation::eventSelect.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("menuInformation::eventSelect.. Begin"); 
   menuObject::eventSelect();
 
-  _DEBUG_FCT_PRINTLN("menuInformation::eventSelect.. End");  
+  _HMIDEBUG_FCT_PRINTLN("menuInformation::eventSelect.. End");  
   return 0;
 }
 /*!
@@ -72,10 +72,10 @@ int menuInformation::eventSelect()
 */
 void menuInformation::begin()
 {
-  _DEBUG_FCT_PRINTLN("menuInformation::begin.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("menuInformation::begin.. Begin"); 
 
 
-  _DEBUG_FCT_PRINTLN("menuInformation::begin.. End"); 
+  _HMIDEBUG_FCT_PRINTLN("menuInformation::begin.. End"); 
 }
 /*!
     @brief  update, call to refresh screen
@@ -85,10 +85,10 @@ void menuInformation::begin()
 */
 void menuInformation::update()
 {
-  _DEBUG_FCT_PRINTLN("menuInformation::update.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("menuInformation::update.. Begin"); 
 
 
-  _DEBUG_FCT_PRINTLN("menuInformation::update.. End"); 
+  _HMIDEBUG_FCT_PRINTLN("menuInformation::update.. End"); 
 }
 /*!
     @brief  resetMenu, 
@@ -98,11 +98,11 @@ void menuInformation::update()
 */
 void menuInformation::resetMenu()
 {
-  _DEBUG_FCT_PRINTLN("menuInformation::resetMenu.. Begin"); 
+  _HMIDEBUG_FCT_PRINTLN("menuInformation::resetMenu.. Begin"); 
   menuObject::resetMenu();
 
 
 
-  _DEBUG_FCT_PRINTLN("menuInformation::resetMenu.. End"); 
+  _HMIDEBUG_FCT_PRINTLN("menuInformation::resetMenu.. End"); 
   
 }

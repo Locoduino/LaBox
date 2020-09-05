@@ -352,31 +352,32 @@ int RegisterList::buildBaseAcknowlegde(int inMonitorPin) volatile
 int RegisterList::checkAcknowlegde(int inMonitorPin, int inBase) volatile
 {
 	int c = 0;
-#ifdef DCCPP_DEBUG_MODE
 	int max = 0;
-#endif
+	int loop = 0;
 
-	for (int j = 0; j < ACK_SAMPLE_COUNT; j++)
+	for (int a = 0; a < 20; a++)
 	{
-		int val = (int)analogRead(inMonitorPin);
-		c = (int)((val - inBase) * ACK_SAMPLE_SMOOTHING + c * (1.0 - ACK_SAMPLE_SMOOTHING));
-#ifdef DCCPP_DEBUG_MODE
-		if (c > max)
-			max = c;
-#endif
-		if (c > ACK_SAMPLE_THRESHOLD)
-			return 1;
+		c = 0;
+		for (int j = 0; j < ACK_SAMPLE_COUNT; j++)
+		{
+			int val = (int)analogRead(inMonitorPin);
+			c = (int)((val - inBase) * ACK_SAMPLE_SMOOTHING + c * (1.0 - ACK_SAMPLE_SMOOTHING));
+			if (c > max)
+			{
+				max = c;
+				loop = a;
+			}
+		}
 	}
 
 #ifdef DCCPP_DEBUG_MODE
-	if (max > ACK_SAMPLE_THRESHOLD / 2)
-	{
-		// Only show closest values...
-		Serial.print(F("Max acknowledge value : "));
-		Serial.println(max);
-	}
+	Serial.print(F(" iter : "));
+	Serial.print(loop);
+	Serial.print(", max : ");
+	Serial.println(max);
 #endif
-	return 0;
+
+	return (max > ACK_SAMPLE_THRESHOLD);
 }
 
 int RegisterList::readCVraw(int cv, int callBack, int callBackSub) volatile
@@ -397,7 +398,7 @@ int RegisterList::readCVraw(int cv, int callBack, int callBackSub) volatile
 
 #ifdef DCCPP_DEBUG_MODE
 	Serial.print(F("readCVraw : start reading cv "));
-	Serial.println(cv);
+	Serial.println(cv+1);
 #endif
 
 	bRead[0] = 0x78 + (highByte(cv) & 0x03);   // any CV>1023 will become modulus(1024) due to bit-mask of 0x03
@@ -408,19 +409,33 @@ int RegisterList::readCVraw(int cv, int callBack, int callBackSub) volatile
 	for (int i = 0; i<8; i++) {
 
 		base = RegisterList::buildBaseAcknowlegde(MonitorPin);
+        
+        delay(10);
+
 
 		bRead[2] = 0xE8 + i;
 
 		loadPacket(0, resetPacket, 2, 3);          // NMRA recommends starting with 3 reset packets
 		loadPacket(0, bRead, 3, 5);                // NMRA recommends 5 verify packets
 		loadPacket(0, resetPacket, 2, 1);          // forces code to wait until all repeats of bRead are completed (and decoder begins to respond)
+#ifdef DCCPP_DEBUG_MODE
+        Serial.print(F("bit : "));
+        Serial.print(i);
+#endif
+        delay(2);
+
+        
 
 		ret = RegisterList::checkAcknowlegde(MonitorPin, base);
 
 		bitWrite(bValue, i, ret);
 	}
+    
+    delay(10);
 
 	base = RegisterList::buildBaseAcknowlegde(MonitorPin);
+    
+    delay(10);
 
 	bRead[0] = 0x74 + (highByte(cv) & 0x03);   // set-up to re-verify entire byte
 	bRead[2] = bValue;
@@ -428,6 +443,11 @@ int RegisterList::readCVraw(int cv, int callBack, int callBackSub) volatile
 	loadPacket(0, resetPacket, 2, 3);          // NMRA recommends starting with 3 reset packets
 	loadPacket(0, bRead, 3, 5);                // NMRA recommends 5 verify packets
 	loadPacket(0, resetPacket, 2, 1);          // forces code to wait until all repeats of bRead are completed (and decoder begins to respond)
+#ifdef DCCPP_DEBUG_MODE
+    Serial.print(F("verif : "));
+#endif
+    delay(2);
+
 
 	ret = RegisterList::checkAcknowlegde(MonitorPin, base);
 
@@ -773,3 +793,9 @@ byte RegisterList::idlePacket[3]={0xFF,0x00,0};                 // always leave 
 byte RegisterList::resetPacket[3]={0x00,0x00,0};
 
 byte RegisterList::bitMask[]={0x80,0x40,0x20,0x10,0x08,0x04,0x02,0x01};         // masks used in interrupt routine to speed the query of a single bit in a Packet
+/*
+ modifs DB mises à la fin pour ne pas changer les numéros de ligne
+ line 400  Serial.println(cv+1); // +1 car cv-- juste avant !
+ line 372 if (max > ACK_SAMPLE_THRESHOLD / 10) // 10 au lieu de 2
+ line 372 if (max < ACK_SAMPLE_THRESHOLD)
+*/

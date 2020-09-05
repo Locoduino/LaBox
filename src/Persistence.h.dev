@@ -4,6 +4,7 @@
 //-------------------------------------------------------------------
 
 #include "Arduino.h"
+#include "SPIFFS.h"
 
 class PersistenceObject;
 
@@ -11,6 +12,7 @@ class PersistenceFile
 {
 private:
 	PersistenceObject* pFirstObject;
+	File File;
 
 public:
 	PersistenceFile();
@@ -24,8 +26,10 @@ public:
 	bool remove(PersistenceObject* inpObject);
 	int count();
 
-	virtual bool write();
-	virtual bool read();
+	static bool begin();
+
+	virtual bool write(const String& inFilename);
+	virtual bool read(const String &inFilename);
 
 #ifdef DCCPP_DEBUG_MODE
 	/** Print the list of persistence objects.

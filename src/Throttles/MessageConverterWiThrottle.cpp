@@ -281,7 +281,7 @@ void MessageConverterWiThrottle::checkHeartbeat(Throttle* inpThrottle)
 	}
 }
 
-void MessageConverterWiThrottle::locoAdd(Throttle* inpThrottle, int inLocoNumber, String th, String actionKey)
+void MessageConverterWiThrottle::locoAdd(Throttle* inpThrottle, int inLocoNumber, String name, String actionKey)
 {
 	uint16_t locoAddress = (uint16_t)actionKey.substring(1).toInt();
 	Locomotive* pLoco = Locomotives::get(locoAddress);
@@ -289,11 +289,11 @@ void MessageConverterWiThrottle::locoAdd(Throttle* inpThrottle, int inLocoNumber
 	if (pLoco == NULL)
 		pLoco = Locomotives::add("Loco", locoAddress, 128);
 
-	inpThrottle->println("M" + th + "+" + actionKey + "<;>");
+	inpThrottle->println("M" + name + "+" + actionKey + "<;>");
 	for (int fKey = 0; fKey < 29; fKey++) 
 	{
 		pLoco->functions.inactivate(fKey);
-		inpThrottle->println("M" + th + "A" + actionKey + "<;>F0" + fKey);
+		inpThrottle->println("M" + name + "A" + actionKey + "<;>F0" + fKey);
 	}
 	if (pLoco->tag < 0)
 	{	// Real new loco !
@@ -301,10 +301,12 @@ void MessageConverterWiThrottle::locoAdd(Throttle* inpThrottle, int inLocoNumber
 		pLoco->setDirection(true);
 		pLoco->tag = inLocoNumber;
 	}
-	inpThrottle->println("M" + th + "+" + actionKey + "<;>V0");
-	inpThrottle->println("M" + th + "+" + actionKey + "<;>R1");
-	inpThrottle->println("M" + th + "+" + actionKey + "<;>s1");
+	inpThrottle->println("M" + name + "+" + actionKey + "<;>V0");
+	inpThrottle->println("M" + name + "+" + actionKey + "<;>R1");
+	inpThrottle->println("M" + name + "+" + actionKey + "<;>s1");
 
+	if (hmi::CurrentInterface != NULL)
+		hmi::CurrentInterface->LocoAdd(name.c_str(), pLoco->getAddress());
 #ifdef DCCPP_DEBUG_MODE
 	Locomotives::printLocomotives();
 #endif
@@ -326,6 +328,9 @@ void MessageConverterWiThrottle::locoRelease(Throttle* inpThrottle, int inLocoNu
 
 	//	pLoco->initialize();
 	inpThrottle->println("M" + th + "-" + actionKey + "<;>");
+
+	if (hmi::CurrentInterface != NULL)
+		hmi::CurrentInterface->LocoRemove(pLoco->getAddress());
 
 #ifdef DCCPP_DEBUG_MODE
 	Locomotives::printLocomotives();
