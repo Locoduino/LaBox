@@ -58,7 +58,9 @@ MessageConverterWiThrottle converterWT3;
 void setup()
 {
   Serial.begin(115200);
-  Serial.println("LaBox 0.6");
+
+  Serial.print("LaBox ");
+  Serial.println(LABOX_LIBRARY_VERSION);
 
   //----------- Start HMI -------------
   boxHMI.begin();
@@ -80,15 +82,9 @@ void setup()
   throttleWifi6.begin(&converterWT3);
 
   DCCpp::begin();
-  /* Configuration for ESP32, can be adapted...
-  DIR -> GPIO_32
-  PWM -> EN
-  MAX471 -> GPIO_36 (A0)
 
-  Config TPC:
-  TPCINT2, TPCD5, TPCA1
-  */
-  DCCpp::beginMain(UNDEFINED_PIN, 22, 4, 33);  
+  // configuration pour L6203 La Box
+  DCCpp::beginMain(UNDEFINED_PIN, 33, 32, 36);  
 }
 
 void loop()
