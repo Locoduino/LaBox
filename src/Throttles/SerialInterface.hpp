@@ -11,30 +11,14 @@
 
 This is the most curious throttle, because the class itself does not exists until you add the macro SERIAL_INTERFACE to your sketch.
 
-    #include "DCCpp.h"
+    #include "Labox.h"
 
-    SERIAL_INTERFACE(Serial);
+    SERIAL_INTERFACE(Serial3, MyName);
 
-and in this case, it has the usual form of a Throttle :
+this macro will create a class with the name SerialInterfaceMyName. 
+To use it in a ThrottleSerial, juste use the other macro during the ThrottleSerial declaration :
 
-    class ThrottleSerial : public Throttle
-    {
-    public:
-		inline ThrottleSerial() : Throttle() { }
-    
-		inline void begin() { }
-    
-		inline void getMessage() 
-		{
-			...
-    	}
-    	
-    	static inline SerialCommanderClass &GetCurrent() 
-    	{
-    		...
-     	}
-    	void printCommander() { ... }
-    };    
+		ThrottleSerial throttleSerial("Serial3-name", SERIAL_INTERFACE_INSTANCE(MyName));
 
 You should avoid to declare a SERIAL_INTERFACE if not necessary, because the Serial library delivered with the Arduino IDE
 allocates a lot of memory for each serial channel used.
@@ -89,6 +73,11 @@ public:\
 	}\
 \
 };
+
+/** Use this macro to define a new named SerialInterface object.
+@param NAME Suffix of the created class name used in the previous SERIALINTERFACE. See the file description for more information.
+*/
+#define SERIAL_INTERFACE_INSTANCE(NAME) new SerialInterface ## NAME()
 
 //-------------------------------------------------------------------
 #endif

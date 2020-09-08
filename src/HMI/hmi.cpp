@@ -540,28 +540,28 @@ void hmi::addNotification(int addr, uint8_t order, uint8_t value, bool functionS
     case HMI_OrderForward :
       if (laBoxState == Labox_StateDCCON) {
         sprintf(message, "@%04d-%s%03d", addr, TXT_Forward, value);
-        pushMessageOnStack(message, strlen(message) );
+        pushMessageOnStack(message, (uint8_t) strlen(message));
         setTrainState(addr, order, value);
       }
       break;
     case HMI_OrderBack :
       if (laBoxState == Labox_StateDCCON) {
         sprintf(message, "@%04d-%s%03d", addr, TXT_Back, value);
-        pushMessageOnStack(message, strlen(message) );
+        pushMessageOnStack(message, (uint8_t) strlen(message));
         setTrainState(addr, order, value);
       }
       break;
     case HMI_OrderStop :
       if (laBoxState == Labox_StateDCCON) {
         sprintf(message, "@%04d-%s", addr, TXT_Stop);
-        pushMessageOnStack(message, strlen(message) );
+        pushMessageOnStack(message, (uint8_t) strlen(message));
         setTrainState(addr, order, value);
       }
       break;
     case HMI_OrderFunction :
       if (laBoxState == Labox_StateDCCON) {
         sprintf(message, "@%04d-%s%02d", addr, TXT_Function, value);
-        pushMessageOnStack(message, strlen(message) );
+        pushMessageOnStack(message, (uint8_t) strlen(message));
         setTrainState(addr, order, value, functionState);
       }
       break;
@@ -569,7 +569,7 @@ void hmi::addNotification(int addr, uint8_t order, uint8_t value, bool functionS
       if (laBoxState != Labox_StateDCCOFF) {
         sprintf(message, "%s", TXT_StopAll);
         laBoxState = Labox_StateDCCOFF;
-        pushMessageOnStack(message, strlen(message) );
+        pushMessageOnStack(message, (uint8_t) strlen(message));
 //        for(int i=0; i < HMI_NbMemorisedTrain; i++)   // Est-ce que l'on veut conserver l'état de tous les trains ou on efface tout ?
 //        {
 //          tabTrains[i].setInfo(0,0,0);
@@ -578,38 +578,38 @@ void hmi::addNotification(int addr, uint8_t order, uint8_t value, bool functionS
       { // bi-stable function
         sprintf(message, "%s", TXT_StartDCC);
         laBoxState = Labox_StateDCCON;
-        pushMessageOnStack(message, strlen(message) );
+        pushMessageOnStack(message, (uint8_t) strlen(message));
       }
       break;
     case HMI_StartDCC :
       if (laBoxState == Labox_StateDCCOFF) {
         sprintf(message, "%s", TXT_StartDCC);
         laBoxState = Labox_StateDCCON;
-        pushMessageOnStack(message, strlen(message) );
+        pushMessageOnStack(message, (uint8_t) strlen(message));
       }
       break;
     case HMI_ShortCurcuit :
       sprintf(message, "%s", TXT_ShortCircuit);
       laBoxState = Labox_StateSHORTCIRCUIT;
-      pushMessageOnStack(message, strlen(message) );
+      pushMessageOnStack(message, (uint8_t) strlen(message));
       break;
     case HMI_WifiWaiting :
       sprintf(message, "%s", TXT_WifiWaiting);
       _HMIState = StateWifiWaiting ;
       laBoxState = Labox_StateDCCOFF;
-      pushMessageOnStack(message, strlen(message) );
+      pushMessageOnStack(message, (uint8_t) strlen(message));
       break;   
     case HMI_noWifi :
       sprintf(message, "%s", TXT_noWifi);
       _HMIState = StateNoWifi ;
       laBoxState = Labox_StateDCCOFF;
-      pushMessageOnStack(message, strlen(message) );    
+      pushMessageOnStack(message, (uint8_t) strlen(message));
     break; 
     case HMI_WifiOk :
       sprintf(message, "%s", TXT_WifiOk);
       _HMIState = StateDashboard ;
       laBoxState = Labox_StateDCCOFF;
-      pushMessageOnStack(message, strlen(message) );    
+      pushMessageOnStack(message, (uint8_t) strlen(message));
     break;
     
     default :

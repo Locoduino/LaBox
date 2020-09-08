@@ -36,10 +36,10 @@ int wifiPort = 44444;
 
 // SERIAL
  
-//SERIAL_INTERFACE(Serial, Normal);
+SERIAL_INTERFACE(Serial, Normal);
+ThrottleSerial throttleSerial("Serial", SERIAL_INTERFACE_INSTANCE(Normal));
 
-//ThrottleSerial throttleSerial("Serial", new SerialInterfaceNormal());
-ThrottleWifi throttleWifi0("DCCpp", dccPPPort);
+//ThrottleWifi throttleWifi0("DCCpp", dccPPPort);
 
 ThrottleWifi throttleWifi1("Z21 - 1", Z21_UDPPORT);
 MessageConverterZ21 converter1;
@@ -68,8 +68,10 @@ void setup()
   //----------- Start Wifi
   ThrottleWifi::connectWifi(ssid, password);//, ip, gateway, subnet, dns);
 
+  throttleSerial.begin();
+
   // For DCCpp syntax applications like DCCpp cab or RTDrive+
-  throttleWifi0.begin(HTTP);
+  //throttleWifi0.begin(HTTP);
 
   // Z21 applications
   throttleWifi1.begin(&converter1);

@@ -19,7 +19,7 @@
 #define PIN_BTN_BTNUP           23
 #define PIN_BTN_BTNDWN          19
 #define PIN_CURRENT_MES         36
-#define PIN_VOLTAGE_MES         14
+#define PIN_VOLTAGE_MES         34
 // U/I correctors
 #define HMI_VoltageK            0.10        // Voltage scaling coefficient
 #define HMI_CurrentK            0.10        // Current scaling coefficient
