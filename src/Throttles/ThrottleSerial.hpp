@@ -21,7 +21,7 @@ public:
 	*/
 	ThrottleSerial(const String& inName, SerialInterface* inpInterface);
 
-	bool begin(EthernetProtocol inProtocol);
+	bool begin(EthernetProtocol inProtocol = NOTSIGNIFICANT);
 	void end();
 	bool loop();
 	bool sendMessage(const String& inMessage);

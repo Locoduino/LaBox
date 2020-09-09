@@ -12,6 +12,7 @@ Part of DCC++ BASE STATION for the Arduino
 #if defined(USE_ETHERNET) || defined(USE_WIFI)
 enum EthernetProtocol
 {
+	NOTSIGNIFICANT,
 	HTTP,
 	TCP,
 	UDP
