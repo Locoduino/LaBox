@@ -32,7 +32,7 @@ Throttle::Throttle(const String& inName, unsigned int inTimeOutDelay)
 	Throttles::add(this);
 }
 
-// The messages in the stack have the syntax:
+// If the message starts with '<', this is a classic DCC++ message. Otherwise, this is a throttle message with the following syntax :
 // DDDSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
 // Where DDD is the numerical form of the Throttle Id which have got the message, in ordrer to answer to this throttle only.
 // SSSSSSSSSSSSSSSSSSSSSSSSSSSSSS is the classic DCC++ message received by the throttle.
@@ -150,7 +150,16 @@ bool Throttle::pushMessage(const String& inpCommand)
 	this->pushMessageInStack(this->id, inpCommand);
 	if (this->timeOutDelay != 0)
 		this->lastActivityDate = millis();
+
 	return true;
+}
+
+bool Throttle::pushDccppMessage(const String& inpCommand)
+{
+	String command = "<";
+	command += inpCommand;
+	command += ">";
+	return Throttle::pushMessage(command);
 }
 
 void Throttle::end()

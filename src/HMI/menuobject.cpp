@@ -221,6 +221,9 @@ int menuObject::eventSelect()
     case MENUTYPELIST :           // User has selected a sub menu
       return MENUCHANGETOCHILD ;
     break;
+    case MENUSPECIAL :           // User has selected a sub menu
+      return MENUSPECIAL ;
+    break;
     default :
       return MENUCHOSEN ;         // It's user selection like Yes or No for exemple
   }

@@ -98,38 +98,65 @@ void TextCommand::receiveCommands()
    commandString[0] = 0;
  } // TextCommand:TextCommand
  
- void TextCommand::process(){
-  
+ void TextCommand::process() {
+
 #if !defined(ARDUINO_ARCH_ESP32) || defined(VISUALSTUDIO)
 	 // On not ESP32 architectures, load and process immediatly the commands.
 	 receiveCommands();
 #endif
 
 	 int pending = MessageStack::MessagesStack.GetPendingMessageIndex();
-		if (pending != 255)
-		{
-			char buffer[MESSAGE_MAXSIZE+10];
+	 if (pending != 255)
+	 {
+		 char bufferStack[MESSAGE_MAXSIZE + 10];
 
-			MessageStack::MessagesStack.GetMessage(pending, buffer);
+		 bufferStack[0] = 0;
+		 MessageStack::MessagesStack.GetMessage(pending, bufferStack);
+
+		 if (bufferStack[0] == 0)
+			 return;
 
 #ifdef USE_THROTTLES
-			pCurrentThrottle = Throttle::getThrottleFromStackMessage(buffer);
-			if (pCurrentThrottle != NULL && pCurrentThrottle->pConverter != NULL)
-			{
-				String message;
-				Throttle::getMessageFromStackMessage(buffer, message);
-				strncpy(buffer, message.c_str(), MESSAGE_MAXSIZE - 3);
-				pCurrentThrottle->pConverter->convert(pCurrentThrottle, buffer);
-			}
-			else
-#endif
-				if (parse(buffer) == false)
-				{
+		 if (bufferStack[0] != '<')	// Throttle message
+		 {
+			 // Throttle message...
+			 pCurrentThrottle = Throttle::getThrottleFromStackMessage(bufferStack);
+			 if (pCurrentThrottle != NULL)
+			 {
+				 char buffer[MESSAGE_MAXSIZE + 10];
+				 buffer[0] = 0;
+
+				 String message;
+				 Throttle::getMessageFromStackMessage(bufferStack, message);
+				 strncpy(buffer, message.c_str(), MESSAGE_MAXSIZE - 3);
 #if defined(DCCPP_DEBUG_MODE)
-					Serial.println("invalid command !");
+				 if (buffer[0] != 0)
+				 {
+					 Serial.print("Throttle ");
+					 Serial.print(pCurrentThrottle->getId());
+					 Serial.print(" ");
+					 Serial.println(buffer);
+				 }
+#endif	
+				 if (pCurrentThrottle->pConverter != NULL)
+				 {
+					 pCurrentThrottle->pConverter->convert(pCurrentThrottle, buffer);
+				 }
+				 else
+				 {
+					 TextCommand::parse(bufferStack);
+				 }
+			 }
+		 }
 #endif
-				}
-		}
+		 if (bufferStack[0] == '<')	// DCC++ message
+			 if (TextCommand::parse(bufferStack) == false)
+			 {
+#if defined(DCCPP_DEBUG_MODE)
+				 Serial.println("invalid command !");
+#endif
+			 }
+	 }
  } // TextCommand:process
    
 ///////////////////////////////////////////////////////////////////////////////
@@ -139,14 +166,17 @@ bool TextCommand::parse(char *com)
 #ifdef USE_THROTTLES
 	String message;
 	pCurrentThrottle = Throttle::getThrottleFromStackMessage(com);
-	Throttle::getMessageFromStackMessage(com, message);
-	strncpy(com, message.c_str(), MESSAGE_MAXSIZE - 3);
+	if (pCurrentThrottle != NULL)
+	{
+		Throttle::getMessageFromStackMessage(com, message);
+		strncpy(com, message.c_str(), MESSAGE_MAXSIZE - 3);
+	}
 #endif
 
 #ifdef DCCPP_DEBUG_MODE
 	Serial.print('<');
 	Serial.print((char)com[0]);
-	Serial.println(F("> command"));
+	Serial.println(F("> parse command"));
 #ifdef VISUALSTUDIO
 	std::cout << com <<  " command received" << std::endl; 
 #endif
@@ -462,7 +492,36 @@ bool TextCommand::parse(char *com)
 #endif
 		return true;
 
-	case 'R':     
+	case 'r':
+		/**	\addtogroup commandsGroup
+		READ CONFIGURATION VARIABLE BYTE FROM ENGINE DECODER ON MAIN TRACK
+		-------------------------------------------------------------------------
+
+		<b>
+		\verbatim
+		<r CV CALLBACKNUM CALLBACKSUB>
+		\endverbatim
+		</b>
+
+		reads a Configuration Variable from the decoder of an engine on the main track
+
+		- <b>CV</b>: the number of the Configuration Variable memory location in the decoder to read from (1-1024)
+		- <b>CALLBACKNUM</b>: an arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs that call this function
+		- <b>CALLBACKSUB</b>: a second arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs (e.g. DCC++ Interface) that call this function
+
+		returns: <b>\<r CALLBACKNUM|CALLBACKSUB|CV VALUE\></b>
+		where VALUE is a number from 0-255 as read from the requested CV, or -1 if read could not be verified
+		*/
+
+		DCCpp::mainRegs.readCV(com + 1);
+
+#ifdef USE_THROTTLES
+		TextCommand::pCurrentThrottle = NULL;
+#endif
+
+		return true;
+
+	case 'R':
 		/**	\addtogroup commandsGroup
 		READ CONFIGURATION VARIABLE BYTE FROM ENGINE DECODER ON PROGRAMMING TRACK
 		-------------------------------------------------------------------------
@@ -474,23 +533,23 @@ bool TextCommand::parse(char *com)
 		</b>
 
 		reads a Configuration Variable from the decoder of an engine on the programming track
-		
+
 		- <b>CV</b>: the number of the Configuration Variable memory location in the decoder to read from (1-1024)
 		- <b>CALLBACKNUM</b>: an arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs that call this function
 		- <b>CALLBACKSUB</b>: a second arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs (e.g. DCC++ Interface) that call this function
-		
+
 		returns: <b>\<r CALLBACKNUM|CALLBACKSUB|CV VALUE\></b>
 		where VALUE is a number from 0-255 as read from the requested CV, or -1 if read could not be verified
 		*/
 
-	  DCCpp::progRegs.readCV(com+1);
+		DCCpp::progRegs.readCV(com + 1);
 
 #ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
 #endif
 		return true;
 
-	case '1':      
+	case '1':
 		/**	\addtogroup commandsGroup
 		TURN ON POWER FROM MOTOR SHIELD TO TRACKS
 		-----------------------------------------

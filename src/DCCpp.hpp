@@ -16,7 +16,7 @@ class DCCpp
 		static bool panicStopped;
 
 		static bool setThrottle(volatile RegisterList *inReg, int nReg, int inLocoId, int inStepsNumber, int inNewSpeed, bool inForward);
-		//static int readCv(volatile RegisterList *inReg, byte inCvId, int callBack = 100, int callBackSub = 200) { return inReg->readCV(inCvId, callBack, callBackSub); }
+		static int readCvRaw(volatile RegisterList* inReg, int inCvId, int callBack = 100, int callBackSub = 200);
 		static bool writeCv(volatile RegisterList *inReg, int inCvId, byte inCvValue, int callBack = 100, int callBackSub = 200);
 		static int identifyLocoId(volatile RegisterList *inReg);
 #ifdef USE_LOCOMOTIVES
@@ -123,6 +123,16 @@ class DCCpp
 		*/
 		static bool IsMainTrack(volatile RegisterList *apRegs) { return apRegs == &mainRegs; }
 		
+		/** Checks if beginMain() has been called with the right arguments !
+		@return true if the main track is defined.
+		*/
+		static bool IsMainTrackDeclared() { return DCCppConfig::SignalEnablePinMain != UNDEFINED_PIN; }
+
+		/** Checks if beginProg() has been called with the right arguments !
+		@return true if the prog track is defined.
+		*/
+		static bool IsProgTrackDeclared() { return DCCppConfig::SignalEnablePinProg != UNDEFINED_PIN; }
+
 		/** Main loop function of the library.
 		*/
 		static void loop();

@@ -83,7 +83,7 @@ public:
 	@remark	For 128 steps max, 0 is stop, 1 is emergency stop...
 	*/
 	void setSpeed(uint8_t speed) {
-		if (speed < 2) { speed = 2;	}
+		if (speed == 1) { speed = 2;	}
 		else if (speed > 127) {	speed = 127; }
 		this->currentSpeed = speed;
 	}

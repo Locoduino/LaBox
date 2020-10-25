@@ -10,6 +10,7 @@ description: <FunctionsState class>
 #ifdef USE_THROTTLES
 Throttle* Throttles::pFirstThrottle = NULL;
 uint16_t Throttles::throttlesCounter = 0;
+int Throttles::executionCore = -1;
 
 Throttle* Throttles::getFirst()
 {		

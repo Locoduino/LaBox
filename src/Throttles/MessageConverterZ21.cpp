@@ -246,9 +246,9 @@ void MessageConverterZ21::setSpeed(Throttle* inpThrottle, byte inNbSteps, byte i
 	CircularBuffer* pBuffer = inpThrottle->getCircularBuffer();
 
 #ifdef DCCPP_DEBUG_MODE
-	Serial.print("Throttle ");
+	Serial.print("Z21 Throttle ");
 	Serial.print(inpThrottle->getId());
-	Serial.print(" : ");
+	Serial.println(" : speed");
 #endif
 
 	int locoAddress = ((inDB1 & 0x3F) << 8) + inDB2;
@@ -281,9 +281,9 @@ void MessageConverterZ21::setFunction(Throttle* inpThrottle, byte inDB1, byte in
 	}
 
 #ifdef DCCPP_DEBUG_MODE
-	Serial.print("Throttle ");
+	Serial.print("Z21 Throttle ");
 	Serial.print(inpThrottle->getId());
-	Serial.print(" : ");
+	Serial.println(" : function");
 #endif
 
 	// inDB3 :  TTNN NNNN		TT:00 off, TT:01 on; TT:10 toggle   NNNNNN function number
@@ -310,12 +310,17 @@ void MessageConverterZ21::cvReadProg(Throttle* inpThrottle, byte inDB1, byte inD
 	int cvAddress = ((inDB1 & 0x3F) << 8) + inDB2;
 	
 #ifdef DCCPP_DEBUG_MODE
-	Serial.print("Throttle ");
+	Serial.print("Z21 Throttle ");
 	Serial.print(inpThrottle->getId());
-	Serial.print(" : ");
+	Serial.println(" : cvReadProg");
 #endif
 
-	int val = DCCpp::readCvProg(cvAddress);
+	int val = -1;
+	if (DCCpp::IsProgTrackDeclared())
+		val = DCCpp::readCvProg(cvAddress);
+	else
+		val = DCCpp::readCvMain(cvAddress);
+
 	if (val == -1)
 		notifyCvNACK(inpThrottle, inDB1, inDB2);
 	else
@@ -327,18 +332,59 @@ void MessageConverterZ21::cvWriteProg(Throttle* inpThrottle, byte inDB1, byte in
 	int cvAddress = ((inDB1 & 0x3F) << 8) + inDB2;
 
 #ifdef DCCPP_DEBUG_MODE
-	Serial.print("Throttle ");
+	Serial.print("Z21 Throttle ");
 	Serial.print(inpThrottle->getId());
-	Serial.print(" : ");
+	Serial.println(" : cvWriteProg");
 #endif
 
-	bool ret = DCCpp::writeCvProg(cvAddress, inDB3);
+	bool ret = false;
+	if (DCCpp::IsProgTrackDeclared())
+		ret = DCCpp::writeCvProg(cvAddress, inDB3);
+	else
+		ret = DCCpp::writeCvMain(cvAddress, inDB3);
+
 	if (!ret)
 		notifyCvNACK(inpThrottle, inDB1, inDB2);
 	else
 		notifyCvRead(inpThrottle, inDB1, inDB2, inDB3);
 }
 
+/*void MessageConverterZ21::cvReadPom(Throttle* inpThrottle, byte inDB1, byte inDB2, byte inDB3, byte inDB4)
+{
+	int locoAddress = ((inDB1 & 0x3F) << 8) + inDB2;
+	int cvAddress = ((inDB3 & 0x3F) << 8) + inDB4;
+
+#ifdef DCCPP_DEBUG_MODE
+	Serial.print("Z21 Throttle ");
+	Serial.print(inpThrottle->getId());
+	Serial.println(" : cvReadMain");
+#endif
+
+	int val = DCCpp::readCvMain(cvAddress);
+	if (val == -1)
+		notifyCvNACK(inpThrottle, inDB1, inDB2);
+	else
+		notifyCvRead(inpThrottle, inDB1, inDB2, val);
+}
+
+void MessageConverterZ21::cvWritePom(Throttle* inpThrottle, byte inDB1, byte inDB2, byte inDB3, byte inDB4, byte inDB5)
+{
+	int locoAddress = ((inDB1 & 0x3F) << 8) + inDB2;
+	int cvAddress = ((inDB3 & 0x3F) << 8) + inDB4;
+
+#ifdef DCCPP_DEBUG_MODE
+	Serial.print("Z21 Throttle ");
+	Serial.print(inpThrottle->getId());
+	Serial.println(" : cvWriteMain");
+#endif
+
+	bool ret = DCCpp::writeCvMain(cvAddress, inDB5);
+	if (!ret)
+		notifyCvNACK(inpThrottle, inDB1, inDB2);
+	else
+		notifyCvRead(inpThrottle, inDB1, inDB2, inDB3);
+}
+*/
 bool MessageConverterZ21::processBuffer(Throttle* inpThrottle)
 {
 	bool done = false;
@@ -489,12 +535,20 @@ bool MessageConverterZ21::processBuffer(Throttle* inpThrottle)
 			done = true;
 			break;
 		case LAN_X_HEADER_CV_READ:
-#ifdef DCCPP_DEBUG_VERBOSE_MODE
-			Serial.print(" CV READ ");
+#ifdef DCCPP_DEBUG_MODE
+			Serial.print(" CV READ PROG ");
 #endif
 			// DB0 should be 0x11
 			cvReadProg(inpThrottle, DB[2], DB[3]);
 			done = true;
+			break;
+		case LAN_X_HEADER_CV_POM:
+#ifdef DCCPP_DEBUG_MODE
+			Serial.println(" CV READ POM : NOT IMPLEMENTED");
+#endif
+			// DB0 should be 0x11
+			//cvReadMain(inpThrottle, DB[2], DB[3], DB[4], DB[5]);
+			//done = true;
 			break;
 		case LAN_X_HEADER_CV_WRITE:
 #ifdef DCCPP_DEBUG_VERBOSE_MODE
@@ -504,7 +558,6 @@ bool MessageConverterZ21::processBuffer(Throttle* inpThrottle)
 			done = true;
 			break;
 		case LAN_X_HEADER_SET_TURNOUT:
-		case LAN_X_HEADER_CV_POM:
 		case 0x22:
 			break;
 		}
@@ -581,7 +634,7 @@ bool MessageConverterZ21::processBuffer(Throttle* inpThrottle)
 	if (!done)
 	{
 #ifdef DCCPP_DEBUG_MODE
-		Serial.print("Throttle ");
+		Serial.print("Z21 Throttle ");
 		Serial.print(inpThrottle->getId());
 		Serial.print(" : ");
 		Serial.print(" not treated :  header:");

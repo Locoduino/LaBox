@@ -186,6 +186,7 @@ void DCCpp::begin()
   if (EEStore::needsRefreshing())
     EEStore::store();
 #endif
+
 #if defined(ARDUINO_ARCH_ESP32)
   MessageStack::MessagesStack.begin(true);
 #else
@@ -204,16 +205,28 @@ void DCCpp::begin()
 
 #if defined(ARDUINO_ARCH_ESP32) && defined(USE_TEXTCOMMAND)
   
-#ifdef DCCPP_DEBUG_MODE
   int core = xPortGetCoreID();
-  Serial.print("Ino executing on core ");
-  Serial.println(core);
-#endif
 
   // Remove WatchDog on Core 0 to avoid continual reboot...
-  disableCore0WDT();
+  if (core == 0)
+  {
+      Throttles::executionCore = 1;
+      disableCore1WDT();
+  }
+  else
+  {
+      Throttles::executionCore = 0;
+      disableCore0WDT();
+  }
 
-  //create a task that will be executed in the Task1code() function, with priority 1 and executed on core 1
+#ifdef DCCPP_DEBUG_MODE
+  Serial.print("Ino executing on core ");
+  Serial.println(core);
+  Serial.print("Throttles command receivers executing on core ");
+  Serial.println(Throttles::executionCore);
+#endif
+
+  //create a task that will be executed in the Task1code() function, with priority 1 and executed on core 0
   xTaskCreatePinnedToCore(
     Task1code,   // Task function.
     "ReceiveCommands",     // name of task.
@@ -221,7 +234,7 @@ void DCCpp::begin()
     NULL,        // parameter of the task
     1,           // priority of the task
     &Task1,      // Task handle to keep track of created task
-    0);    // pin task to thge other available core.
+    Throttles::executionCore);    // pin task to the other available core.
 #endif
 
 #ifdef DCCPP_DEBUG_MODE
@@ -350,6 +363,10 @@ void DCCpp::panicStop(bool inStop)
 
 void DCCpp::powerOn(bool inMain, bool inProg)
 {
+#ifdef DCCPP_DEBUG_MODE
+  Serial.println(F("DCCpp PowerOn"));
+#endif
+
   bool done = false;
   if (inProg && DCCppConfig::SignalEnablePinProg != UNDEFINED_PIN)
   {
@@ -383,6 +400,10 @@ void DCCpp::powerOn(bool inMain, bool inProg)
 
 void DCCpp::powerOff(bool inMain, bool inProg)
 {
+#ifdef DCCPP_DEBUG_MODE
+  Serial.println(F("DCCpp PowerOff"));
+#endif
+
   bool done = false;
   if (inProg && DCCppConfig::SignalEnablePinProg != UNDEFINED_PIN)
   {
@@ -559,16 +580,26 @@ void DCCpp::setFunctions(volatile RegisterList *inpRegs, int nReg, int inLocoId,
     }
   }
 
+  int b1, b2 = -1;
+
   if (flags & 1)
-    inpRegs->setFunction(nReg, inLocoId, oneByte1, -1);
+    b1 = oneByte1;
   if (flags & 2)
-    inpRegs->setFunction(nReg, inLocoId, twoByte1, -1);
+    b1 = twoByte1;
   if (flags & 4)
-    inpRegs->setFunction(nReg, inLocoId, threeByte1, -1);
+    b1 = threeByte1;
   if (flags & 8)
-    inpRegs->setFunction(nReg, inLocoId, 222, fourByte2);
+  {
+    b1 = 222;
+    b2 = fourByte2;
+  }
   if (flags & 16)
-    inpRegs->setFunction(nReg, inLocoId, 223, fiveByte2);
+  {
+    b1 = 223;
+    b2 = fiveByte2;
+  }
+
+  inpRegs->setFunction(nReg, inLocoId, b1, b2);
 
   inStates.statesSent();
 
@@ -585,12 +616,12 @@ int DCCpp::identifyLocoId(volatile RegisterList *inReg)
 {
   int  id = -1;
   int temp;
-  temp = inReg->readCV(29, 100, 200);
+  temp = inReg->readCVraw(29, 100, 200);
   if ((temp != -1) && (bitRead(temp, 5))) {
     // long address : get CV#17 and CV#18
-    id = inReg->readCV(18, 100, 200);
+    id = inReg->readCVraw(18, 100, 200);
     if (id != -1) {
-      temp = inReg->readCV(17, 100, 200);
+      temp = inReg->readCVraw(17, 100, 200);
       if (temp != -1) {
         id = id + ((temp - 192) << 8);
       }
@@ -598,13 +629,15 @@ int DCCpp::identifyLocoId(volatile RegisterList *inReg)
   }
   else {
     // short address: read only CV#1
-    id = inReg->readCV(1, 100, 200);
+    id = inReg->readCVraw(1, 100, 200);
   }
+
   return (id);
 }
 
 int DCCpp::readCvMain(int inCvId, int callBack, int callBackSub)
 {
+  Serial.println("main");
   int cvValue;
   cvValue = mainRegs.readCVmain(inCvId, callBack, callBackSub);
   if (hmi::CurrentInterface != NULL)
@@ -623,6 +656,7 @@ bool DCCpp::writeCvMain(int inCvId, byte cvValue, int callBack, int callBackSub)
 
 int DCCpp::readCvProg(int inCvId, int callBack, int callBackSub) 
 { 
+  Serial.println("prog");
   int cvValue;
   cvValue = progRegs.readCV(inCvId, callBack, callBackSub);
   if (hmi::CurrentInterface != NULL)

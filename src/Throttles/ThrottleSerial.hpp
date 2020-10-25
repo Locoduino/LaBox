@@ -33,6 +33,8 @@ public:
 	*/
 	void printThrottle();
 #endif
+protected:
+	bool pushMessage(const String& inMessage);
 };
 
 #endif

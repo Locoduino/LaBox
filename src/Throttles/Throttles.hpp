@@ -16,6 +16,8 @@ private:
 	static uint16_t throttlesCounter;	/**< When a throttle is created, affect this number as its id, and increments the counter. No id must be reused ! */
 
 public:
+	static int executionCore;	/**< Core number for the execution of the receiving commands loop ! */
+
 	/** Get the first Throttle.
 	@return The first throttle of the linked list throttle or NULL if the list is empty.
 	*/

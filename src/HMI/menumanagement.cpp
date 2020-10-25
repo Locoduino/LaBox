@@ -12,6 +12,7 @@
 #include "menuobject.h"
 #include "menusetvalue.h"
 #include "menuinformation.h"
+#include "menuspecial.h"
 #include "globals.h"
 
 extern enumHMIState  _HMIState ;
@@ -32,6 +33,7 @@ MenuManagement::MenuManagement(hmi*  screen)
   onOffLine     = new menuObject(display, baseMenu, TXT_MenuDCCOffLine, MENUTYPELIST);
     onOffLineOn = new menuObject(display, onOffLine, TXT_MenuOnLine,   0);
     onOffLineOff= new menuObject(display, onOffLine, TXT_MenuOffLine,  1);
+  trainAddrRead = new menuTrainAddrRead(display, baseMenu, TXT_MenuAddrRead,  MENUSPECIAL);
   TrainView     = new menuObject(display, baseMenu, TXT_TrainView, MENUTYPELIST);
     V1Train     = new menuObject(display, TrainView, TXT_V1Train,  1);
     V2Trains    = new menuObject(display, TrainView, TXT_V2Trains, 2);
@@ -172,6 +174,18 @@ void MenuManagement::BtnSelectPressed()
       activeMenu = activeMenu->subMenu[activeMenu->SelectListIndex];
       activeMenu->parent->resetMenu();
 
+    break;
+    case MENUSPECIAL :
+      _HMIDEBUG_LEVEL1_PRINT("Change menu from ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->caption);
+      _HMIDEBUG_LEVEL1_PRINT(" to SPECIAL menu ");_HMIDEBUG_LEVEL1_PRINTLN(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
+      activeMenu = activeMenu->subMenu[activeMenu->SelectListIndex];
+
+//      if(activeMenu->userDefinedValue == MENUTYPECOMEBCK)
+//      {
+//        Serial.print("userDefinedValue == MENUTYPECOMEBCK");
+//        activeMenu->resetMenu();
+//        activeMenu = activeMenu->parent;
+//      }
     break;
     case MENUCHOSEN :
       _HMIDEBUG_LEVEL1_PRINT("Menu choice ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->caption);_HMIDEBUG_LEVEL1_PRINT(" has been made : ");

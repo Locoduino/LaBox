@@ -298,7 +298,7 @@ void hmi::dashboard()
   drawFastHLine(0,10,128, WHITE);
 
   setCursor(0, 48);
-  sprintf(message, "U=%02.1fV  |  I=%1.2fA", voltage, current);
+  sprintf(message, "U=%1.0fV  |  I=%1.0fmA", voltage, current);
   println(message);
 
   //--- Message stack, only 4 last events
@@ -740,9 +740,16 @@ void hmi::readVoltage()
 */
 void hmi::readCurrent()
 {
-  _HMIDEBUG_FCT_PRINTLN("hmi::readCurrent().. Begin");  
-  
-  current = analogRead(PIN_CURRENT_MES) * HMI_CurrentK ;
+  _HMIDEBUG_FCT_PRINTLN("hmi::readCurrent().. Begin");    
+  //current = analogRead(PIN_CURRENT_MES) * HMI_CurrentK ;
+  // DB : remplacé par une moyenne de 50 mesures 
+  float base = 0;
+	for (int j = 0; j < 50; j++)
+	{
+		float val = analogRead(PIN_CURRENT_MES);
+		base += val;
+	}
+	current = ((base / 50) * HMI_CurrentK) - HMI_deltaCurrent;
 #ifdef _HMIDEBUG_SIMUL
   current = ((float)random(0, 410)) / 100;
 #endif  

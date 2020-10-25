@@ -36,6 +36,7 @@ class MenuManagement
     //----- Members
     menuObject* listMenu[50];
     menuObject* baseMenu;
+    menuObject* trainAddrRead;
     menuObject* onOffLine;
     menuObject* onOffLineOn;
     menuObject* onOffLineOff;

@@ -142,11 +142,13 @@ public:
 #endif
 
 protected:
+	bool pushDccppMessage(const String& inMessage);
 	virtual bool pushMessage(const String& inMessage);
 };
 
 #include "SerialInterface.hpp"
 #include "ThrottleSerial.hpp"
+#include "ThrottleAutomation.hpp"
 #include "ThrottleEthernet.hpp"
 #include "ThrottleWifi.hpp"
 

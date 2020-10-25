@@ -108,6 +108,8 @@ public:
 	void setFunction(Throttle* inpThrottle, byte inDB1, byte inDB2, byte inDB3);
 	void cvReadProg(Throttle* inpThrottle, byte inDB1, byte inDB2);
 	void cvWriteProg(Throttle* inpThrottle, byte inDB1, byte inDB2, byte inDB3);
+	void cvReadPom(Throttle* inpThrottle, byte inDB1, byte inDB2, byte inDB3, byte inDB4);
+	void cvWritePom(Throttle* inpThrottle, byte inDB1, byte inDB2, byte inDB3, byte inDB4, byte inDB5);
 
 #ifdef DCCPP_DEBUG_MODE
 	/** Print the status of the Converter.

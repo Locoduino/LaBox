@@ -31,6 +31,11 @@ void MessageStack::FreeMessage(byte inMessageIndex)
 
 bool MessageStack::PushMessage(const char *inMessage)
 {
+#if defined(DCCPP_DEBUG_VERBOSE_MODE)
+		Serial.print("MessagesStack push ");
+		Serial.println(inMessage);
+#endif
+
 	START_SEMAPHORE()
 	for (int i = 0; i < MESSAGE_MAXNUMBER; i++)
 		if (this->messages[i][0] == 0)

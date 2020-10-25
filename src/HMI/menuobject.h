@@ -27,6 +27,7 @@ class menuObject
     menuObject*   selectedMenu ;      
     int           nbSubMenu ;
     int           value ;
+    bool          exitAsk;
     int           position ;
     char          caption[HMI_MenueMessageSize];
     int           firstListIndex;

@@ -23,94 +23,56 @@ description: <Dcc Automatic Controller sample>
 #error To be able to compile this sample,the line #define USE_TEXTCOMMAND must be uncommented in DCCpp.h
 #endif
 
-struct StateMachineItem
-{
-	static StateMachineItem *first;
+//--------------------------- HMI client -------------------------------------
+hmi boxHMI(&Wire);
+//----------------------------------------------------------------------------
 
-	int delay;			// delay for 'this' command
-	char command[20];
-	char comment[20];
-	StateMachineItem *next;
-
-	static StateMachineItem *GetLastItem()
-	{
-		StateMachineItem *curr = first;
-		while (curr != NULL && curr->next != NULL)
-			curr = curr->next;
-
-		return curr;
-	}
-
-	StateMachineItem(int inDelay, const char *inCommand, const char *inComment)
-	{
-		this->delay = inDelay;
-		strcpy(this->command, inCommand);
-		strcpy(this->comment, inComment);
-		this->next = NULL;
-		if (first == NULL)
-			first = this;
-		else
-			GetLastItem()->next = this;
-	}
-};
-
-StateMachineItem *StateMachineItem::first = NULL;
-
-StateMachineItem *currentItem = NULL;
-unsigned long timeValue = 0;
+ThrottleAutomation automation("Automation");
 
 void setup()
 {
-	Serial.begin(115200);
+  Serial.begin(115200);
 
-	new StateMachineItem(0, "t 1 3 0 1", "ON");				// On register 1, set direction to forward on cab 3
-	new StateMachineItem(0, "f 3 144", "Light on");			// Light FL (F0) on
-	new StateMachineItem(3000, "t 1 3 50 1", "Forward");	// On register 1, go forward at speed 30 on cab 3 for 3s
-	new StateMachineItem(1000, "t 1 3 0 1", "Stop");		// Stop cab 3 after 1 second
-	new StateMachineItem(2000, "", "Wait");					// Wait complete stop 2s
-	new StateMachineItem(1000, "t 1 3 0 0", "To bwd");		// On register 1, set direction to backward on cab 3
-	new StateMachineItem(3000, "t 1 3 50 0", "Backward");	// On register 1, go backward at speed 30 on cab 3
-	new StateMachineItem(1000, "t 1 3 0 0", "Stop");		// Stop cab 3 after 1 second
-	new StateMachineItem(2000, "", "Wait");					// Wait complete stop
-	new StateMachineItem(1000, "t 1 3 0 1", "To fwd");		// On register 1, set direction to forward on cab 3
-	new StateMachineItem(500, "f 3 128", "Light off");		// Light off : blink three times
-	new StateMachineItem(500, "f 3 144", "Light on");		// Light FL (F0) on
-	new StateMachineItem(500, "f 3 128", "Light off");		// Light off
-	new StateMachineItem(500, "f 3 144", "Light on");		// Light on
-	new StateMachineItem(500, "f 3 128", "Light off");		// Light off
-	new StateMachineItem(500, "f 3 144", "Light on");		// Light on
-	new StateMachineItem(500, "f 3 128", "Light off");		// Light off
+  Serial.print("LaBox / Automation sample ");
+  Serial.println(LABOX_LIBRARY_VERSION);
 
-	DCCpp::begin();
-	// Configuration for my LMD18200. See the page 'Configuration lines' in the documentation for other samples.
-	DCCpp::beginMain(UNDEFINED_PIN, 32, UNDEFINED_PIN, 34);
+  //----------- Start HMI -------------
+  boxHMI.begin();
 
-	DCCpp::powerOn();
+  automation.begin();
 
-	// Start on first item
-	// Start timer too.
-	currentItem = StateMachineItem::first;
-	timeValue = millis();
+  automation.AddItem(0, "t 1 3 0 1", "ON");       // On register 1, set direction to forward on cab 3
+  automation.AddItem(0, "f 3 144", "Light on");     // Light FL (F0) on
+  automation.AddItem(3000, "t 1 3 50 1", "Forward");  // On register 1, go forward at speed 30 on cab 3 for 3s
+  automation.AddItem(1000, "t 1 3 0 1", "Stop");    // Stop cab 3 after 1 second
+  automation.AddItem(2000, "", "Wait");         // Wait complete stop 2s
+  automation.AddItem(1000, "t 1 3 0 0", "To bwd");    // On register 1, set direction to backward on cab 3
+  automation.AddItem(3000, "t 1 3 50 0", "Backward"); // On register 1, go backward at speed 30 on cab 3
+  automation.AddItem(1000, "t 1 3 0 0", "Stop");    // Stop cab 3 after 1 second
+  automation.AddItem(2000, "", "Wait");         // Wait complete stop
+  automation.AddItem(1000, "t 1 3 0 1", "To fwd");    // On register 1, set direction to forward on cab 3
+  automation.AddItem(500, "f 3 128", "Light off");    // Light off : blink three times
+  automation.AddItem(500, "f 3 144", "Light on");   // Light FL (F0) on
+  automation.AddItem(500, "f 3 128", "Light off");    // Light off
+  automation.AddItem(500, "f 3 144", "Light on");   // Light on
+  automation.AddItem(500, "f 3 128", "Light off");    // Light off
+  automation.AddItem(500, "f 3 144", "Light on");   // Light on
+  automation.AddItem(500, "f 3 128", "Light off");    // Light off
 
-	TextCommand::parse(currentItem->command);
+  DCCpp::begin();
+  // Configuration for my LMD18200. See the page 'Configuration lines' in the documentation for other samples.
+  DCCpp::beginMain(UNDEFINED_PIN, 32, UNDEFINED_PIN, 34);
+
+  DCCpp::powerOn();
+
+  automation.printThrottleItems();
+  
+  automation.Start();
 }
-
 
 void loop()
 {
-	DCCpp::loop();
+  boxHMI.update();
 
-	if ((int)(millis() - timeValue) >= currentItem->delay)
-	{
-		currentItem = currentItem->next;
-		if (currentItem == NULL)
-		{
-			currentItem = StateMachineItem::first;
-			Serial.println("Restart");
-		}
-
-		timeValue = millis();
-		TextCommand::parse(currentItem->command);
-		Serial.println(currentItem->comment);
-	}
+  DCCpp::loop();
 }

@@ -15,14 +15,16 @@
 #define HMI_Rotation            2           // 1 : 90°, 2 : 180°, 3 : 270°
 
 // Pins
+#define PIN_LEDBUILTIN           2
 #define PIN_BTN_SEL             18
 #define PIN_BTN_BTNUP           23
 #define PIN_BTN_BTNDWN          19
 #define PIN_CURRENT_MES         36
 #define PIN_VOLTAGE_MES         34
 // U/I correctors
-#define HMI_VoltageK            0.10        // Voltage scaling coefficient
-#define HMI_CurrentK            0.10        // Current scaling coefficient
+#define HMI_VoltageK            0.0068      // Voltage scaling coefficient
+#define HMI_CurrentK            0.9        	// Current scaling coefficient
+#define HMI_deltaCurrent		100			// Current value shift with I=0
 // Stack / string allocation sizes
 #define HMI_StackNbCarElt       20          // 10 elements into the stack
 #define HMI_EventMaxToDisplay   5           // We can display in full screnn 7 lines of event
@@ -65,6 +67,7 @@
 #define MENUEXIT                301
 #define MENUCHANGETOCHILD       302
 #define MENUCHOSEN              303
+#define MENUSPECIAL             304
 #define MENUTYPECOMEBCK         0x8000
 #define MENUTYPELIST            0x7999
 #define MENUACTION              0x7998
@@ -103,6 +106,7 @@
 #define TXT_MenuSoftReset       "Redemarrage"
 #define TXT_MenuFacReset        "Factory Reset"
 #define TXT_MenuBack            "< Retour >"
+#define TXT_MenuAddrRead        "Lecture addr Train"
 #define TXT_PhysicalMes         "Mesures U et I"
 #define TXT_Language            "Langue"
 #define TXT_TrainView           "Type de vue trains"

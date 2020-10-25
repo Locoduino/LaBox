@@ -45,6 +45,11 @@ bool ThrottleSerial::isConnected()
 	return true;
 }
 
+bool ThrottleSerial::pushMessage(const String& inpCommand)
+{
+	return this->pushDccppMessage(inpCommand);
+}
+
 #ifdef DCCPP_DEBUG_MODE
 void ThrottleSerial::printThrottle()
 {

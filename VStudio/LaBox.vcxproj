@@ -172,6 +172,7 @@
     <ClInclude Include="..\src\HMI\menumanagement.h" />
     <ClInclude Include="..\src\HMI\menuobject.h" />
     <ClInclude Include="..\src\HMI\menusetvalue.h" />
+    <ClInclude Include="..\src\HMI\menuspecial.h" />
     <ClInclude Include="..\src\LaBox.h" />
     <ClInclude Include="..\src\Locomotives\FunctionsState.hpp" />
     <ClInclude Include="..\src\Locomotives\Locomotive.hpp" />
@@ -183,6 +184,7 @@
     <ClInclude Include="..\src\Throttles\MessageConverterZ21.hpp" />
     <ClInclude Include="..\src\Throttles\SerialInterface.hpp" />
     <ClInclude Include="..\src\Throttles\Throttle.hpp" />
+    <ClInclude Include="..\src\Throttles\ThrottleAutomation.hpp" />
     <ClInclude Include="..\src\Throttles\ThrottleEthernet.hpp" />
     <ClInclude Include="..\src\Throttles\Throttles.hpp" />
     <ClInclude Include="..\src\Throttles\ThrottleSerial.hpp" />
@@ -217,6 +219,7 @@
     <ClCompile Include="..\src\HMI\menumanagement.cpp" />
     <ClCompile Include="..\src\HMI\menuobject.cpp" />
     <ClCompile Include="..\src\HMI\menusetvalue.cpp" />
+    <ClCompile Include="..\src\HMI\menuspecial.cpp" />
     <ClCompile Include="..\src\Locomotives\FunctionsState.cpp" />
     <ClCompile Include="..\src\Locomotives\Locomotive.cpp" />
     <ClCompile Include="..\src\Locomotives\Locomotives.cpp" />
@@ -226,6 +229,7 @@
     <ClCompile Include="..\src\Throttles\MessageConverterWiThrottle.cpp" />
     <ClCompile Include="..\src\Throttles\MessageConverterZ21.cpp" />
     <ClCompile Include="..\src\Throttles\Throttle.cpp" />
+    <ClCompile Include="..\src\Throttles\ThrottleAutomation.cpp" />
     <ClCompile Include="..\src\Throttles\ThrottleEthernet.cpp" />
     <ClCompile Include="..\src\Throttles\Throttles.cpp" />
     <ClCompile Include="..\src\Throttles\ThrottleSerial.cpp" />

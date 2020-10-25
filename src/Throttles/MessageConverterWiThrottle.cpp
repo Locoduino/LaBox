@@ -66,13 +66,16 @@ void MessageConverterWiThrottle::clientStart(Throttle* inpThrottle)
 
 void MessageConverterWiThrottle::clientStop(Throttle* inpThrottle)
 {
+	inpThrottle->end();
+
 #ifdef DCCPP_DEBUG_MODE
 	Serial.print("Converter : client ");
 	Serial.print(inpThrottle->getId());
 	Serial.println(" disconnected");
+
+	Throttles::printThrottles();
 #endif
 
-	inpThrottle->end();
 	this->heartbeatEnable = false;
 	for (int i = 0; i < WIMAXLOCOSNUMBER; i++)
 	{
@@ -122,8 +125,10 @@ bool MessageConverterWiThrottle::convert(Throttle* inpThrottle, const String& in
 	if (inCommand[0] == 'P' && inCommand[1] == 'P' && inCommand[2] == 'A')
 	{
 		String command = inCommand.substring(3);
-		DCCpp::IsPowerOnMain = command.toInt() == 0 ? false : true;
-		Serial.println("<" + command + ">");            // vers dcc++ <1> ou <0>
+		if (command.toInt() == 0)
+			DCCpp::powerOff();
+		else
+			DCCpp::powerOn();
 
 		// TODO : loop on all clients...
 		inpThrottle->println("PPA" + command + "\n\n");
@@ -205,8 +210,25 @@ void MessageConverterWiThrottle::locoAction(Throttle* inpThrottle, int inLocoNum
 		uint8_t function = (uint8_t)inActionVal.substring(2).toInt(); // numero de fonction dans la commande
 		bool activate = inActionVal[1] == '1';
 
-		pLoco->setDCCFunction(function, activate);
-		return;
+		// Special case for WiThrottle : 
+		// WiThrottle protocol does not handle both kind of functions, JMRI interprets the function messages
+		// depending of its knowledge of locos.
+		// We dont have any knowledge about driven locos, so we fix a rule : F0 is a switch, all other functions are push buttons !
+		// So here, we have to interpret the messages from WiThrottle apps, to convert it to the corrects DCC messages.
+		
+		// Specific case for F0 : the loco will store the current state of this function, and each press of F0 in the app
+		// must be transformed to a switch change.
+		if (function == 0)
+		{	// Do not handle inactivate message from app. Only activating messages are handled.
+			if (!activate)
+					return;
+
+			pLoco->setDCCFunction(0, !pLoco->functions.isActivated(0));
+		}
+		else
+		{ // All other functions are handled as push buttons.
+			pLoco->setDCCFunction(function, activate);
+		}
 	}
 
 	if (inActionVal.startsWith("qV")) // ask for current speed  // actionKey remplace LocoThrottle[Throttle]

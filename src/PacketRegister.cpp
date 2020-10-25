@@ -160,10 +160,15 @@ void RegisterList::setThrottle(int nReg, int cab, int tSpeed, int tDirection) vo
 #endif
 	speedTable[nReg] = tDirection == 1 ? tSpeed : -tSpeed;
 
+	if (hmi::CurrentInterface != NULL)
+	{
+		hmi::CurrentInterface->ChangeDirection(cab, tDirection);
+		hmi::CurrentInterface->ChangeSpeed(cab, tSpeed);
+	}
 } // RegisterList::setThrottle(ints)
 
 #ifdef USE_TEXTCOMMAND
-void RegisterList::setThrottle(char *s) volatile
+void RegisterList::setThrottle(const char *s) volatile
 {
   int nReg;
   int cab;
@@ -223,7 +228,7 @@ void RegisterList::setFunction(int nReg, int cab, int fByte, int eByte) volatile
 } // RegisterList::setFunction(ints)
 
 #ifdef USE_TEXTCOMMAND
-void RegisterList::setFunction(char *s) volatile
+void RegisterList::setFunction(const char *s) volatile
 {
 	int reg, cab;
 	int fByte, eByte;
@@ -284,7 +289,7 @@ void RegisterList::setAccessory(int aAdd, int aNum, int activate) volatile
 } // RegisterList::setAccessory(ints)
 
 #ifdef USE_TEXTCOMMAND
-void RegisterList::setAccessory(char *s) volatile
+void RegisterList::setAccessory(const char *s) volatile
 {
 	int aAdd;                       // the accessory address (0-511 = 9 bits) 
 	int aNum;                       // the accessory number within that address (0-3)
@@ -322,7 +327,7 @@ void RegisterList::writeTextPacket(int nReg, byte *b, int nBytes) volatile
 } // RegisterList::writeTextPacket(bytes)
 
 #ifdef USE_TEXTCOMMAND
-void RegisterList::writeTextPacket(char *s) volatile
+void RegisterList::writeTextPacket(const char *s) volatile
 {
 	int nReg;
 	byte b[6];
@@ -410,49 +415,51 @@ int RegisterList::readCVraw(int cv, int callBack, int callBackSub) volatile
 
 		base = RegisterList::buildBaseAcknowlegde(MonitorPin);
         
-        delay(10);
-
+    delay(10);
 
 		bRead[2] = 0xE8 + i;
 
 		loadPacket(0, resetPacket, 2, 3);          // NMRA recommends starting with 3 reset packets
 		loadPacket(0, bRead, 3, 5);                // NMRA recommends 5 verify packets
-		loadPacket(0, resetPacket, 2, 1);          // forces code to wait until all repeats of bRead are completed (and decoder begins to respond)
+//		loadPacket(0, resetPacket, 2, 1);          // forces code to wait until all repeats of bRead are completed (and decoder begins to respond)
+		loadPacket(0, idlePacket, 2, 6);          // NMRA recommends 6 idle or reset packets for decoder recovery time
 #ifdef DCCPP_DEBUG_MODE
-        Serial.print(F("bit : "));
-        Serial.print(i);
+    Serial.print(F("bit : "));
+    Serial.print(i);
 #endif
-        delay(2);
-
-        
+    delay(2);	        
 
 		ret = RegisterList::checkAcknowlegde(MonitorPin, base);
 
 		bitWrite(bValue, i, ret);
 	}
-    
-    delay(10);
+  delay(10);
 
 	base = RegisterList::buildBaseAcknowlegde(MonitorPin);
-    
-    delay(10);
+
+  delay(10);
 
 	bRead[0] = 0x74 + (highByte(cv) & 0x03);   // set-up to re-verify entire byte
 	bRead[2] = bValue;
 
-	loadPacket(0, resetPacket, 2, 3);          // NMRA recommends starting with 3 reset packets
-	loadPacket(0, bRead, 3, 5);                // NMRA recommends 5 verify packets
-	loadPacket(0, resetPacket, 2, 1);          // forces code to wait until all repeats of bRead are completed (and decoder begins to respond)
+	loadPacket(0, resetPacket, 2, 3);       // NMRA recommends starting with 3 reset packets
+	loadPacket(0, bRead, 3, 5);             // NMRA recommends 5 verify packets
+	//loadPacket(0, resetPacket, 2, 1);     // forces code to wait until all repeats of bRead are completed (and decoder begins to respond)
+	loadPacket(0, idlePacket, 2, 6);				// NMRA recommends 6 idle or reset packets for decoder recovery time
 #ifdef DCCPP_DEBUG_MODE
-    Serial.print(F("verif : "));
+  Serial.print(F("verif : "));
 #endif
-    delay(2);
-
+  delay(2);
 
 	ret = RegisterList::checkAcknowlegde(MonitorPin, base);
 
 	if (ret == 0)    // verify unsuccessful
 		bValue = -1;
+
+#ifdef USE_THROTTLES
+	if (TextCommand::pCurrentThrottle == NULL)
+		return bValue;
+#endif
 
 #if defined(USE_TEXTCOMMAND)
 	DCCPP_INTERFACE.print("<r");
@@ -478,11 +485,12 @@ int RegisterList::readCVraw(int cv, int callBack, int callBackSub) volatile
 
 int RegisterList::readCV(int cv, int callBack, int callBackSub) volatile 
 {
+	Serial.println("RegisterList::readCv");
 	return RegisterList::readCVraw(cv, callBack, callBackSub);
 } // RegisterList::readCV(ints)
 
 #ifdef USE_TEXTCOMMAND
-int RegisterList::readCV(char *s) volatile
+int RegisterList::readCV(const char *s) volatile
 {
 	int cv, callBack, callBackSub;
 
@@ -505,7 +513,7 @@ int RegisterList::readCVmain(int cv, int callBack, int callBackSub) volatile
 } // RegisterList::readCV_Main()
 
 #ifdef USE_TEXTCOMMAND
-int RegisterList::readCVmain(char *s) volatile
+int RegisterList::readCVmain(const char *s) volatile
 {
 	int cv, callBack, callBackSub;
 
@@ -535,10 +543,14 @@ bool RegisterList::writeCVByte(int cv, int bValue, int callBack, int callBackSub
 	bWrite[1] = lowByte(cv);
 	bWrite[2] = bValue;
 
-	loadPacket(0, resetPacket, 2, 1);
+	loadPacket(0, resetPacket, 2, 3);        // NMRA recommends starting with 3 reset packets
+	loadPacket(0, bWrite, 3, 5);             // NMRA recommends 5 verify packets
+	loadPacket(0, bWrite, 3, 6);             // NMRA recommends 6 write or reset packets for decoder recovery time
+
+	/*loadPacket(0, resetPacket, 2, 1);
 	loadPacket(0, bWrite, 3, 4);
 	loadPacket(0, resetPacket, 2, 1);
-	loadPacket(0, idlePacket, 2, 10);
+	loadPacket(0, idlePacket, 2, 10);*/
 
 	// If monitor pin undefined, write cv without any confirmation...
 	if (DCCppConfig::CurrentMonitorProg != UNDEFINED_PIN)
@@ -549,9 +561,12 @@ bool RegisterList::writeCVByte(int cv, int bValue, int callBack, int callBackSub
 
 		loadPacket(0, resetPacket, 2, 3);          // NMRA recommends starting with 3 reset packets
 		loadPacket(0, bWrite, 3, 5);               // NMRA recommends 5 verify packets
-		loadPacket(0, resetPacket, 2, 1);          // forces code to wait until all repeats of bRead are completed (and decoder begins to respond)
+		//loadPacket(0, resetPacket, 2, 1);          // forces code to wait until all repeats of bRead are completed (and decoder begins to respond)
+		loadPacket(0, bWrite, 3, 6);               // NMRA recommends 6 write or reset packets for decoder recovery time
 
 		ret = RegisterList::checkAcknowlegde(DCCppConfig::CurrentMonitorProg, base);
+
+		loadPacket(0, resetPacket, 2, 1);        // Final reset packet (and decoder begins to respond)
 
 		if (ret != 0)    // verify successful
 			ok = true;
@@ -583,7 +598,7 @@ bool RegisterList::writeCVByte(int cv, int bValue, int callBack, int callBackSub
 } // RegisterList::writeCVByte(ints)
 
 #ifdef USE_TEXTCOMMAND
-bool RegisterList::writeCVByte(char *s) volatile
+bool RegisterList::writeCVByte(const char *s) volatile
 {
 	int bValue, cv, callBack, callBackSub;
 
@@ -615,10 +630,14 @@ bool RegisterList::writeCVBit(int cv, int bNum, int bValue, int callBack, int ca
 	bWrite[1] = lowByte(cv);
 	bWrite[2] = 0xF0 + bValue * 8 + bNum;
 
-	loadPacket(0, resetPacket, 2, 1);
+	/*loadPacket(0, resetPacket, 2, 1);
 	loadPacket(0, bWrite, 3, 4);
 	loadPacket(0, resetPacket, 2, 1);
-	loadPacket(0, idlePacket, 2, 10);
+	loadPacket(0, idlePacket, 2, 10);*/
+
+	loadPacket(0, resetPacket, 2, 3);        // NMRA recommends starting with 3 reset packets
+	loadPacket(0, bWrite, 3, 5);             // NMRA recommends 5 verify packets
+	loadPacket(0, bWrite, 3, 6);             // NMRA recommends 6 write or reset packets for decoder recovery time
 
 	// If monitor pin undefined, write cv without any confirmation...
 	if (DCCppConfig::CurrentMonitorProg != UNDEFINED_PIN)
@@ -629,9 +648,12 @@ bool RegisterList::writeCVBit(int cv, int bNum, int bValue, int callBack, int ca
 
 		loadPacket(0, resetPacket, 2, 3);          // NMRA recommends starting with 3 reset packets
 		loadPacket(0, bWrite, 3, 5);               // NMRA recommends 5 verfy packets
-		loadPacket(0, resetPacket, 2, 1);          // forces code to wait until all repeats of bRead are completed (and decoder begins to respond)
+		//loadPacket(0, resetPacket, 2, 1);          // forces code to wait until all repeats of bRead are completed (and decoder begins to respond)
+		loadPacket(0, bWrite, 3, 6);           // NMRA recommends 6 write or reset packets for decoder recovery time
 
 		ret = RegisterList::checkAcknowlegde(DCCppConfig::CurrentMonitorProg, base);
+
+		loadPacket(0, resetPacket, 2, 1);      // Final reset packetcompleted (and decoder begins to respond)
 
 		if (ret != 0)    // verify successful
 			ok = true;
@@ -665,7 +687,7 @@ bool RegisterList::writeCVBit(int cv, int bNum, int bValue, int callBack, int ca
 } // RegisterList::writeCVBit(ints)
 
 #ifdef USE_TEXTCOMMAND
-bool RegisterList::writeCVBit(char *s) volatile
+bool RegisterList::writeCVBit(const char *s) volatile
 {
   int bNum, bValue, cv, callBack, callBackSub;
 
@@ -703,7 +725,7 @@ void RegisterList::writeCVByteMain(int cab, int cv, int bValue) volatile
 } // RegisterList::writeCVByteMain(ints)
 
 #ifdef USE_TEXTCOMMAND
-void RegisterList::writeCVByteMain(char *s) volatile
+void RegisterList::writeCVByteMain(const char *s) volatile
 {
 	int cab;
 	int cv;
@@ -746,7 +768,7 @@ void RegisterList::writeCVBitMain(int cab, int cv, int bNum, int bValue) volatil
 } // RegisterList::writeCVBitMain(ints)
 
 #ifdef USE_TEXTCOMMAND
-void RegisterList::writeCVBitMain(char *s) volatile
+void RegisterList::writeCVBitMain(const char *s) volatile
 {
 	int cab;
 	int cv;

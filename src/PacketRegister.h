@@ -59,10 +59,10 @@ struct RegisterList{
   void loadPacket(int, byte *, int, int, int=0) volatile;
 
 #ifdef USE_TEXTCOMMAND
-  void setThrottle(char *) volatile;
-  void setFunction(char *) volatile;
-  void setAccessory(char *) volatile;
-  void writeTextPacket(char *) volatile;
+  void setThrottle(const char *) volatile;
+  void setFunction(const char *) volatile;
+  void setAccessory(const char *) volatile;
+  void writeTextPacket(const char *) volatile;
 #endif
 
   int readCVraw(int cv, int callBack, int callBackSub) volatile;
@@ -70,13 +70,13 @@ struct RegisterList{
 	int checkAcknowlegde(int inMonitorPin,  int inBase) volatile;
 
 #ifdef USE_TEXTCOMMAND
-  int readCV(char *) volatile;
-  bool writeCVByte(char *) volatile;
-  bool writeCVBit(char *) volatile;
+  int readCV(const char *) volatile;
+  bool writeCVByte(const char *) volatile;
+  bool writeCVBit(const char *) volatile;
 
-  int readCVmain(char *) volatile;
-  void writeCVByteMain(char *) volatile;
-  void writeCVBitMain(char *s) volatile;
+  int readCVmain(const char *) volatile;
+  void writeCVByteMain(const char *) volatile;
+  void writeCVBitMain(const char *s) volatile;
 #endif
 
 	byte setAckThreshold(byte inNewValue);
