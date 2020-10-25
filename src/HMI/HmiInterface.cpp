@@ -20,12 +20,12 @@ void hmi::HmiInterfaceLoop()
   switch (msg.event)
   {
   case HmiInterfaceEvent_WifiStartConnection:
-    Serial.println("HmiInterface :: WifiStartConnection");
+    _HMIDEBUG_LEVEL1_PRINTLN("HmiInterface :: WifiStartConnection");
     this->addNotification(0, HMI_WifiWaiting, 0);
     break;
 
   case HmiInterfaceEvent_WifiConnected:
-    Serial.println("HmiInterface :: WifiConnected");
+    _HMIDEBUG_LEVEL1_PRINTLN("HmiInterface :: WifiConnected");
 
     addNotification(HMI_WifiOk);
     sprintf(mess, "%d.%d.%d.%d", msg.data.ip[0], msg.data.ip[1], msg.data.ip[2], msg.data.ip[3]);
@@ -34,74 +34,74 @@ void hmi::HmiInterfaceLoop()
     break;
 
   case HmiInterfaceEvent_WifiEndConnection:
-    Serial.println("HmiInterface :: WifiEndConnection");
+    _HMIDEBUG_LEVEL1_PRINTLN("HmiInterface :: WifiEndConnection");
     this->addNotification(HMI_noWifi);
     break;
 
   case HmiInterfaceEvent_NewClient:
-    Serial.println("HmiInterface :: NewClient");
+    _HMIDEBUG_LEVEL1_PRINTLN("HmiInterface :: NewClient");
 
     sprintf(mess, "#%d: %d.%d.%d.%d", msg.data.client.clientId, msg.data.client.ip[0], msg.data.client.ip[1], msg.data.client.ip[2], msg.data.client.ip[3]);
     this->addNotification(mess);
     break;
 
   case HmiInterfaceEvent_CloseClient:
-    Serial.println("HmiInterface :: CloseClient");
+    _HMIDEBUG_LEVEL1_PRINTLN("HmiInterface :: CloseClient");
 
     sprintf(mess, "#%d closed", msg.data.client.clientId);
     this->addNotification(mess);
     break;
 
   case HmiInterfaceEvent_ChangeSpeed:
-    Serial.println("HmiInterface :: ChangeSpeed");
+    _HMIDEBUG_LEVEL1_PRINTLN("HmiInterface :: ChangeSpeed");
     addNotification(msg.data.dcc.addr, Locomotives::get(msg.data.dcc.addr)->isDirectionForward() ? HMI_OrderForward : HMI_OrderBack, msg.data.dcc.speed);
     break;
 
   case HmiInterfaceEvent_ChangeDirection:
-    Serial.println("HmiInterface :: ChangeDirection");
+    _HMIDEBUG_LEVEL1_PRINTLN("HmiInterface :: ChangeDirection");
     addNotification(msg.data.dcc.addr, msg.data.dcc.forward ? HMI_OrderForward : HMI_OrderBack, Locomotives::get(msg.data.dcc.addr)->getSpeed());
     break;
 
   case HmiInterfaceEvent_ChangeFunction:
-    Serial.println("HmiInterface :: ChangeFunction");
+    _HMIDEBUG_LEVEL1_PRINTLN("HmiInterface :: ChangeFunction");
     addNotification(msg.data.dcc.addr, HMI_OrderFunction, msg.data.dcc.function);
     break;
 
   case HmiInterfaceEvent_DccOn:
-    Serial.println("HmiInterface :: DccOn");
+    _HMIDEBUG_LEVEL1_PRINTLN("HmiInterface :: DccOn");
     addNotification(HMI_StartDCC);
     break;
 
   case HmiInterfaceEvent_DccOff:
-    Serial.println("HmiInterface :: DccOff");
+    _HMIDEBUG_LEVEL1_PRINTLN("HmiInterface :: DccOff");
     addNotification(HMI_OrderStopAll);
     break;
 
   case HmiInterfaceEvent_DccShort:
-    Serial.println("HmiInterface :: Short");
+    _HMIDEBUG_LEVEL1_PRINTLN("HmiInterface :: Short");
     addNotification(HMI_ShortCurcuit);
     break;
 
   case HmiInterfaceEvent_DccEmergencyStop:
-    Serial.println("HmiInterface :: EmergencyStop");
+    _HMIDEBUG_LEVEL1_PRINTLN("HmiInterface :: EmergencyStop");
     // Todo : missing order emergency stop !
     addNotification(HMI_OrderStopAll);
     break;
 
   case HmiInterfaceEvent_DccGeneralStop:
-    Serial.println("HmiInterface :: GeneralStop");
+    _HMIDEBUG_LEVEL1_PRINTLN("HmiInterface :: GeneralStop");
     addNotification(HMI_OrderStopAll);
     break;
 
   case HmiInterfaceEvent_LocoAdd:
-    Serial.println("HmiInterface :: LocoAdd");
+    _HMIDEBUG_LEVEL1_PRINTLN("HmiInterface :: LocoAdd");
     addNotification(msg.data.dcc.addr, 
             Locomotives::get(msg.data.dcc.addr)->isDirectionForward() ? HMI_OrderForward : HMI_OrderBack, 
             Locomotives::get(msg.data.dcc.addr)->getSpeed());
     break;
 
   case HmiInterfaceEvent_LocoRemove:
-    Serial.println("HmiInterface :: LocoRemove");
+    _HMIDEBUG_LEVEL1_PRINTLN("HmiInterface :: LocoRemove");
     addNotification(msg.data.dcc.addr, HMI_OrderStop, 0);
     break;
   }

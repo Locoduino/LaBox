@@ -169,7 +169,7 @@ bool MessageConverterWiThrottle::convert(Throttle* inpThrottle, const String& in
 		String actionData = inCommand.substring(3);	// S22<;>S22
 		int delimiter = actionData.indexOf(";");		// 4
 		String actionKey = actionData.substring(0, delimiter - 1); // S22 L255 ou * pour toutes les locos
-		String actionVal = actionData.substring(delimiter + 2);	// S22  L255  F027  V100
+		String actionVal = actionData.substring(delimiter + 2);	// S22  L255  F027  V100	X
 		
 		switch (action[0])
 		{
@@ -228,6 +228,7 @@ void MessageConverterWiThrottle::locoAction(Throttle* inpThrottle, int inLocoNum
 		else
 		{ // All other functions are handled as push buttons.
 			pLoco->setDCCFunction(function, activate);
+			pLoco->setDCCFunction(function, !activate);
 		}
 	}
 

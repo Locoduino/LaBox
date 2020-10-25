@@ -441,13 +441,6 @@ byte DCCpp::setAckThreshold(byte inNewValue)
 
 bool DCCpp::setThrottle(volatile RegisterList *inpRegs, int nReg,  int inLocoId, int inStepsNumber, int inNewSpeed, bool inForward)
 {
-  int val = 0;
-
-  if (panicStopped)
-    val = 1;
-  else if (inNewSpeed > 1)
-    val = map(inNewSpeed, 2, inStepsNumber, 2, 126);
-
 #ifdef DCCPP_DEBUG_MODE
   Serial.print(F("DCCpp SetSpeed for loco "));
   Serial.print(inLocoId);
@@ -455,8 +448,6 @@ bool DCCpp::setThrottle(volatile RegisterList *inpRegs, int nReg,  int inLocoId,
   Serial.print(inForward ? inNewSpeed : -inNewSpeed);
   Serial.print(F("/"));
   Serial.print(inStepsNumber);
-//  Serial.print(F(" (in Dcc "));
-//  Serial.print(val);
   Serial.println(F(" )"));
 #endif
 
@@ -465,7 +456,8 @@ bool DCCpp::setThrottle(volatile RegisterList *inpRegs, int nReg,  int inLocoId,
     hmi::CurrentInterface->ChangeDirection(inLocoId, inForward);
     hmi::CurrentInterface->ChangeSpeed(inLocoId, inNewSpeed);
   }
-  inpRegs->setThrottle(nReg, inLocoId, val, inForward);
+
+  inpRegs->setThrottle(nReg, inLocoId, inNewSpeed, inForward);
 
   return true;
 }

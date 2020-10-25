@@ -82,8 +82,8 @@ void Locomotive::stop()
 
 void Locomotive::emergencyStop()
 {
-	this->setSpeed(1);
-	DCCpp::setSpeedMain(this->speedRegisterNumber, this->address, this->getSpeedMax(), this->currentSpeed, this->direction);
+	this->currentSpeed = 0;
+	DCCpp::setSpeedMain(this->speedRegisterNumber, this->address, this->getSpeedMax(), 1, this->direction);
 	if (Locomotives::notifyEmergencyStop!= NULL)
 		Locomotives::notifyEmergencyStop(this->address, true);
 }
