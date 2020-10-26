@@ -150,7 +150,7 @@ void TextCommand::receiveCommands()
 		 }
 #endif
 		 if (bufferStack[0] == '<')	// DCC++ message
-			 if (TextCommand::parse(bufferStack) == false)
+			 if (TextCommand::parse(bufferStack + 1) == false)
 			 {
 #if defined(DCCPP_DEBUG_MODE)
 				 Serial.println("invalid command !");
@@ -169,7 +169,10 @@ bool TextCommand::parse(char *com)
 	if (pCurrentThrottle != NULL)
 	{
 		Throttle::getMessageFromStackMessage(com, message);
-		strncpy(com, message.c_str(), MESSAGE_MAXSIZE - 3);
+		if (message[0] == '<')
+			strncpy(com, message.c_str()+1, MESSAGE_MAXSIZE - 3);
+		else
+			strncpy(com, message.c_str(), MESSAGE_MAXSIZE - 3);
 	}
 #endif
 

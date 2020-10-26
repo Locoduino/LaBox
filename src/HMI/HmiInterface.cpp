@@ -13,6 +13,7 @@ void hmi::HmiInterfaceLoop()
 
   HmiInterfaceMessage msg;
   char mess[LineCarNbMax];
+  Locomotive* loco = NULL;
 
   if (!this->pHmiInterfaceEventBuffer->GetBytes((byte*)&msg, sizeof(msg)))
     return;
@@ -54,12 +55,16 @@ void hmi::HmiInterfaceLoop()
 
   case HmiInterfaceEvent_ChangeSpeed:
     _HMIDEBUG_LEVEL1_PRINTLN("HmiInterface :: ChangeSpeed");
-    addNotification(msg.data.dcc.addr, Locomotives::get(msg.data.dcc.addr)->isDirectionForward() ? HMI_OrderForward : HMI_OrderBack, msg.data.dcc.speed);
+    loco = Locomotives::get(msg.data.dcc.addr);
+    if (loco != NULL)
+      addNotification(msg.data.dcc.addr, loco->isDirectionForward() ? HMI_OrderForward : HMI_OrderBack, msg.data.dcc.speed);
     break;
 
   case HmiInterfaceEvent_ChangeDirection:
     _HMIDEBUG_LEVEL1_PRINTLN("HmiInterface :: ChangeDirection");
-    addNotification(msg.data.dcc.addr, msg.data.dcc.forward ? HMI_OrderForward : HMI_OrderBack, Locomotives::get(msg.data.dcc.addr)->getSpeed());
+    loco = Locomotives::get(msg.data.dcc.addr);
+    if (loco != NULL)
+      addNotification(msg.data.dcc.addr, msg.data.dcc.forward ? HMI_OrderForward : HMI_OrderBack, loco->getSpeed());
     break;
 
   case HmiInterfaceEvent_ChangeFunction:
@@ -95,9 +100,11 @@ void hmi::HmiInterfaceLoop()
 
   case HmiInterfaceEvent_LocoAdd:
     _HMIDEBUG_LEVEL1_PRINTLN("HmiInterface :: LocoAdd");
-    addNotification(msg.data.dcc.addr, 
-            Locomotives::get(msg.data.dcc.addr)->isDirectionForward() ? HMI_OrderForward : HMI_OrderBack, 
-            Locomotives::get(msg.data.dcc.addr)->getSpeed());
+    loco = Locomotives::get(msg.data.dcc.addr);
+    if (loco != NULL)
+      addNotification(msg.data.dcc.addr,
+            loco->isDirectionForward() ? HMI_OrderForward : HMI_OrderBack, 
+            loco->getSpeed());
     break;
 
   case HmiInterfaceEvent_LocoRemove:

@@ -156,10 +156,15 @@ bool Throttle::pushMessage(const String& inpCommand)
 
 bool Throttle::pushDccppMessage(const String& inpCommand)
 {
-	String command = "<";
-	command += inpCommand;
-	command += ">";
-	return Throttle::pushMessage(command);
+	char comm[MESSAGE_MAXSIZE];
+
+	comm[0] = '<';
+	comm[1] = 0;
+	strncpy(comm + 1, inpCommand.c_str(), MESSAGE_MAXSIZE - 2);
+	comm[1 + inpCommand.length()] = '>';
+	comm[2 + inpCommand.length()] = 0;
+
+	return Throttle::pushMessage(comm);
 }
 
 void Throttle::end()
