@@ -95,7 +95,7 @@ bool Throttle::getCharacter(char inC, Throttle* inpThrottle)
 		}
 		else
 		{
-			if (inC > ' ' && strlen(inpThrottle->commandString) < MAX_COMMAND_LENGTH)    // if comamndString still has space, append character just read from network
+			if (inC >= ' ' && strlen(inpThrottle->commandString) < MAX_COMMAND_LENGTH)    // if comamndString still has space, append character just read from network
 				sprintf(inpThrottle->commandString, "%s%c", inpThrottle->commandString, inC);     // otherwise, character is ignored (but continue to look for start or end characters)}
 		}
 	}
