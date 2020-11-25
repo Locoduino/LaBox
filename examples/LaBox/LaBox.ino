@@ -65,6 +65,8 @@ void setup()
   //----------- Start HMI -------------
   boxHMI.begin();
   
+  //Locomotives::debugLocomotivesSet();
+
   //----------- Start Wifi
   ThrottleWifi::connectWifi(ssid, password);//, ip, gateway, subnet, dns);
 

@@ -8,4 +8,4 @@ Start include file for LaBox project.
 
 #include "DCCpp.h"
 
-#define LABOX_LIBRARY_VERSION		"0.7.3"
+#define LABOX_LIBRARY_VERSION		"0.7.4"

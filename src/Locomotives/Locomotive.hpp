@@ -5,6 +5,9 @@
 
 #include "DCCpp.h"
 #include "WString.h"
+#include "ArduinoJson.h"
+#include "FunctionsState.hpp"
+#include "Registers.hpp"
 
 #define LOCOMOTIVE_NAME_SIZE	32
 
@@ -131,6 +134,10 @@ public:
 	/** Set the given function to the given state.
 	*/
 	void setDCCFunction(uint8_t inFunction, bool inActivate);
+
+	/* Save this locomotives data in JSON format.
+	*/
+	bool Save(JsonObject inObject);
 
 #ifdef DCCPP_DEBUG_MODE
 	/** Print the status of the locomotive.

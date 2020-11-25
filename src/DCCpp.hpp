@@ -222,6 +222,7 @@ class DCCpp
 		*/
 		static inline void setFunctionsMain(int nReg, int inLocoId, FunctionsState &inStates) { setFunctions(&(mainRegs), nReg, inLocoId, inStates); }
 #endif
+
 		// Programming track functions
 
 		/** For the given decoder id, set the speed and the direction on the programming track.

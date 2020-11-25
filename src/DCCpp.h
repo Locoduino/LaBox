@@ -481,14 +481,14 @@ Main include file of the library.*/
     #define USE_OUTPUT
     /**Comment this line to avoid using and compiling Sensors.*/
     #define USE_SENSOR
-	/**Comment this line to avoid using and compiling Serial commands.*/
-	#define USE_TEXTCOMMAND
-	/**Comment this line to avoid using and compiling Ethernet shield using Wiznet 5100 chip (Arduino Shield v1).*/
-	#define USE_ETHERNET_WIZNET_5100
-	/**Comment this line to avoid using and compiling Ethernet shield using Wiznet 5500 chip (Arduino Shield v2).*/
-	#define USE_ETHERNET_WIZNET_5500
-	/**Comment this line to avoid using and compiling Ethernet shield using Wiznet 5200 chip (Seeed Studio).*/
-	#define USE_ETHERNET_WIZNET_5200
+		/**Comment this line to avoid using and compiling Serial commands.*/
+		#define USE_TEXTCOMMAND
+		/**Comment this line to avoid using and compiling Ethernet shield using Wiznet 5100 chip (Arduino Shield v1).*/
+		#define USE_ETHERNET_WIZNET_5100
+		/**Comment this line to avoid using and compiling Ethernet shield using Wiznet 5500 chip (Arduino Shield v2).*/
+		#define USE_ETHERNET_WIZNET_5500
+		/**Comment this line to avoid using and compiling Ethernet shield using Wiznet 5200 chip (Seeed Studio).*/
+		#define USE_ETHERNET_WIZNET_5200
     /**Comment this line to avoid using and compiling Ethernet shield using ENC28J60 chip.*/
     #define USE_ETHERNET_ENC28J60
     /**Comment this line to avoid using and compiling Wifi communication using the Arduino as a local Wifi Access Point.*/
@@ -502,7 +502,7 @@ Main include file of the library.*/
     #undef USE_EEPROM
     #undef USE_OUTPUT
     #undef USE_SENSOR
-	#undef USE_TEXTCOMMAND
+		#undef USE_TEXTCOMMAND
     #undef USE_ETHERNET_WIZNET_5100
     #undef USE_ETHERNET_WIZNET_5500
     #undef USE_ETHERNET_WIZNET_5200
@@ -521,14 +521,14 @@ Main include file of the library.*/
     You can use the define PRINT_DCCPP() in your sketch instead of a call to DCCpp.showConfiguration().
     If DCCPP_PRINT_DCCPP is not defined, PRINT_DCCPP is defined as empty, so you will not have a compilation error.*/
     #define DCCPP_PRINT_DCCPP
-	/** This define gets rid of 2 timers and uses only Timer2 to tick every 58us and change logic levels on both tracks. 
-	Zero bit is changed every 2 ticks, "one" bit changes every tick; this makes timings roughly equal to DCC specs.
-	This frees one timer and 2 pins to be used for something else, though PWM pins controlled by Timer2 
-	cannot be used for hardware - PWM(they can, however, be used to output DCC signal using proposed method since 
-	it is effectively a software - PWM).Jumpers for shields are not needed anymore. This is done at the RAM cost of 
-	2 bytes per RegisterList and 2 extra pointers in DCCppConfig (pointers might not be needed, they are used for 
-	direct IO port manipulation to bypass arduino's digitalWrite).*/
-	#define USE_ONLY1_INTERRUPT
+		/** This define gets rid of 2 timers and uses only Timer2 to tick every 58us and change logic levels on both tracks. 
+		Zero bit is changed every 2 ticks, "one" bit changes every tick; this makes timings roughly equal to DCC specs.
+		This frees one timer and 2 pins to be used for something else, though PWM pins controlled by Timer2 
+		cannot be used for hardware - PWM(they can, however, be used to output DCC signal using proposed method since 
+		it is effectively a software - PWM).Jumpers for shields are not needed anymore. This is done at the RAM cost of 
+		2 bytes per RegisterList and 2 extra pointers in DCCppConfig (pointers might not be needed, they are used for 
+		direct IO port manipulation to bypass arduino's digitalWrite).*/
+		#define USE_ONLY1_INTERRUPT
 #endif
 
 #if defined(USE_ETHERNET_WIZNET_5100) || defined(USE_ETHERNET_WIZNET_5500) || defined(USE_ETHERNET_WIZNET_5200) || defined(USE_ETHERNET_ENC28J60)

@@ -82,7 +82,7 @@ struct RegisterList{
 	byte setAckThreshold(byte inNewValue);
 
   void setThrottle(int nReg, int cab, int tSpeed, int tDirection) volatile;
-  void setFunction(int nReg, int cab, int fByte, int eByte) volatile;
+  void setFunction(int nReg, int cab, int fByte, int eByte, bool returnMessages = true) volatile;
   void setAccessory(int aAdd, int aNum, int activate) volatile;
   void writeTextPacket(int nReg, byte *b, int nBytes) volatile;
   int readCV(int cv, int callBack, int callBackSub) volatile;
@@ -91,6 +91,7 @@ struct RegisterList{
   bool writeCVBit(int cv, int bNum, int bValue, int callBack, int callBackSub) volatile;	// prog track
   void writeCVByteMain(int cab, int cv, int bvalue) volatile;
   void writeCVBitMain(int cab, int cv, int bNum, int bValue) volatile;
+  bool isRegisterEmpty() volatile { return this->nextReg == NULL; }
 
 #ifdef DCCPP_DEBUG_MODE
   void printPacket(int, byte *, int, int) volatile;

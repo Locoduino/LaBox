@@ -36,25 +36,25 @@ volatile uint8_t *DCCppConfig::SignalPortInProg = 0;
 ///////////////////////////////////////////////////////////////////////////////
 
 void Register::initPackets(){
-  activePacket=packet;
-  updatePacket=packet+1;
+  activePacket = packet;
+  updatePacket = packet+1;
 } // Register::initPackets
 
 ///////////////////////////////////////////////////////////////////////////////
 	
 RegisterList::RegisterList(int maxNumRegs){
-  this->maxNumRegs=maxNumRegs;
-  reg=(Register *)calloc((maxNumRegs+1),sizeof(Register));
-  for(int i=0;i<=maxNumRegs;i++)
-	reg[i].initPackets();
-  regMap=(Register **)calloc((maxNumRegs+1),sizeof(Register *));
-  speedTable=(int *)calloc((maxNumRegs+1),sizeof(int *));
-  currentReg=reg;
-  regMap[0]=reg;
-  maxLoadedReg=reg;
-  nextReg=NULL;
-  currentBit=0;
-  nRepeat=0;
+  this->maxNumRegs = maxNumRegs;
+  this->reg = (Register *)calloc((maxNumRegs + 1), sizeof(Register));
+  for(int i = 0; i <= maxNumRegs; i++)
+		this->reg[i].initPackets();
+  this->regMap = (Register **)calloc((maxNumRegs + 1), sizeof(Register *));
+  this->speedTable = (int *)calloc((maxNumRegs + 1), sizeof(int *));
+  this->currentReg = this->reg;
+  this->regMap[0] = this->reg;
+  this->maxLoadedReg = this->reg;
+  this->nextReg = NULL;
+  this->currentBit = 0;
+  this->nRepeat = 0;
 } // RegisterList::RegisterList
   
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,53 +68,56 @@ void RegisterList::loadPacket(int nReg, byte *b, int nBytes, int nRepeat, int pr
 #ifdef VISUALSTUDIO
   return;
 #endif
-  nReg=nReg%((maxNumRegs+1));          // force nReg to be between 0 and maxNumRegs, inclusive
+  nReg = nReg % ((this->maxNumRegs + 1));          // force nReg to be between 0 and maxNumRegs, inclusive
 
-  while(nextReg!=NULL);              // pause while there is a Register already waiting to be updated -- nextReg will be reset to NULL by interrupt when prior Register updated fully processed
+  while(this->nextReg != NULL);              // pause while there is a Register already waiting to be updated -- nextReg will be reset to NULL by interrupt when prior Register updated fully processed
  
-  if(regMap[nReg]==NULL)              // first time this Register Number has been called
-   regMap[nReg]=maxLoadedReg+1;       // set Register Pointer for this Register Number to next available Register
+  if(this->regMap[nReg] == NULL)              // first time this Register Number has been called
+   this->regMap[nReg] = this->maxLoadedReg+1;       // set Register Pointer for this Register Number to next available Register
  
-  Register *r=regMap[nReg];           // set Register to be updated
-  Packet *p=r->updatePacket;          // set Packet in the Register to be updated
-  byte *buf=p->buf;                   // set byte buffer in the Packet to be updated
+  Register *r = this->regMap[nReg];           // set Register to be updated
+  Packet *p = r->updatePacket;          // set Packet in the Register to be updated
+  byte *buf = p->buf;                   // set byte buffer in the Packet to be updated
 		  
-  b[nBytes]=b[0];                        // copy first byte into what will become the checksum byte  
-  for(int i=1;i<nBytes;i++)              // XOR remaining bytes into checksum byte
-	b[nBytes]^=b[i];
+  b[nBytes] = b[0];                        // copy first byte into what will become the checksum byte  
+  for(int i = 1; i < nBytes; i++)              // XOR remaining bytes into checksum byte
+		b[nBytes] ^= b[i];
   nBytes++;                              // increment number of bytes in packet to include checksum byte
 	  
-  buf[0]=0xFF;                        // first 8 bytes of 22-byte preamble
-  buf[1]=0xFF;                        // second 8 bytes of 22-byte preamble
-  buf[2]=0xFC + bitRead(b[0],7);      // last 6 bytes of 22-byte preamble + data start bit + b[0], bit 7
-  buf[3]=b[0]<<1;                     // b[0], bits 6-0 + data start bit
-  buf[4]=b[1];                        // b[1], all bits
-  buf[5]=b[2]>>1;                     // b[2], bits 7-1
-  buf[6]=b[2]<<7;                     // b[2], bit 0
+  buf[0] = 0xFF;                        // first 8 bytes of 22-byte preamble
+  buf[1] = 0xFF;                        // second 8 bytes of 22-byte preamble
+  buf[2] = 0xFC + bitRead(b[0], 7);      // last 6 bytes of 22-byte preamble + data start bit + b[0], bit 7
+  buf[3] = b[0] << 1;                     // b[0], bits 6-0 + data start bit
+  buf[4] = b[1];                        // b[1], all bits
+  buf[5] = b[2] >> 1;                     // b[2], bits 7-1
+  buf[6] = b[2] << 7;                     // b[2], bit 0
   
-  if(nBytes==3){
-	p->nBits=49;
-  } else{
-	buf[6]+=b[3]>>2;                  // b[3], bits 7-2
-	buf[7]=b[3]<<6;                   // b[3], bit 1-0
-	if(nBytes==4){
-	  p->nBits=58;
-	} else{
-	  buf[7]+=b[4]>>3;                // b[4], bits 7-3
-	  buf[8]=b[4]<<5;                 // b[4], bits 2-0
-	  if(nBytes==5){
-		p->nBits=67;
-	  } else{
-		buf[8]+=b[5]>>4;              // b[5], bits 7-4
-		buf[9]=b[5]<<4;               // b[5], bits 3-0
-		p->nBits=76;
-	  } // >5 bytes
-	} // >4 bytes
+  if(nBytes == 3) {
+		p->nBits=49;
+  } 
+	else {
+		buf[6]+=b[3]>>2;                  // b[3], bits 7-2
+		buf[7]=b[3]<<6;                   // b[3], bit 1-0
+		if(nBytes==4){
+			p->nBits=58;
+		} 
+		else {
+			buf[7]+=b[4]>>3;                // b[4], bits 7-3
+			buf[8]=b[4]<<5;                 // b[4], bits 2-0
+			if(nBytes==5) {
+				p->nBits=67;
+			} 
+			else {
+				buf[8]+=b[5]>>4;              // b[5], bits 7-4
+				buf[9]=b[5]<<4;               // b[5], bits 3-0
+				p->nBits=76;
+			} // >5 bytes
+		} // >4 bytes
   } // >3 bytes
   
-  nextReg=r;
-  this->nRepeat=nRepeat;
-  maxLoadedReg=max(maxLoadedReg,nextReg);
+  this->nextReg = r;
+  this->nRepeat = nRepeat;
+  this->maxLoadedReg = max(this->maxLoadedReg, this->nextReg);
   
 #ifdef DCCPP_DEBUG_MODE
 #ifdef DCCPP_DEBUG_VERBOSE_MODE
@@ -189,7 +192,7 @@ void RegisterList::setThrottle(const char *s) volatile
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void RegisterList::setFunction(int nReg, int cab, int fByte, int eByte) volatile
+void RegisterList::setFunction(int nReg, int cab, int fByte, int eByte, bool returnMessages) volatile
 {
 	byte b[5];                      // save space for checksum byte
 	byte nB = 0;
@@ -208,17 +211,21 @@ void RegisterList::setFunction(int nReg, int cab, int fByte, int eByte) volatile
 	}
 
 #if defined(USE_TEXTCOMMAND)
-	DCCPP_INTERFACE.print("<F");
-	DCCPP_INTERFACE.print(nReg); DCCPP_INTERFACE.print(" ");
-	DCCPP_INTERFACE.print(cab); DCCPP_INTERFACE.print(" ");
-	DCCPP_INTERFACE.print(fByte); DCCPP_INTERFACE.print(" ");
-	DCCPP_INTERFACE.print(eByte);
-	DCCPP_INTERFACE.print(">");
+	if (returnMessages)
+	{
+		DCCPP_INTERFACE.print("<F");
+		DCCPP_INTERFACE.print(nReg); DCCPP_INTERFACE.print(" ");
+		DCCPP_INTERFACE.print(cab); DCCPP_INTERFACE.print(" ");
+		DCCPP_INTERFACE.print(fByte); DCCPP_INTERFACE.print(" ");
+		DCCPP_INTERFACE.print(eByte);
+		DCCPP_INTERFACE.print(">");
 #ifdef USE_THROTTLES
-	if (DCCPP_INTERFACE.sendNewline())
+		if (DCCPP_INTERFACE.sendNewline())
 #endif
-		DCCPP_INTERFACE.println("");
+			DCCPP_INTERFACE.println("");
+	}
 #endif
+
 	/* NMRA DCC norm ask for two DCC packets instead of only one:
 	"Command Stations that generate these packets, and which are not periodically refreshing these functions,
 	must send at least two repetitions of these commands when any function state is changed."
@@ -547,11 +554,6 @@ bool RegisterList::writeCVByte(int cv, int bValue, int callBack, int callBackSub
 	loadPacket(0, bWrite, 3, 5);             // NMRA recommends 5 verify packets
 	loadPacket(0, bWrite, 3, 6);             // NMRA recommends 6 write or reset packets for decoder recovery time
 
-	/*loadPacket(0, resetPacket, 2, 1);
-	loadPacket(0, bWrite, 3, 4);
-	loadPacket(0, resetPacket, 2, 1);
-	loadPacket(0, idlePacket, 2, 10);*/
-
 	// If monitor pin undefined, write cv without any confirmation...
 	if (DCCppConfig::CurrentMonitorProg != UNDEFINED_PIN)
 	{
@@ -561,7 +563,6 @@ bool RegisterList::writeCVByte(int cv, int bValue, int callBack, int callBackSub
 
 		loadPacket(0, resetPacket, 2, 3);          // NMRA recommends starting with 3 reset packets
 		loadPacket(0, bWrite, 3, 5);               // NMRA recommends 5 verify packets
-		//loadPacket(0, resetPacket, 2, 1);          // forces code to wait until all repeats of bRead are completed (and decoder begins to respond)
 		loadPacket(0, bWrite, 3, 6);               // NMRA recommends 6 write or reset packets for decoder recovery time
 
 		ret = RegisterList::checkAcknowlegde(DCCppConfig::CurrentMonitorProg, base);
@@ -630,11 +631,6 @@ bool RegisterList::writeCVBit(int cv, int bNum, int bValue, int callBack, int ca
 	bWrite[1] = lowByte(cv);
 	bWrite[2] = 0xF0 + bValue * 8 + bNum;
 
-	/*loadPacket(0, resetPacket, 2, 1);
-	loadPacket(0, bWrite, 3, 4);
-	loadPacket(0, resetPacket, 2, 1);
-	loadPacket(0, idlePacket, 2, 10);*/
-
 	loadPacket(0, resetPacket, 2, 3);        // NMRA recommends starting with 3 reset packets
 	loadPacket(0, bWrite, 3, 5);             // NMRA recommends 5 verify packets
 	loadPacket(0, bWrite, 3, 6);             // NMRA recommends 6 write or reset packets for decoder recovery time
@@ -648,7 +644,6 @@ bool RegisterList::writeCVBit(int cv, int bNum, int bValue, int callBack, int ca
 
 		loadPacket(0, resetPacket, 2, 3);          // NMRA recommends starting with 3 reset packets
 		loadPacket(0, bWrite, 3, 5);               // NMRA recommends 5 verfy packets
-		//loadPacket(0, resetPacket, 2, 1);          // forces code to wait until all repeats of bRead are completed (and decoder begins to respond)
 		loadPacket(0, bWrite, 3, 6);           // NMRA recommends 6 write or reset packets for decoder recovery time
 
 		ret = RegisterList::checkAcknowlegde(DCCppConfig::CurrentMonitorProg, base);

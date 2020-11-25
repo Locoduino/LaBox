@@ -110,7 +110,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);VISUALSTUDIO;DCCPP_PRINT_DCCPP;DCCPP_DEBUG_MODE;_CRT_SECURE_NO_WARNINGS;ARDUINO=10812</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VisualStudioDir)\..\Arduino\ArduiEmulatorWin\ArduiEmulatorLib;../src;../vstudio;../src/hmi;../../DIO2/VStudio/</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(VisualStudioDir)\..\Arduino\ArduiEmulatorWin\ArduiEmulatorLib;$(VisualStudioDir)\..\Arduino\ArduiEmulatorWin\ArduinoJson;../src;../vstudio;../src/hmi;../../DIO2/VStudio/</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessKeepComments>false</PreprocessKeepComments>

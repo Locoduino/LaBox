@@ -96,6 +96,20 @@ void Locomotive::setDCCFunction(uint8_t inFunction, bool inActivate)
 		Locomotives::notifyFunction(this->address, inFunction, inActivate);
 }
 
+bool Locomotive::Save(JsonObject inLoco)
+{
+	inLoco["name"] = this->name;
+	inLoco["Id"] = this->address;
+	inLoco["Register"] = this->speedRegisterNumber;
+	inLoco["SpeedMax"] = this->speedMax;
+	inLoco["Speed"] = this->currentSpeed;
+	inLoco["direction"] = this->direction;
+
+	this->functions.Save(inLoco);
+
+	return true;
+}
+
 #ifdef DCCPP_DEBUG_MODE
 void Locomotive::printLocomotive()
 {

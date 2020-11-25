@@ -60,27 +60,27 @@ description: <DCCpp signal for ESP32 modules>
 #define DCC_SIGNAL(R) \
 	byte nextBitToSendLocal = 0; \
   if(R->currentBit == R->currentReg->activePacket->nBits){    /* IF no more bits in this DCC Packet */ \
-	R->currentBit = 0;                                       /*   reset current bit pointer and determine which Register and Packet to process next--- */ \
-	if (R->nRepeat > 0 && R->currentReg == R->reg) {               /*   IF current Register is first Register AND should be repeated */ \
-		R->nRepeat--;                                        /*     decrement repeat count; result is this same Packet will be repeated */ \
-	} \
-	else if (R->nextReg != NULL) {                           /*   ELSE IF another Register has been updated */ \
-		R->currentReg = R->nextReg;                             /*     update currentReg to nextReg */ \
-		R->nextReg = NULL;                                     /*     reset nextReg to NULL */ \
-		R->tempPacket = R->currentReg->activePacket;            /*     flip active and update Packets */ \
-		R->currentReg->activePacket = R->currentReg->updatePacket; \
-		R->currentReg->updatePacket = R->tempPacket; \
-	} \
-	else {                                               /*   ELSE simply move to next Register */ \
-		if (R->currentReg == R->maxLoadedReg)                    /*     BUT IF this is last Register loaded */ \
-			R->currentReg = R->reg;                               /*       first reset currentReg to base Register, THEN */ \
-			R->currentReg++;                                     /*     increment current Register (note this logic causes Register[0] to be skipped when simply cycling through all Registers) */ \
-		}                                                     /*   END-ELSE */ \
-	}                                                       /* END-IF: currentReg, activePacket, and currentBit should now be properly set to point to next DCC bit */ \
+		R->currentBit = 0;                                       /*   reset current bit pointer and determine which Register and Packet to process next--- */ \
+		if (R->nRepeat > 0 && R->currentReg == R->reg) {               /*   IF current Register is first Register AND should be repeated */ \
+			R->nRepeat--;                                        /*     decrement repeat count; result is this same Packet will be repeated */ \
+		} \
+		else if (R->nextReg != NULL) {                           /*   ELSE IF another Register has been updated */ \
+			R->currentReg = R->nextReg;                             /*     update currentReg to nextReg */ \
+			R->nextReg = NULL;                                     /*     reset nextReg to NULL */ \
+			R->tempPacket = R->currentReg->activePacket;            /*     flip active and update Packets */ \
+			R->currentReg->activePacket = R->currentReg->updatePacket; \
+			R->currentReg->updatePacket = R->tempPacket; \
+		} \
+		else {                                               /*   ELSE simply move to next Register */ \
+			if (R->currentReg == R->maxLoadedReg)                    /*     BUT IF this is last Register loaded */ \
+				R->currentReg = R->reg;                               /*       first reset currentReg to base Register, THEN */ \
+				R->currentReg++;                                     /*     increment current Register (note this logic causes Register[0] to be skipped when simply cycling through all Registers) */ \
+			}                                                     /*   END-ELSE */ \
+		}                                                       /* END-IF: currentReg, activePacket, and currentBit should now be properly set to point to next DCC bit */ \
 	\
-	if (R->currentReg->activePacket->buf[R->currentBit / 8] & R->bitMask[R->currentBit % 8]) {     /* IF bit is a ONE */ \
-		nextBitToSendLocal = 1;					 \
-  } else{                                                                              /* ELSE it is a ZERO */ \
+		if (R->currentReg->activePacket->buf[R->currentBit / 8] & R->bitMask[R->currentBit % 8]) {     /* IF bit is a ONE */ \
+			nextBitToSendLocal = 1;					 \
+  } else {                                                                              /* ELSE it is a ZERO */ \
 		nextBitToSendLocal = 0;					 \
 	}                                                                                    /* END-ELSE */ \
 	\

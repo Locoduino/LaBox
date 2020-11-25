@@ -72,6 +72,8 @@ void DCCpp::loop()
 #ifdef USE_SENSOR
   Sensor::check();    // check sensors for activated or not
 #endif
+
+  FunctionsState::functionsLoop();
 }
 
 #ifndef USE_ONLY1_INTERRUPT
@@ -372,14 +374,14 @@ void DCCpp::powerOn(bool inMain, bool inProg)
   {
     digitalWrite(DCCppConfig::SignalEnablePinProg, HIGH);
     done = true;
-    IsPowerOnMain = true;
+    IsPowerOnProg = true;
   }
 
   if (inMain && DCCppConfig::SignalEnablePinMain != UNDEFINED_PIN)
   {
     digitalWrite(DCCppConfig::SignalEnablePinMain, HIGH);
     done = true;
-    IsPowerOnProg = true;
+    IsPowerOnMain = true;
   }
 
   if (done)
@@ -409,13 +411,13 @@ void DCCpp::powerOff(bool inMain, bool inProg)
   {
     digitalWrite(DCCppConfig::SignalEnablePinProg, LOW);
     done = true;
-    IsPowerOnMain = false;
+    IsPowerOnProg = false;
   }
   if (inMain && DCCppConfig::SignalEnablePinMain != UNDEFINED_PIN)
   {
     digitalWrite(DCCppConfig::SignalEnablePinMain, LOW);
     done = true;
-    IsPowerOnProg = false;
+    IsPowerOnMain = false;
   }
 
   if (done)
@@ -477,13 +479,8 @@ void DCCpp::setFunctions(volatile RegisterList *inpRegs, int nReg, int inLocoId,
       Serial.println(F("Invalid register number on programming track."));
   }
 #endif
-  byte flags = 0;
-
-  byte oneByte1 = 128;	// Group one functions F0-F4
-  byte twoByte1 = 176;	// Group two F5-F8
-  byte threeByte1 = 160;	// Group three F9-F12
-  byte fourByte2 = 0;		// Group four F13-F20
-  byte fiveByte2 = 0;		// Group five F21-F28
+  bool send[5];
+  send[0] = send[1] = send[2] = send[3] = send[4] = false;
 
   for (byte func = 0; func <= 28; func++)
   {
@@ -493,105 +490,41 @@ void DCCpp::setFunctions(volatile RegisterList *inpRegs, int nReg, int inLocoId,
       {
         hmi::CurrentInterface->ChangeFunction(inLocoId, func, inStates.isActivated(func));
       }
-    }
 
-    if (func <= 4)
-    {
-      /*
-      	To set functions F0 - F4 on(= 1) or off(= 0) :
-
-           BYTE1 : 128 + F1 * 1 + F2 * 2 + F3 * 4 + F4 * 8 + F0 * 16
-        BYTE2 : omitted
-      */
-
-      if (inStates.isActivationChanged(func))
-        flags |= 1;
-      if (inStates.isActivated(func))
+      // in case of desactivation of one function, mark the good block to send.
+      if (!inStates.isActivated(func))
       {
-        if (func == 0)
-          oneByte1 += 16;
-        else
-          oneByte1 += (1 << (func - 1));
+        int blockNb = 0;
+        if (func > 4)
+        {
+          blockNb++;
+          if (func > 8)
+          {
+            blockNb++;
+            if (func > 12)
+            {
+              blockNb++;
+              if (func > 20)
+                blockNb++;
+            }
+          }
+        }
+
+        send[blockNb] = true;
       }
     }
-    else if (func <= 8)
-    {
-      /*
-      	To set functions F5 - F8 on(= 1) or off(= 0) :
-
-           BYTE1 : 176 + F5 * 1 + F6 * 2 + F7 * 4 + F8 * 8
-        BYTE2 : omitted
-      */
-
-      if (inStates.isActivationChanged(func))
-        flags |= 2;
-      if (inStates.isActivated(func))
-        twoByte1 += (1 << (func - 5));
-    }
-    else if (func <= 12)
-    {
-      /*
-           To set functions F9 - F12 on(= 1) or off(= 0) :
-
-           BYTE1 : 160 + F9 * 1 + F10 * 2 + F11 * 4 + F12 * 8
-        BYTE2 : omitted
-      */
-
-      if (inStates.isActivationChanged(func))
-        flags |= 4;
-      if (inStates.isActivated(func))
-        threeByte1 += (1 << (func - 9));
-    }
-    else if (func <= 20)
-    {
-      /*
-           To set functions F13 - F20 on(= 1) or off(= 0) :
-
-           BYTE1 : 222
-        BYTE2 : F13 * 1 + F14 * 2 + F15 * 4 + F16 * 8 + F17 * 16 + F18 * 32 + F19 * 64 + F20 * 128
-      */
-
-      if (inStates.isActivationChanged(func))
-        flags |= 8;
-      if (inStates.isActivated(func))
-        fourByte2 += (1 << (func - 13));
-    }
-    else if (func <= 28)
-    {
-      /*
-           To set functions F21 - F28 on(= 1) of off(= 0) :
-
-           BYTE1 : 223
-        BYTE2 : F21 * 1 + F22 * 2 + F23 * 4 + F24 * 8 + F25 * 16 + F26 * 32 + F27 * 64 + F28 * 128
-      */
-
-      if (inStates.isActivationChanged(func))
-        flags |= 16;
-      if (inStates.isActivated(func))
-        fiveByte2 += (1 << (func - 21));
-    }
   }
 
-  int b1, b2 = -1;
-
-  if (flags & 1)
-    b1 = oneByte1;
-  if (flags & 2)
-    b1 = twoByte1;
-  if (flags & 4)
-    b1 = threeByte1;
-  if (flags & 8)
+  // All modifyied blocks must be send !
+  for (int i = 0; i < 5; i++)
   {
-    b1 = 222;
-    b2 = fourByte2;
+    if (send[i] == true)
+    {
+      int b1, b2;
+      inStates.buildDCCbytes(i, &b1, &b2, true);  // store the computed bytes in the functionsState cache.
+      inpRegs->setFunction(nReg, inLocoId, b1, b2);
+    }
   }
-  if (flags & 16)
-  {
-    b1 = 223;
-    b2 = fiveByte2;
-  }
-
-  inpRegs->setFunction(nReg, inLocoId, b1, b2);
 
   inStates.statesSent();
 

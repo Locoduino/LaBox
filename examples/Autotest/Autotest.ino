@@ -1,5 +1,5 @@
 /*************************************************************
-project: <Dc/Dcc Controller>
+project: <LaBox Controller>
 author: <Thierry PARIS>
 description: <Dcc Automatic Controller sample>
 *************************************************************/
@@ -60,11 +60,12 @@ void setup()
   automation.AddItem(500, "f 3 128", "Light off");    // Light off
 
   DCCpp::begin();
-  // Configuration for my LMD18200. See the page 'Configuration lines' in the documentation for other samples.
-  DCCpp::beginMain(UNDEFINED_PIN, 32, UNDEFINED_PIN, 34);
+  // configuration pour L6203 La Box
+  DCCpp::beginMain(UNDEFINED_PIN, 33, 32, 36);  
 
   DCCpp::powerOn();
 
+  // for test only...
   automation.printThrottleItems();
   
   automation.Start();

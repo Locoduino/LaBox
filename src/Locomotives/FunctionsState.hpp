@@ -5,6 +5,8 @@
 
 #include "DCCpp.h"
 
+class Locomotive;
+
 /**
 This is a class to handle decoder functions.
 An instance of this class handle the status of the functions of one decoder.
@@ -22,13 +24,28 @@ private:
 	*/
 	byte activeFlagsSent[4];
 
+	/**Memo of the bytes to send to dcc orders according to actual activated functions.
+	* These bytes has to be reconstructed at each modification of function activation.
+	* The values are coded on 'int' just to be able to keep a -1 value !
+	*/
+	int dccFirstByte[5], dccSecondByte[5];
+
 	inline byte byteNumber(byte inFunctionNumber) { return inFunctionNumber / 8; }
 	inline byte bitNumber(byte inFunctionNumber) { return inFunctionNumber % 8; }
+
+	static Locomotive *currentLocomotive;
+	static byte currentFunctionBlock;		// F0-4 : 0, F5-8 : 1, F9-12 : 2, F13-20 : 3, F20-28 : 4
 
 public:
 	/** Initialize the instance.
 	*/
 	FunctionsState();
+
+	/** Get one byte from the activeFlags array.
+	@param inIndex	Number of the byte to get, from 0 to 3.
+	@return byte describing a part of the flags.
+	*/
+	byte getActiveFlags(byte inIndex) { 	return this->activeFlags[inIndex]; }
 
 	/** Reset all functions to inactive.
 	*/
@@ -55,11 +72,42 @@ public:
 	*/
 	bool isActivationChanged(byte inFunctionNumber);
 
+	/** Check if the given function block contains at least one finction activated.
+	The allowed number goes from 0 to 4 : Functions 0 to 4 : block 0, F5-8 : 1, F9-12 : 2, F13-20 : 3, F20-28 : 4.
+	@param inBlock	Number of the block function to check.
+	@return True if at least one function is activated in the given block.
+	*/
+	bool isFunctionBlockActivated(byte inBlock);
+
+	/** Build the bytes to send to DCC according to modified functions.
+	@param inBlock	Number of the function to check. The allowed number goes from 0 to 4 : Functions 0 to 4 : block 0, F5-8 : 1, F9-12 : 2, F13-20 : 3, F20-28 : 4.	
+	@param pByte1	first byte address for DCC
+	@param pByte2	second byte address for DCC
+	@param storeBytes	if true, the computed bytes will be stored in firstDccBytes and secondDccBytes arrays.
+	@return True if at least one function is activated in the given block.
+	*/
+	bool buildDCCbytes(byte blockNb, int* pByte1, int* pByte2, bool storeBytes = false);
+
+	bool buildDCCF0F4bytes();
+	bool buildDCCF5F8bytes();
+	bool buildDCCF9F12bytes();
+	bool buildDCCF13F20bytes();
+	bool buildDCCF21F28bytes();
+
+	/**This function will send packets on DCC track at regular intervals to restore functions on machines which suffered of a long short-circuit.*/
+	static void functionsLoop();
+
+	/* Save this data in JSON format.
+	*/
+	bool Save(JsonObject inObject);
+
 #ifdef DCCPP_DEBUG_MODE
 	/** Print the list of activated functions.
 	@remark Only available if DCCPP_DEBUG_MODE is defined.
 	*/
 	void printActivated();
+
+	static void test();
 #endif
 };
 

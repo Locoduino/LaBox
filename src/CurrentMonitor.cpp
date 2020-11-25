@@ -41,10 +41,10 @@ void CurrentMonitor::check()
   	float base = 0;
 	for (int j = 0; j < 50; j++)
 	{
-		float val = analogRead(this->pin);
+		float val = (float) analogRead(this->pin);
 		base += val;
 	}
-	this->current = ((base / 50)  * 0.9) - 100;
+	this->current = (float) (((base / 50)  * 0.9) - 100);
 	// current overload and Signal is on
 	if (this->current > this->currentSampleMax && digitalRead(this->signalPin) == HIGH)
 	{

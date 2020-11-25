@@ -7,6 +7,14 @@ description: <FunctionsState class>
 #include "Arduino.h"
 #include "DCCpp.h"
 
+#include "FS.h"
+#include "SPIFFS.h"
+
+/* You only need to format SPIFFS the first time you run a
+	 test or else use the SPIFFS plugin to create a partition
+	 https://github.com/me-no-dev/arduino-esp32fs-plugin */
+#define FORMAT_SPIFFS_IF_FAILED true
+
 #ifdef USE_LOCOMOTIVES
 
 notifySpeedDirType Locomotives::notifySpeedDir = NULL;
@@ -22,6 +30,22 @@ Locomotive* Locomotives::get(uint16_t inAddress)
 	while (pCurr != NULL)
 	{
 		if (pCurr->getAddress() == inAddress)
+		{
+			return pCurr;
+		}
+		pCurr = pCurr->pNextLocomotive;
+	}
+
+	return NULL;
+}
+
+Locomotive* Locomotives::getByRegister(int8_t inRegister)
+{
+	Locomotive* pCurr = pFirstLocomotive;
+
+	while (pCurr != NULL)
+	{
+		if (pCurr->getSpeedRegister() == inRegister)
 		{
 			return pCurr;
 		}
@@ -142,8 +166,14 @@ int Locomotives::count()
 	return count;
 }
 
-/* Send a DCC command to stop the locmotive IMMEDIATELY
-	*/
+Locomotive* Locomotives::getNextLocomotive(Locomotive* inCurrent)
+{
+	if (inCurrent != NULL && inCurrent->pNextLocomotive != NULL)
+		return inCurrent->pNextLocomotive;
+
+	return pFirstLocomotive;
+}
+
 void Locomotives::emergencyStop()
 {
 	Locomotive* pCurr = pFirstLocomotive;
@@ -153,6 +183,58 @@ void Locomotives::emergencyStop()
 		pCurr->emergencyStop();
 		pCurr = pCurr->pNextLocomotive;
 	}
+}
+
+bool Locomotives::SaveAll()
+{
+	// SPIFFS begin
+	if (SPIFFS.totalBytes() == 0)
+		if (!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED)) {
+			Serial.println("SPIFFS Mount Failed");
+			return false;
+		}
+
+	// New file created
+	File file = SPIFFS.open("/Locomotives.json", FILE_WRITE);
+	if (!file) {
+		Serial.println("- failed to open file for writing");
+		return false;
+	}
+
+	//////////////////// Json data building
+	StaticJsonDocument<4096> locoDocument;
+
+	JsonArray data = locoDocument.createNestedArray("Locomotives");
+
+	Locomotive* pCurr = pFirstLocomotive;
+
+	while (pCurr != NULL)
+	{
+		JsonObject loco = data.createNestedObject();
+
+		pCurr->Save(loco);
+		//bool ret = data.add(loco);
+
+		pCurr = pCurr->pNextLocomotive;
+	}
+
+	char buffer[4096];
+
+#ifdef VISUALSTUDIO
+	serializeJsonPretty(locoDocument, buffer);
+#else
+	serializeJson(locoDocument, buffer);
+#endif
+
+	// Write file
+	if (file.print(buffer)) {
+		Serial.println("- file written");
+	}
+	else {
+		Serial.println("- file.print failed");
+	}
+
+	return true;
 }
 
 #ifdef DCCPP_DEBUG_MODE
@@ -174,6 +256,31 @@ void Locomotives::printLocomotives()
 		count++;
 		pCurr = pCurr->pNextLocomotive;
 	}
+}
+
+void Locomotives::debugLocomotivesSet()
+{
+	Locomotive *pLoco = NULL;
+	
+	pLoco = Locomotives::add("BB65000", 65, 128);
+	pLoco->setSpeed(0);
+	pLoco->setDirection(1);	
+	pLoco->setFunction(0, true);
+	pLoco->setFunction(28, true);
+
+	pLoco = Locomotives::add("CC72000", 72, 128);
+	pLoco->setSpeed(127);
+	pLoco->setDirection(0);
+	pLoco->setFunction(6, true);
+	pLoco->setFunction(11, true);
+
+	pLoco = Locomotives::add("150x", 150, 128);
+	pLoco->setSpeed(30);
+	pLoco->setDirection(1);
+
+	pLoco = Locomotives::add("Y7200", 7200, 14);
+	pLoco->setSpeed(30);		// Error !
+	pLoco->setDirection(0);
 }
 #endif
 #endif

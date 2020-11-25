@@ -5,9 +5,7 @@
 
 #include "DCCpp.h"
 
-#include "FunctionsState.hpp"
 #include "Locomotive.hpp"
-#include "Registers.hpp"
 
 typedef void (*notifySpeedDirType)(uint16_t inLocoAddress, uint8_t inSpeed, bool inIsForward);
 typedef void (*notifyFunctionType)(uint16_t inLocoAddress, uint8_t inFunction, bool inIsActivated);
@@ -31,6 +29,11 @@ public:
 	@return The found locomotive or NULL if not found.
 	*/
 	static Locomotive* get(uint16_t inAddress);
+	/** Get a particular Locomotive.
+	@param inAddress	The register number [MAIN_REGISTER_FIRSTCONTINUAL, MAX_MAIN_REGISTERS] of the locomotive.
+	@return The found locomotive or NULL if not found.
+	*/
+	static Locomotive* getByRegister(int8_t inRegister);
 	/** Adds a new locomotive.
 	@param inName	Locomotive new name.
 	@param inAddress	Locomotive new DCC address.
@@ -62,17 +65,30 @@ public:
 	/** Get the pointer of the first locomotive.
 	@return Start of the linked list of locomotives.
 	*/
-	static Locomotive *getFirstLocomotive() { return pFirstLocomotive; }
+	static Locomotive* getFirstLocomotive() { return pFirstLocomotive; }
+	/** Get the pointer of the next locomotive.
+	@return The next locomotive in the chained list. If this locomotive does not anymore exists in the list, restart from the first one.
+	*/
+	static Locomotive* getNextLocomotive(Locomotive *inCurrent);
 
 	/* Send a DCC command to stop the locmotive IMMEDIATELY
 	*/
 	static void emergencyStop();
+
+	/* Save all locomotives data in JSON format.
+	*/
+	static bool SaveAll();
 
 #ifdef DCCPP_DEBUG_MODE
 	/** Print the list of assigned locomotives.
 	@remark Only available if DCCPP_DEBUG_MODE is defined.
 	*/
 	static void printLocomotives();
+
+	/** Build a fake list of locomotives, only used for tests.
+	@remark Only available if DCCPP_DEBUG_MODE is defined.
+	*/
+	static void debugLocomotivesSet();
 #endif
 };
 #endif

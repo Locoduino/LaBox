@@ -32,7 +32,7 @@ uint8_t Registers::allocateRegister()
 
 void Registers::freeRegister(uint8_t inRegister)
 {
-	if (inRegister == 0)
+	if (inRegister < 1)
 	{
 		return;
 	}
