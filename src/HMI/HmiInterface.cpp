@@ -69,7 +69,12 @@ void hmi::HmiInterfaceLoop()
 
   case HmiInterfaceEvent_ChangeFunction:
     _HMIDEBUG_LEVEL1_PRINTLN("HmiInterface :: ChangeFunction");
-    addNotification(msg.data.dcc.addr, HMI_OrderFunction, msg.data.dcc.function);
+    loco = Locomotives::get(msg.data.dcc.addr);
+    if (loco != NULL)
+    {
+      if (loco->functions.isActivationChanged(msg.data.dcc.function))
+        addNotification(msg.data.dcc.addr, HMI_OrderFunction, msg.data.dcc.function);
+    }
     break;
 
   case HmiInterfaceEvent_DccOn:

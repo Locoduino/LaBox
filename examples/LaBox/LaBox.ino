@@ -88,7 +88,7 @@ void setup()
   DCCpp::begin();
 
   // configuration pour L6203 La Box
-  DCCpp::beginMain(UNDEFINED_PIN, 33, 32, 36);  
+  DCCpp::beginMain(UNDEFINED_PIN, 33, 32, 36);
 }
 
 void loop()
