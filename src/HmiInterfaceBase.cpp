@@ -5,7 +5,7 @@ HmiInterface* HmiInterface::CurrentInterface = NULL;
 
 HmiInterface::HmiInterface()
 {
-  this->pHmiInterfaceEventBuffer = new CircularBuffer(sizeof(HmiInterfaceMessage) * 4);
+  this->pHmiInterfaceEventBuffer = new CircularBuffer(sizeof(HmiInterfaceMessage) * 10);
   this->pHmiInterfaceEventBuffer->begin(true);
 }
 

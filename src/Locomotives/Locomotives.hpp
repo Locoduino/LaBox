@@ -38,9 +38,10 @@ public:
 	@param inName	Locomotive new name.
 	@param inAddress	Locomotive new DCC address.
 	@param inSpeedMax	Locomotive max speed steps, default is 128.
-	@return pointer on the new locomotive or NULL if no place available.
+	@param inRegister	Locomotive associated register. If 0, the register is automatically affected.
+	@return pointer on the new locomotive or NULL if no place available. Its register is automatically affected.
 	*/
-	static Locomotive* add(const String& inName, uint16_t inAddress, uint8_t inSpeedMax = 128);
+	static Locomotive* add(const String& inName, uint16_t inAddress, uint8_t inSpeedMax = 128, int8_t inRegister = 0);
 	/** Removes a particular locomotive.
 	@param inAddress	The DCC id (1-65535) of the locomotive.
 	*/

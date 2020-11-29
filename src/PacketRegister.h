@@ -60,7 +60,7 @@ struct RegisterList{
 
 #ifdef USE_TEXTCOMMAND
   void setThrottle(const char *) volatile;
-  void setFunction(const char *) volatile;
+  void setFunction(const char *, bool returnMessages = true) volatile;
   void setAccessory(const char *) volatile;
   void writeTextPacket(const char *) volatile;
 #endif
@@ -95,6 +95,9 @@ struct RegisterList{
 
 #ifdef DCCPP_DEBUG_MODE
   void printPacket(int, byte *, int, int) volatile;
+#ifdef USE_TEXTCOMMAND
+  void testFunctionCommands() volatile;
+#endif
 #endif
 };
 

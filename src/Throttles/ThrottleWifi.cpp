@@ -104,7 +104,9 @@ void ThrottleWifi::connectWifi(const char* inSsid, const char* inPassword, IPAdd
 			hmi::CurrentInterface->WifiEndConnection(inSsid);
 			hmi::CurrentInterface->HmiInterfaceUpdateDrawing();
 		}
+#ifndef VISUALSTUDIO
 		while (true);
+#endif
 	}
 #endif
 }

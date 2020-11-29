@@ -168,6 +168,19 @@ void RegisterList::setThrottle(int nReg, int cab, int tSpeed, int tDirection) vo
 		hmi::CurrentInterface->ChangeDirection(cab, tDirection);
 		hmi::CurrentInterface->ChangeSpeed(cab, tSpeed);
 	}
+	Locomotive* loco = Locomotives::get(cab);
+	if (loco == NULL)
+	{
+		char name[10];
+		sprintf(name, "%d-%d", nReg, cab);
+		Locomotives::add(name, cab, 128, nReg);
+		loco = Locomotives::get(cab);
+	}
+	if (loco != NULL)
+	{
+		loco->setSpeed(tSpeed);
+		loco->setDirection(tDirection);
+	}
 } // RegisterList::setThrottle(ints)
 
 #ifdef USE_TEXTCOMMAND
@@ -191,6 +204,23 @@ void RegisterList::setThrottle(const char *s) volatile
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void checkFunction(int cab, int theByte, int startFunc, int endFunc, Locomotive *pLoco)
+{
+	bool state = false;
+	for (int func = startFunc; func <= endFunc; func++)
+	{
+		state = (theByte & (1 << (func - startFunc))) > 0;
+		if (hmi::CurrentInterface != NULL)
+		{
+			hmi::CurrentInterface->ChangeFunction(cab, func, state);
+		}
+		if (pLoco != NULL)
+		{
+			pLoco->setFunction(func, state);
+		}
+	}
+}
 
 void RegisterList::setFunction(int nReg, int cab, int fByte, int eByte, bool returnMessages) volatile
 {
@@ -226,6 +256,103 @@ void RegisterList::setFunction(int nReg, int cab, int fByte, int eByte, bool ret
 	}
 #endif
 
+	if (hmi::CurrentInterface != NULL)
+	{
+		bool state = false;
+		Locomotive* loco = Locomotives::get(cab);
+		if (loco == NULL)
+		{
+			char name[10];
+			sprintf(name, "%d-%d", nReg, cab);
+			Locomotives::add(name, cab, 128, nReg);
+			loco = Locomotives::get(cab);
+		}
+
+		/* Block 0
+		*
+		* To set functions F0 - F4 on(= 1) or off(= 0) :
+		*
+		* BYTE1 : 128 + F1 * 1 + F2 * 2 + F3 * 4 + F4 * 8 + F0 * 16
+		* BYTE2 : omitted
+	  */
+		if ((fByte & B11100000) == B10000000 && eByte == -1)
+		{
+			fByte &= B01111111;		// remove bit 7.
+			for (int func = 0; func <= 4; func++)
+			{
+				if (func == 0)
+				{
+					state = (fByte & B00010000) > 0;
+				}
+				else
+				{
+					state = (fByte & (1 << (func - 1))) > 0;
+				}
+				hmi::CurrentInterface->ChangeFunction(cab, func, state);
+				if (loco != NULL)
+				{
+					loco->setFunction(func, state);
+				}
+			}
+		}
+
+		/* Block 1
+		*	To set functions F5 - F8 on(= 1) or off(= 0) :
+		*
+		*	BYTE1 : 176 + F5 * 1 + F6 * 2 + F7 * 4 + F8 * 8
+		*	BYTE2 : omitted
+		*/
+		if ((fByte & B11110000) == B10110000 && eByte == -1)
+		{
+			fByte -= 176;
+			checkFunction(cab, fByte, 5, 8, loco);
+		}
+
+		/* Block 2
+		*	To set functions F9 - F12 on(= 1) or off(= 0) :
+		*
+		*	BYTE1 : 160 + F9 * 1 + F10 * 2 + F11 * 4 + F12 * 8
+		*	BYTE2 : omitted
+		*/
+		if ((fByte & B11110000) == B10100000 && eByte == -1)
+		{
+			fByte -= 160;
+			checkFunction(cab, fByte, 9, 12, loco);
+		}
+
+		/* Block 3
+		*	To set functions F13 - F20 on(= 1) or off(= 0) :
+		*
+		*	BYTE1 : 222
+		*	BYTE2 : F13 * 1 + F14 * 2 + F15 * 4 + F16 * 8 + F17 * 16 + F18 * 32 + F19 * 64 + F20 * 128
+		*/
+		if (fByte == 222 && eByte != -1)
+		{
+			checkFunction(cab, eByte, 13, 20, loco);
+		}
+
+		/* Block 4
+		* To set functions F21 - F28 on(= 1) of off(= 0) :
+
+		* BYTE1 : 223
+		* BYTE2 : F21 * 1 + F22 * 2 + F23 * 4 + F24 * 8 + F25 * 16 + F26 * 32 + F27 * 64 + F28 * 128
+		*/
+		if (fByte == 223 && eByte != -1)
+		{
+			checkFunction(cab, eByte, 21, 28, loco);
+		}
+
+		if (loco != NULL)
+		{
+			if (hmi::CurrentInterface != NULL)
+			{
+				hmi::CurrentInterface->HmiInterfaceLoop();
+			}
+			loco->functions.statesSent();
+			loco->printLocomotive();
+		}
+	}
+
 	/* NMRA DCC norm ask for two DCC packets instead of only one:
 	"Command Stations that generate these packets, and which are not periodically refreshing these functions,
 	must send at least two repetitions of these commands when any function state is changed."
@@ -235,7 +362,7 @@ void RegisterList::setFunction(int nReg, int cab, int fByte, int eByte, bool ret
 } // RegisterList::setFunction(ints)
 
 #ifdef USE_TEXTCOMMAND
-void RegisterList::setFunction(const char *s) volatile
+void RegisterList::setFunction(const char *s, bool returnMessages) volatile
 {
 	int reg, cab;
 	int fByte, eByte;
@@ -277,9 +404,68 @@ void RegisterList::setFunction(const char *s) volatile
 		return;
 	}
 
-	this->setFunction(reg, cab, fByte, eByte);
+	this->setFunction(reg, cab, fByte, eByte, returnMessages);
 
 } // RegisterList::setFunction(string)
+
+#ifdef DCCPP_DEBUG_MODE
+void RegisterList::testFunctionCommands() volatile
+{
+	Locomotive* loco = Locomotives::get(3);
+	if (loco != NULL)
+		loco->printLocomotive();
+
+	// Block 0
+	setFunction("3 144", false);  // F0
+	setFunction("3 145", false);  // F1
+	setFunction("3 147", false);  // F2
+	setFunction("3 151", false);  // F3
+	setFunction("3 159", false);  // F4
+	if (loco != NULL)
+		loco->printLocomotive();
+
+	// Block 1
+	setFunction("3 177", false);  // F5
+	setFunction("3 179", false);  // F6
+	setFunction("3 183", false);  // F7
+	setFunction("3 191", false);  // F8
+	if (loco != NULL)
+		loco->printLocomotive();
+
+	// Block 2
+	setFunction("3 161", false);  // F9
+	setFunction("3 163", false);  // F10
+	setFunction("3 167", false);  // F11
+	setFunction("3 175", false);  // F12
+	if (loco != NULL)
+		loco->printLocomotive();
+
+	// Block 3
+	setFunction("3 222 1", false);  // F13
+	setFunction("3 222 3", false);  // F14
+	setFunction("3 222 7", false);  // F15
+	setFunction("3 222 15", false);  // F16
+	setFunction("3 222 31", false);  // F17
+	setFunction("3 222 63", false);  // F18
+	setFunction("3 222 127", false);  // F19
+	setFunction("3 222 255", false);  // F20
+	if (loco != NULL)
+		loco->printLocomotive();
+
+	// Block 4
+	setFunction("3 223 1", false);  // F21
+	setFunction("3 223 3", false);  // F22
+	setFunction("3 223 7", false);  // F23
+	setFunction("3 223 15", false);  // F24
+	setFunction("3 223 31", false);  // F25
+	setFunction("3 223 63", false);  // F26
+	setFunction("3 223 127", false);  // F27
+	setFunction("3 223 255", false);  // F28
+	if (loco != NULL)
+		loco->printLocomotive();
+}
+#endif
+
 #endif
 
   ///////////////////////////////////////////////////////////////////////////////

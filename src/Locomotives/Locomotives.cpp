@@ -71,19 +71,22 @@ Locomotive* Locomotives::get(const String& inName)
 	return NULL;
 }
 
-Locomotive* Locomotives::add(const String& inName, uint16_t inAddress, uint8_t inSpeedMax)
+Locomotive* Locomotives::add(const String& inName, uint16_t inAddress, uint8_t inSpeedMax, int8_t inRegister)
 {
 	Locomotive* pNewLocomotive = NULL;
 
-	uint8_t speedReg = Registers::allocateRegister();
+	if (inRegister == 0)
+	{
+		inRegister = Registers::allocateRegister();
+	}
 
-	if (speedReg == 0)
+	if (inRegister == 0)
 	{
 		// No more registers available.
 		return NULL;
 	}
 
-	pNewLocomotive = new Locomotive(inName, speedReg, inAddress, inSpeedMax);
+	pNewLocomotive = new Locomotive(inName, inRegister, inAddress, inSpeedMax);
 
 	if (pNewLocomotive != NULL)
 	{
@@ -262,11 +265,11 @@ void Locomotives::debugLocomotivesSet()
 {
 	Locomotive *pLoco = NULL;
 	
-	pLoco = Locomotives::add("BB65000", 65, 128);
+	pLoco = Locomotives::add("BB65000", 3, 128);
 	pLoco->setSpeed(0);
 	pLoco->setDirection(1);	
-	pLoco->setFunction(0, true);
-	pLoco->setFunction(28, true);
+	//pLoco->setFunction(0, true);
+	//pLoco->setFunction(28, true);
 
 	pLoco = Locomotives::add("CC72000", 72, 128);
 	pLoco->setSpeed(127);
