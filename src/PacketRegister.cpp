@@ -172,7 +172,7 @@ void RegisterList::setThrottle(int nReg, int cab, int tSpeed, int tDirection) vo
 	if (loco == NULL)
 	{
 		char name[10];
-		sprintf(name, "%d-%d", nReg, cab);
+		sprintf(name, "%04d", cab);
 		Locomotives::add(name, cab, 128, nReg);
 		loco = Locomotives::get(cab);
 	}
@@ -263,8 +263,8 @@ void RegisterList::setFunction(int nReg, int cab, int fByte, int eByte, bool ret
 		if (loco == NULL)
 		{
 			char name[10];
-			sprintf(name, "%d-%d", nReg, cab);
-			Locomotives::add(name, cab, 128, nReg);
+			sprintf(name, "%04d", cab);
+			Locomotives::add(name, cab, 128);
 			loco = Locomotives::get(cab);
 		}
 
