@@ -346,10 +346,12 @@ void RegisterList::setFunction(int nReg, int cab, int fByte, int eByte, bool ret
 		{
 			if (hmi::CurrentInterface != NULL)
 			{
-				hmi::CurrentInterface->HmiInterfaceLoop();
+				bool ret = false;
+				do {
+					ret = hmi::CurrentInterface->HmiInterfaceLoop();
+				} while (ret);
 			}
 			loco->functions.statesSent();
-			loco->printLocomotive();
 		}
 	}
 

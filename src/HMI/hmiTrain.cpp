@@ -62,11 +62,12 @@ void hmiTrain::update()
 /*!
     @brief  setInfo, update information as mode and speed
     @param  trainMode like 
-	  @param  trainSpeed (0->128) 
+    @param  trainSpeed (0->128)
+    @param  functionState
     @return None (void).
     @note
 */
-void hmiTrain::setInfo(int _addr, uint8_t _order, uint8_t _value)
+void hmiTrain::setInfo(int _addr, uint8_t _order, uint8_t _value, bool _functionState)
 {
   _HMIDEBUG_FCT_PRINTLN("hmiTrain::setInfo.. Begin"); 
   _HMIDEBUG_PARAMS_PRINT("hmiTrain::setInfo, addr :  ");_HMIDEBUG_PARAMS_PRINT(_addr); _HMIDEBUG_PARAMS_PRINT(", order : ");_HMIDEBUG_PARAMS_PRINT(_order);_HMIDEBUG_PARAMS_PRINT(", value : ");_HMIDEBUG_PARAMS_PRINTLN(_value);
@@ -83,9 +84,9 @@ void hmiTrain::setInfo(int _addr, uint8_t _order, uint8_t _value)
       mode = _order;
     break;
     case HMI_OrderFunction :
-      if(_value >= 0 && _value <= HMITrain_NbMaxFunctions)
+      if(_value >= 0 && _value <= HMITrain_NbMaxFunctions && function[_value] != _functionState)
       {
-        function[_value] = function[_value] ? false : true ;
+        function[_value] = _functionState;
         if(_value!=0 ) lastFunction = _value ;   //   Exception for function 0 (lights)
         //_HMIDEBUG_LEVEL1_PRINT("setInfo, reception commande function n°");_HMIDEBUG_LEVEL1_PRINT(_value);_HMIDEBUG_LEVEL1_PRINT(", nouvelle valeur : ");_HMIDEBUG_LEVEL1_PRINTLN(function[_value] ? "True" : "False");
       }

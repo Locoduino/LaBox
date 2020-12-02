@@ -104,7 +104,7 @@ public:
 	void WriteCV(bool mainTrack, uint16_t cvAddr, byte cvValue, bool success);
 	void ReadCV(bool mainTrack, uint16_t cvAddr, byte cvValue, bool success);
 
-	virtual void HmiInterfaceLoop() = 0;
+	virtual bool HmiInterfaceLoop() = 0;
 	virtual void HmiInterfaceUpdateDrawing() = 0;
 };
 

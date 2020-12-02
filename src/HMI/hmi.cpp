@@ -669,7 +669,7 @@ void hmi::setTrainState(int addr, uint8_t order, uint8_t value, bool state)
   switch(i)
   {
     case 0 : // The train that we pilot is already the first at the top of the list
-      tabTrains[0].setInfo(addr, order, value);
+      tabTrains[0].setInfo(addr, order, value, state);
     break;
     case HMI_NbMemorisedTrain : 
       i--; // We remove one to place on the last index of the table
@@ -687,7 +687,7 @@ void hmi::setTrainState(int addr, uint8_t order, uint8_t value, bool state)
         tabTrains[j] = tabTrains[j-1] ;
       }
       // Update information
-      tabTrains[0].setInfo(addr, order, value);
+      tabTrains[0].setInfo(addr, order, value, state);
 #ifdef _HMIDEBUG_LEVEL3_PRINTLN
       for(int z=0; z < HMI_NbMemorisedTrain;z++)
       { // Stack shift to update the updated object at the very top

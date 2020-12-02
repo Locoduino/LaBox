@@ -3,20 +3,20 @@
 #include "HmiInterface.hpp"
 #include "Labox.h"
 
-void hmi::HmiInterfaceLoop()
+bool hmi::HmiInterfaceLoop()
 {
   _HMIDEBUG_FCT_PRINTLN("hmi::HmiInterfaceLoop().. Begin");
 
   int core = xPortGetCoreID();
   if (core != this->executionCore || this->pHmiInterfaceEventBuffer == NULL)
-    return;
+    return false;
 
   HmiInterfaceMessage msg;
   char mess[LineCarNbMax];
   Locomotive* loco = NULL;
 
   if (!this->pHmiInterfaceEventBuffer->GetBytes((byte*)&msg, sizeof(msg)))
-    return;
+    return false;
 
   switch (msg.event)
   {
@@ -69,12 +69,7 @@ void hmi::HmiInterfaceLoop()
 
   case HmiInterfaceEvent_ChangeFunction:
     _HMIDEBUG_LEVEL1_PRINTLN("HmiInterface :: ChangeFunction");
-    loco = Locomotives::get(msg.data.dcc.addr);
-    if (loco != NULL)
-    {
-      if (loco->functions.isActivationChanged(msg.data.dcc.function))
-        addNotification(msg.data.dcc.addr, HMI_OrderFunction, msg.data.dcc.function);
-    }
+    addNotification(msg.data.dcc.addr, HMI_OrderFunction, msg.data.dcc.function, msg.data.dcc.state);
     break;
 
   case HmiInterfaceEvent_DccOn:
@@ -118,6 +113,8 @@ void hmi::HmiInterfaceLoop()
     break;
   }
   _HMIDEBUG_FCT_PRINTLN("hmi::HmiInterfaceLoop().. End");
+
+  return true;
 }
 
 void hmi::HmiInterfaceUpdateDrawing()

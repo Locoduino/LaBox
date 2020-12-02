@@ -75,7 +75,7 @@ class hmi : public Adafruit_SSD1306, public HmiInterface
     
     // HmiInterface
 
-    void HmiInterfaceLoop();
+    bool HmiInterfaceLoop();
     void HmiInterfaceUpdateDrawing();
 };
 

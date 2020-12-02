@@ -30,7 +30,7 @@ class hmiTrain
 	void begin();
   void update();
   void setHMIpointer(hmi* _hmi);
-	void setInfo(int addr, uint8_t order, uint8_t value);
+	void setInfo(int addr, uint8_t order, uint8_t value, bool functionState = false);
 	void dashboard(int pos_x1, int pos_y1, int pos_x2, int pos_y2);
   void dashboard1T();
   void drawLightSymbol(int pos_x, int pos_y, int starSize);
