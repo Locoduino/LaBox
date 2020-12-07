@@ -23,11 +23,13 @@ void ThrottleWifi::connectWifi(const char* inSsid, const char* inPassword, IPAdd
 {
 	bool connected = false;
 
+#ifdef USE_HMI
 	if (hmi::CurrentInterface != NULL)
 	{
 		hmi::CurrentInterface->WifiStartConnection(inSsid);
 		hmi::CurrentInterface->HmiInterfaceUpdateDrawing();
 	}
+#endif
 
 	//DO NOT TOUCH
 	//  This is here to force the ESP32 to reset the WiFi and initialise correctly.
@@ -41,6 +43,9 @@ void ThrottleWifi::connectWifi(const char* inSsid, const char* inPassword, IPAdd
 
 #ifdef USE_WIFI_LOCALSSID
 	connected = WiFi.softAP(inSsid, inPassword);
+#else
+#ifdef VISUALSTUDIO
+	connected = false;
 #else
 	if (!(inIp == INADDR_NONE))
 	{
@@ -70,6 +75,7 @@ void ThrottleWifi::connectWifi(const char* inSsid, const char* inPassword, IPAdd
 		connected = true;
 	}
 #endif
+#endif
 
 #ifdef USE_WIFI_LOCALSSID
 	ThrottleWifi::wifiIp = WiFi.softAPIP();
@@ -86,11 +92,13 @@ void ThrottleWifi::connectWifi(const char* inSsid, const char* inPassword, IPAdd
 		Serial.print(" (");
 		Serial.print(inSsid);
 		Serial.println(F(") connected ! connectWifi achieved."));
+#ifdef USE_HMI
 		if (hmi::CurrentInterface != NULL)
 		{
 			hmi::CurrentInterface->WifiConnected(wifiIp);
 			hmi::CurrentInterface->HmiInterfaceUpdateDrawing();
 		}
+#endif
 	}
 	else
 	{
@@ -99,11 +107,13 @@ void ThrottleWifi::connectWifi(const char* inSsid, const char* inPassword, IPAdd
 		Serial.print(" on ");
 		Serial.print(inSsid);
 		Serial.println(F(" NOT CONNECTED. Restart Arduino !"));
+#ifdef USE_HMI
 		if (hmi::CurrentInterface != NULL)
 		{
 			hmi::CurrentInterface->WifiEndConnection(inSsid);
 			hmi::CurrentInterface->HmiInterfaceUpdateDrawing();
 		}
+#endif
 #ifndef VISUALSTUDIO
 		while (true);
 #endif
@@ -221,8 +231,10 @@ bool ThrottleWifi::loop()
 					pWifi->setRemoteIP(_ClientUDP.remoteIP());
 					if (pWifi->pConverter != NULL)
 						pWifi->pConverter->clientStart(pWifi);
+#ifdef USE_HMI
 					if (hmi::CurrentInterface != NULL)
 						hmi::CurrentInterface->NewClient(pWifi->id, pWifi->remoteIP(), pWifi->port);
+#endif
 					if (DCCpp::powerOnAtFirstClient)
 					{
 						TextCommand::pCurrentThrottle = pWifi;
@@ -255,8 +267,10 @@ bool ThrottleWifi::loop()
 					pWifi->client = foundClient;
 					if (pWifi->pConverter != NULL)
 						pWifi->pConverter->clientStart(pWifi);
+#ifdef USE_HMI
 					if (hmi::CurrentInterface != NULL)
 						hmi::CurrentInterface->NewClient(pWifi->id, pWifi->remoteIP(), pWifi->port);
+#endif
 					if (DCCpp::powerOnAtFirstClient)
 					{
 						TextCommand::pCurrentThrottle = pWifi;
@@ -377,8 +391,10 @@ void ThrottleWifi::end()
 	Throttle::end();
 
 	this->remoteIp = INADDR_NONE;
+#ifdef USE_HMI
 	if (hmi::CurrentInterface != NULL)
 		hmi::CurrentInterface->CloseClient(this->id);
+#endif
 }
 
 bool ThrottleWifi::isConnected()

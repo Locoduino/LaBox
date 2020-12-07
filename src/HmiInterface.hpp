@@ -3,7 +3,7 @@
 #define __HmiInterface_Hpp__
 //-------------------------------------------------------------------
 
-#include <Arduino.h>
+#ifdef USE_HMI
 #include <CircularBuffer.hpp>
 
 #define HmiInterfaceEvent_WifiStartConnection		0
@@ -108,4 +108,5 @@ public:
 	virtual void HmiInterfaceUpdateDrawing() = 0;
 };
 
+#endif
 #endif

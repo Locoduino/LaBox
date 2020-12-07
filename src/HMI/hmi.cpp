@@ -5,6 +5,7 @@
  * @Author : Cedric Bellec
  * @Organization : Locoduino.org
  */
+#include "Labox.h"
 #include "Wire.h"
 
 #include "hmi.h"
@@ -12,7 +13,8 @@
 #include "menumanagement.h"
 #include "globals.h"
 
-// variables must be global due to static methods
+#ifdef USE_HMI
+ // variables must be global due to static methods
 enumEvent     _HMIEvent;
 enumHMIState  _HMIState ;
 
@@ -873,3 +875,4 @@ void hmi::showWifiWaiting()
   _HMIDEBUG_FCT_PRINTLN("hmi::showWifiWaiting().. End");
   
 }
+#endif

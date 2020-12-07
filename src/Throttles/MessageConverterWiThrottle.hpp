@@ -6,7 +6,7 @@
 #include "DCCpp.h"
 #include "WString.h"
 
-#if defined(USE_THROTTLES)
+#if defined(USE_THROTTLES) && defined(USE_WIFI)
 
 #define HEARTBEATTIMEOUT 10
 #define WICOMMANDSIZE	30

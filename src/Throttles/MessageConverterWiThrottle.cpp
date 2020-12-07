@@ -7,7 +7,7 @@ description: <Message converter base class>
 #include "Arduino.h"
 #include "DCCpp.h"
 
-#if defined(USE_THROTTLES)
+#if defined(USE_THROTTLES) && defined (USE_WIFI)
 #ifdef USE_TURNOUT
 tData MessageConverterWiThrottle::turnouts[512];
 #endif
@@ -328,8 +328,10 @@ void MessageConverterWiThrottle::locoAdd(Throttle* inpThrottle, int inLocoNumber
 	inpThrottle->println("M" + name + "+" + actionKey + "<;>R1");
 	inpThrottle->println("M" + name + "+" + actionKey + "<;>s1");
 
+#ifdef USE_HMI
 	if (hmi::CurrentInterface != NULL)
 		hmi::CurrentInterface->LocoAdd(name.c_str(), pLoco->getAddress());
+#endif
 #ifdef DCCPP_DEBUG_MODE
 	Locomotives::printLocomotives();
 #endif
@@ -352,9 +354,10 @@ void MessageConverterWiThrottle::locoRelease(Throttle* inpThrottle, int inLocoNu
 	//	pLoco->initialize();
 	inpThrottle->println("M" + th + "-" + actionKey + "<;>");
 
+#ifdef USE_HMI
 	if (hmi::CurrentInterface != NULL)
 		hmi::CurrentInterface->LocoRemove(pLoco->getAddress());
-
+#endif
 #ifdef DCCPP_DEBUG_MODE
 	Locomotives::printLocomotives();
 #endif

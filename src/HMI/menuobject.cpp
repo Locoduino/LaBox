@@ -10,6 +10,9 @@
  * @Organization : Locoduino.org
  */
 
+#include "Labox.h"
+
+#ifdef USE_HMI
 #include "globals.h"
 #include "menuobject.h"
 #include <Adafruit_GFX.h>
@@ -230,3 +233,4 @@ int menuObject::eventSelect()
   _HMIDEBUG_FCT_PRINTLN("menuObject::eventSelect.. End"); 
   return 0;
 }
+#endif

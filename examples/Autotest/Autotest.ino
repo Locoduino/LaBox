@@ -19,12 +19,14 @@ description: <Dcc Automatic Controller sample>
 #include "LaBox.h"
 #include "string.h"
 
-#ifndef USE_TEXTCOMMAND
+#if !defined(USE_TEXTCOMMAND) || !defined(USE_THROTTLES)
 #error To be able to compile this sample,the line #define USE_TEXTCOMMAND must be uncommented in DCCpp.h
 #endif
 
 //--------------------------- HMI client -------------------------------------
+#ifdef USE_HMI
 hmi boxHMI(&Wire);
+#endif
 //----------------------------------------------------------------------------
 
 ThrottleAutomation automation("Automation");
@@ -37,7 +39,9 @@ void setup()
   Serial.println(LABOX_LIBRARY_VERSION);
 
   //----------- Start HMI -------------
+#ifdef USE_HMI
   boxHMI.begin();
+#endif
 
   automation.begin();
 
@@ -73,7 +77,9 @@ void setup()
 
 void loop()
 {
+#ifdef USE_HMI
   boxHMI.update();
+#endif
 
   DCCpp::loop();
 }

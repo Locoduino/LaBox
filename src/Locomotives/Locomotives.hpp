@@ -5,6 +5,7 @@
 
 #include "DCCpp.h"
 
+#ifdef USE_LOCOMOTIVES
 #include "Locomotive.hpp"
 
 typedef void (*notifySpeedDirType)(uint16_t inLocoAddress, uint8_t inSpeed, bool inIsForward);
@@ -92,4 +93,5 @@ public:
 	static void debugLocomotivesSet();
 #endif
 };
+#endif
 #endif

@@ -11,6 +11,7 @@
 #ifndef _MENUSETVALUE
 #define _MENUSETVALUE
 
+#ifdef USE_HMI
 #include "menuobject.h"
 #include "hmiConfig.h"
 
@@ -38,4 +39,5 @@ class menuSetValue : public menuObject
     void resetMenu();
 };
 
+#endif
 #endif

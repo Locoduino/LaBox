@@ -6,11 +6,13 @@
  * @Organization : Locoduino.org
  */
 
+#include "Labox.h"
 #include "hmi.h"
 #include "hmiTrain.h"
 #include "icons.h"
 #include "globals.h"
 
+#ifdef USE_HMI
 extern enumHMIState  _HMIState ;
 extern enumHMIState  _HMIState_prev;
 extern enumEvent     _HMIEvent;
@@ -330,3 +332,4 @@ hmiTrain & hmiTrain::operator=(const hmiTrain & _hmiTrain)
   _HMIDEBUG_FCT_PRINTLN("hmiTrain::operator=.. End"); 
   return *this;
 }
+#endif

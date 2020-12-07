@@ -13,6 +13,7 @@
 #ifndef MENUOBJECT
 #define MENUOBJECT
 
+#ifdef USE_HMI
 #include "hmiConfig.h"
 
 #define nbMaxSubmenu        15
@@ -54,4 +55,5 @@ class menuObject
 
 };
 
+#endif
 #endif

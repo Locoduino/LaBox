@@ -6,11 +6,11 @@
  * @Organization : Locoduino.org
  */
 
+#ifdef USE_HMI
 #ifndef _HMITrain
 #define _HMITrain
 #include "Adafruit_GFX.h"
 #include "Adafruit_SSD1306.h"
-#include "arduino.h"
 #include "hmiConfig.h"
 class hmi;
 class hmiTrain
@@ -46,4 +46,5 @@ class hmiTrain
 
 
 
+#endif
 #endif

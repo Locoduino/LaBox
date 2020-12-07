@@ -73,7 +73,9 @@ void DCCpp::loop()
   Sensor::check();    // check sensors for activated or not
 #endif
 
+#ifdef USE_LOCOMOTIVES
   FunctionsState::functionsLoop();
+#endif
 }
 
 #ifndef USE_ONLY1_INTERRUPT
@@ -205,7 +207,7 @@ void DCCpp::begin()
   }
 #endif*/
 
-#if defined(ARDUINO_ARCH_ESP32) && defined(USE_TEXTCOMMAND)
+#if defined(ARDUINO_ARCH_ESP32) && defined(USE_THROTTLES)
   
   int core = xPortGetCoreID();
 
@@ -359,8 +361,10 @@ void DCCpp::panicStop(bool inStop)
     powerOff();
   else
     powerOn();
+#ifdef USE_HMI
   if (hmi::CurrentInterface != NULL)
     hmi::CurrentInterface->DCCEmergencyStop();
+#endif
 }
 
 void DCCpp::powerOn(bool inMain, bool inProg)
@@ -386,10 +390,12 @@ void DCCpp::powerOn(bool inMain, bool inProg)
 
   if (done)
   {
+#ifdef USE_HMI
     if (hmi::CurrentInterface != NULL)
     {
       hmi::CurrentInterface->DCCOn();
     }
+#endif
     DCCPP_INTERFACE.print("<p1>");
 #ifdef USE_THROTTLES
     if (DCCPP_INTERFACE.sendNewline())
@@ -422,8 +428,10 @@ void DCCpp::powerOff(bool inMain, bool inProg)
 
   if (done)
   {
+#ifdef USE_HMI
     if (hmi::CurrentInterface != NULL)
       hmi::CurrentInterface->DCCOff();
+#endif
     DCCPP_INTERFACE.print("<p0>");
 #ifdef USE_THROTTLES
     if (DCCPP_INTERFACE.sendNewline())
@@ -453,12 +461,13 @@ bool DCCpp::setThrottle(volatile RegisterList *inpRegs, int nReg,  int inLocoId,
   Serial.println(F(" )"));
 #endif
 
+#ifdef USE_HMI
   if (hmi::CurrentInterface != NULL)
   {
     hmi::CurrentInterface->ChangeDirection(inLocoId, inForward);
     hmi::CurrentInterface->ChangeSpeed(inLocoId, inNewSpeed);
   }
-
+#endif
   inpRegs->setThrottle(nReg, inLocoId, inNewSpeed, inForward);
 
   return true;
@@ -486,11 +495,12 @@ void DCCpp::setFunctions(volatile RegisterList *inpRegs, int nReg, int inLocoId,
   {
     if (inStates.isActivationChanged(func))
     {
+#ifdef USE_HMI
       if (hmi::CurrentInterface != NULL)
       {
         hmi::CurrentInterface->ChangeFunction(inLocoId, func, inStates.isActivated(func));
       }
-
+#endif
       // in case of desactivation of one function, mark the good block to send.
       if (!inStates.isActivated(func))
       {
@@ -565,17 +575,20 @@ int DCCpp::readCvMain(int inCvId, int callBack, int callBackSub)
   Serial.println("main");
   int cvValue;
   cvValue = mainRegs.readCVmain(inCvId, callBack, callBackSub);
+#ifdef USE_HMI
   if (hmi::CurrentInterface != NULL)
     hmi::CurrentInterface->ReadCV(true, inCvId, cvValue, cvValue != -1);
-
+#endif
   return cvValue;
 }
 
 bool DCCpp::writeCvMain(int inCvId, byte cvValue, int callBack, int callBackSub)
 { 
   bool ret = writeCv(&(mainRegs), inCvId, cvValue, callBack, callBackSub);
+#ifdef USE_HMI
   if (hmi::CurrentInterface != NULL)
     hmi::CurrentInterface->WriteCV(true, inCvId, cvValue, ret);
+#endif
   return ret;
 }
 
@@ -584,17 +597,20 @@ int DCCpp::readCvProg(int inCvId, int callBack, int callBackSub)
   Serial.println("prog");
   int cvValue;
   cvValue = progRegs.readCV(inCvId, callBack, callBackSub);
+#ifdef USE_HMI
   if (hmi::CurrentInterface != NULL)
     hmi::CurrentInterface->ReadCV(false, inCvId, cvValue, cvValue != -1);
-
+#endif
   return cvValue;
 }
 
 bool DCCpp::writeCvProg(int inCvId, byte cvValue, int callBack, int callBackSub) 
 { 
   bool ret = writeCv(&(progRegs), inCvId, cvValue, callBack, callBackSub);
+#ifdef USE_HMI
   if (hmi::CurrentInterface != NULL)
     hmi::CurrentInterface->WriteCV(false, inCvId, cvValue, ret);
+#endif
   return ret;
 }
 

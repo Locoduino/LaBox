@@ -4,12 +4,14 @@ author: <Thierry PARIS>
 description: <FunctionsState class>
 *************************************************************/
 
-#include "Arduino.h"
 #include "DCCpp.h"
 
 #ifdef USE_LOCOMOTIVES
+#include "ArduinoJson.h"
+
 Locomotive *FunctionsState::currentLocomotive = NULL;
 byte FunctionsState::currentFunctionBlock = 0;
+#endif
 
 FunctionsState::FunctionsState()
 {
@@ -97,6 +99,7 @@ bool FunctionsState::isFunctionBlockActivated(byte inBlock)
 
 long dateTime = 0;
 
+#ifdef USE_LOCOMOTIVES
 void FunctionsState::functionsLoop()
 {
 	if (!DCCpp::mainRegs.isRegisterEmpty())  // do not add a new packet if there is a Register already waiting to be updated -- nextReg will be reset to NULL by interrupt when prior Register updated fully processed
@@ -155,6 +158,7 @@ void FunctionsState::functionsLoop()
 #endif
 	}
 }
+#endif
 
 bool FunctionsState::buildDCCF0F4bytes()
 {
@@ -424,6 +428,7 @@ bool FunctionsState::buildDCCbytes(byte block, int* pByte1, int* pByte2, bool st
 	return flags > 0;
 }
 
+#ifdef USE_LOCOMOTIVES
 bool FunctionsState::Save(JsonObject inLoco)
 {
 	JsonArray functions = inLoco.createNestedArray("Functions");
@@ -434,6 +439,7 @@ bool FunctionsState::Save(JsonObject inLoco)
 
 	return true;
 }
+#endif
 
 #ifdef DCCPP_DEBUG_MODE
 void FunctionsState::printActivated()
@@ -540,5 +546,4 @@ void FunctionsState::test()
 	ret = test.isFunctionBlockActivated(4);	// true;
 	test.inactivate(28);
 }
-#endif
 #endif

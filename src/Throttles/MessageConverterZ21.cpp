@@ -7,7 +7,7 @@ description: <Message converter base class>
 #include "Arduino.h"
 #include "DCCpp.h"
 
-#if defined(USE_THROTTLES)
+#if defined(USE_THROTTLES) && defined (USE_WIFI)
 
 MessageConverterZ21::MessageConverterZ21()
 {

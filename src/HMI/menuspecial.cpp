@@ -5,12 +5,14 @@
  * @Author : Cedric Bellec
  * @Organization : Locoduino.org
  */
+#include "Labox.h"
+
+#ifdef USE_HMI
 #include "menuobject.h"
 #include "menuspecial.h"
 #include "globals.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-#include <DCCpp.h>
 /*!
     @brief  menuTrainAddrRead Constructor
     @param  Screen, an Adafruit_SSD1306 object to permit to display our menu
@@ -140,3 +142,4 @@ void menuTrainAddrRead::resetMenu()
   _HMIDEBUG_FCT_PRINTLN("menuTrainAddrRead::resetMenu.. End"); 
   
 }
+#endif

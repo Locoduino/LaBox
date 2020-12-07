@@ -80,14 +80,14 @@ void TextCommand::receiveCommands()
 
 		while (DCCPP_INTERFACE.available() > 0) {    // while there is data on the serial line
 			c = DCCPP_INTERFACE.read();
-			if (c == '<')                    // start of new command
-				commandString[0] = 0;
-			else if (c == '>')               // end of new command
+			if (c == '>')               // end of new command
 			{
 				MessageStack::MessagesStack.PushMessage(commandString);
+				commandString[0] = 0;
 			}
-			else if (strlen(commandString) < MAX_COMMAND_LENGTH)	// if commandString still has space, append character just read from serial line
-				sprintf(commandString, "%s%c", commandString, c);	// otherwise, character is ignored (but continue to look for '<' or '>')
+			else 
+				if (strlen(commandString) < MAX_COMMAND_LENGTH)	// if commandString still has space, append character just read from serial line
+					sprintf(commandString, "%s%c", commandString, c);	// otherwise, character is ignored (but continue to look for '<' or '>')
 		} // while
 
 #endif

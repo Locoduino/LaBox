@@ -11,6 +11,7 @@
 #ifndef MENUMANAGEMENT
 #define MENUMANAGEMENT
 
+#ifdef USE_HMI
 #include "Adafruit_GFX.h"
 #include "Adafruit_SSD1306.h"
 #include "hmiConfig.h"
@@ -81,6 +82,6 @@ class MenuManagement
     //----- functions
     //void addMenuInList(menuObject* item);
 };
-
+#endif
 
 #endif

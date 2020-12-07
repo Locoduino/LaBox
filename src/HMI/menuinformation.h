@@ -9,6 +9,7 @@
 #ifndef MENUINFORMATION
 #define MENUINFORMATION
 
+#ifdef USE_HMI
 #include "menuobject.h"
 #include "hmiConfig.h"
 
@@ -33,6 +34,6 @@ class menuInformation : public menuObject
     //----- functions
     void resetMenu();
 };
-
+#endif
 
 #endif

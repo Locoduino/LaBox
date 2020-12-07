@@ -5,7 +5,10 @@
 
 #include "DCCpp.h"
 
+#ifdef USE_LOCOMOTIVES
+#include "ArduinoJson.h"
 class Locomotive;
+#endif
 
 /**
 This is a class to handle decoder functions.
@@ -33,8 +36,10 @@ private:
 	inline byte byteNumber(byte inFunctionNumber) { return inFunctionNumber / 8; }
 	inline byte bitNumber(byte inFunctionNumber) { return inFunctionNumber % 8; }
 
+#ifdef USE_LOCOMOTIVES
 	static Locomotive *currentLocomotive;
 	static byte currentFunctionBlock;		// F0-4 : 0, F5-8 : 1, F9-12 : 2, F13-20 : 3, F20-28 : 4
+#endif
 
 public:
 	/** Initialize the instance.
@@ -94,12 +99,14 @@ public:
 	bool buildDCCF13F20bytes();
 	bool buildDCCF21F28bytes();
 
+#ifdef USE_LOCOMOTIVES
 	/**This function will send packets on DCC track at regular intervals to restore functions on machines which suffered of a long short-circuit.*/
 	static void functionsLoop();
 
 	/* Save this data in JSON format.
 	*/
 	bool Save(JsonObject inObject);
+#endif
 
 #ifdef DCCPP_DEBUG_MODE
 	/** Print the list of activated functions.

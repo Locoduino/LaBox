@@ -7,6 +7,8 @@ description: <FunctionsState class>
 #include "Arduino.h"
 #include "DCCpp.h"
 
+#ifdef USE_LOCOMOTIVES
+
 #include "FS.h"
 #include "SPIFFS.h"
 
@@ -14,8 +16,6 @@ description: <FunctionsState class>
 	 test or else use the SPIFFS plugin to create a partition
 	 https://github.com/me-no-dev/arduino-esp32fs-plugin */
 #define FORMAT_SPIFFS_IF_FAILED true
-
-#ifdef USE_LOCOMOTIVES
 
 notifySpeedDirType Locomotives::notifySpeedDir = NULL;
 notifyFunctionType Locomotives::notifyFunction = NULL;
