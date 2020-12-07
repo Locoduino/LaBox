@@ -1,44 +1,30 @@
 /*************************************************************
-project: <LaBox>
+project: <Dc/Dcc Controller>
 author: <Thierry PARIS>
-description: <LaBox Serial Controller sample>
+description: <Dcc Serial Controller sample>
 *************************************************************/
 
-#include "LaBox.h"
+#include "DCCpp.h"
 
-#if !defined(USE_TEXTCOMMAND) || !defined(USE_WIFI)
-#error To be able to compile this sample,the lines #define USE_TEXTCOMMAND and #define USE_WIFI_EXTERNSSID or USE_WIFI_LOCALSSID must be uncommented in DCCpp.h
+#ifndef USE_TEXTCOMMAND
+#error To be able to compile this sample,the line #define USE_TEXTCOMMAND must be uncommented in DCCpp.h
 #endif
-
-//--------------------------- HMI client -------------------------------------
-hmi boxHMI(&Wire);
-//----------------------------------------------------------------------------
-
-// SERIAL
- 
-SERIAL_INTERFACE(Serial, Normal);
-ThrottleSerial throttleSerial("Serial", SERIAL_INTERFACE_INSTANCE(Normal));
 
 void setup()
 {
-  Serial.begin(115200);
+	Serial.begin(115200);
 
-  Serial.print("LaBox ");
-  Serial.println(LABOX_LIBRARY_VERSION);
-
-  //----------- Start HMI -------------
-  boxHMI.begin();
-  
-  throttleSerial.begin();
-
-  DCCpp::begin();
-
-  // configuration pour L6203 La Box
-  DCCpp::beginMain(UNDEFINED_PIN, 33, 32, 36);  
+	DCCpp::begin();
+  // Configuration for my LMD18200. See the page 'Configuration lines' in the documentation for other samples.
+#if defined(ARDUINO_ARCH_ESP32)
+  DCCpp::beginMain(UNDEFINED_PIN, 33, 32, 36);
+#else
+  DCCpp::beginMain(UNDEFINED_PIN, DCC_SIGNAL_PIN_MAIN, 11, A0);
+#endif
 }
 
 void loop()
 {
-  boxHMI.update();
-  DCCpp::loop();
+	DCCpp::loop();
 }
+

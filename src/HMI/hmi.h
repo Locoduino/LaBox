@@ -8,6 +8,8 @@
 
 #ifndef _HMI
 #define _HMI
+
+#ifdef USE_HMI
 #include "Adafruit_GFX.h"
 #include "Adafruit_SSD1306.h"
 #include "OneButton.h"
@@ -78,7 +80,5 @@ class hmi : public Adafruit_SSD1306, public HmiInterface
     bool HmiInterfaceLoop();
     void HmiInterfaceUpdateDrawing();
 };
-
-
-
+#endif
 #endif

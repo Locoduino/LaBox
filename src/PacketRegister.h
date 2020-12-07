@@ -95,7 +95,7 @@ struct RegisterList{
 
 #ifdef DCCPP_DEBUG_MODE
   void printPacket(int, byte *, int, int) volatile;
-#ifdef USE_TEXTCOMMAND
+#if defined(USE_TEXTCOMMAND) && defined(USE_LOCOMOTIVES)
   void testFunctionCommands() volatile;
 #endif
 #endif

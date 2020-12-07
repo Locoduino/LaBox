@@ -1,6 +1,7 @@
 #include "Labox.h"
 #include "HmiInterface.hpp"
 
+#ifdef USE_HMI
 HmiInterface* HmiInterface::CurrentInterface = NULL;
 
 HmiInterface::HmiInterface()
@@ -169,3 +170,4 @@ void HmiInterface::ReadCV(bool mainTrack, uint16_t cvAddr, byte cvValue, bool su
 
   this->pHmiInterfaceEventBuffer->PushBytes((byte*)&msg, sizeof(msg));
 }
+#endif

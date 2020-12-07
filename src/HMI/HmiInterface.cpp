@@ -1,8 +1,10 @@
+#include "Labox.h"
 #include "hmi.h"
 #include "hmiConfig.h"
 #include "HmiInterface.hpp"
 #include "Labox.h"
 
+#ifdef USE_HMI
 bool hmi::HmiInterfaceLoop()
 {
   _HMIDEBUG_FCT_PRINTLN("hmi::HmiInterfaceLoop().. Begin");
@@ -121,4 +123,4 @@ void hmi::HmiInterfaceUpdateDrawing()
 {
   this->update();
 }
-
+#endif

@@ -8,6 +8,7 @@
 #ifndef HMICONFIG_H
 #define HMICONFIG_H
 
+#ifdef USE_HMI
 //---------------------- HMI section ------------------------------------
 #define HMI_I2C_ADDR            0x3C
 #define SCREEN_WIDTH            128         // OLED display width, in pixels
@@ -146,4 +147,5 @@
 #define Labox_StateSHORTCIRCUIT  103
 
 
+#endif
 #endif

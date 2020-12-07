@@ -7,6 +7,9 @@
  * @Author : Cedric Bellec
  * @Organization : Locoduino.org
  */
+#include "Labox.h"
+
+#ifdef USE_HMI
 #include "hmi.h"
 #include "menumanagement.h"
 #include "menuobject.h"
@@ -306,3 +309,4 @@ void MenuManagement::resetMenu()
   activeMenu = baseMenu;
   _HMIDEBUG_FCT_PRINTLN("MenuManagement::resetMenu.. End");   
 }
+#endif

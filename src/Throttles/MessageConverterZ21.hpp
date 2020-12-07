@@ -5,7 +5,7 @@
 
 #include "DCCpp.h"
 
-#if defined(USE_THROTTLES)
+#if defined(USE_THROTTLES) && defined (USE_WIFI)
 
 #define Z21_UDPPORT		21105
 #define Z21_TIMEOUT		60000		// if no activity during 1 minute, disconnect the throttle...

@@ -9,6 +9,7 @@
 #ifndef __MENUSPECIAL__
 #define __MENUSPECIAL__
 
+#ifdef USE_HMI
 #include "menuobject.h"
 #include "hmiConfig.h"
 
@@ -36,6 +37,6 @@ class menuTrainAddrRead : public menuObject
     //----- functions
     void resetMenu();
 };
-
+#endif
 
 #endif

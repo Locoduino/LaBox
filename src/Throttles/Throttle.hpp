@@ -146,11 +146,20 @@ protected:
 	virtual bool pushMessage(const String& inMessage);
 };
 
+#ifdef USE_TEXTCOMMAND
 #include "SerialInterface.hpp"
 #include "ThrottleSerial.hpp"
 #include "ThrottleAutomation.hpp"
+#endif
+#ifdef USE_ETHERNET
 #include "ThrottleEthernet.hpp"
+#endif
+#ifdef USE_WIFI
 #include "ThrottleWifi.hpp"
-
+#ifdef USE_TEXTCOMMAND
+#include "ThrottleWifiJMRI.hpp"
+#endif
+#endif
+	
 #endif
 #endif

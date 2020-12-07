@@ -7,6 +7,9 @@
  * @Author : Cedric Bellec
  * @Organization : Locoduino.org
  */
+#include "Labox.h"
+
+#ifdef USE_HMI
 #include "menuobject.h"
 #include "menusetvalue.h"
 #include "globals.h"
@@ -108,3 +111,4 @@ int menuSetValue::eventSelect()
   _HMIDEBUG_FCT_PRINTLN("menuSetValue::eventSelect.. End");  
   return 0;
 }
+#endif

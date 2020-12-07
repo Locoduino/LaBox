@@ -163,11 +163,14 @@ void RegisterList::setThrottle(int nReg, int cab, int tSpeed, int tDirection) vo
 #endif
 	speedTable[nReg] = tDirection == 1 ? tSpeed : -tSpeed;
 
+#ifdef USE_HMI
 	if (hmi::CurrentInterface != NULL)
 	{
 		hmi::CurrentInterface->ChangeDirection(cab, tDirection);
 		hmi::CurrentInterface->ChangeSpeed(cab, tSpeed);
 	}
+#endif
+#ifdef USE_LOCOMOTIVES
 	Locomotive* loco = Locomotives::get(cab);
 	if (loco == NULL)
 	{
@@ -181,6 +184,7 @@ void RegisterList::setThrottle(int nReg, int cab, int tSpeed, int tDirection) vo
 		loco->setSpeed(tSpeed);
 		loco->setDirection(tDirection);
 	}
+#endif
 } // RegisterList::setThrottle(ints)
 
 #ifdef USE_TEXTCOMMAND
@@ -205,20 +209,29 @@ void RegisterList::setThrottle(const char *s) volatile
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void checkFunction(int cab, int theByte, int startFunc, int endFunc, Locomotive *pLoco)
+void checkFunction(int cab, int theByte, int startFunc, int endFunc,
+#ifdef USE_LOCOMOTIVES
+	Locomotive* pLoco)
+#else
+	int dummyLoco)
+#endif
 {
 	bool state = false;
 	for (int func = startFunc; func <= endFunc; func++)
 	{
 		state = (theByte & (1 << (func - startFunc))) > 0;
+#ifdef USE_HMI
 		if (hmi::CurrentInterface != NULL)
 		{
 			hmi::CurrentInterface->ChangeFunction(cab, func, state);
 		}
+#endif
+#ifdef USE_LOCOMOTIVES
 		if (pLoco != NULL)
 		{
 			pLoco->setFunction(func, state);
 		}
+#endif
 	}
 }
 
@@ -227,7 +240,7 @@ void RegisterList::setFunction(int nReg, int cab, int fByte, int eByte, bool ret
 	byte b[5];                      // save space for checksum byte
 	byte nB = 0;
 
-	if (cab>127)
+	if (cab > 127)
 		b[nB++] = highByte(cab) | 0xC0;      // convert train number into a two-byte address
 
 	b[nB++] = lowByte(cab);
@@ -256,104 +269,114 @@ void RegisterList::setFunction(int nReg, int cab, int fByte, int eByte, bool ret
 	}
 #endif
 
-	if (hmi::CurrentInterface != NULL)
+	bool state = false;
+#ifdef USE_LOCOMOTIVES
+	Locomotive* loco = Locomotives::get(cab);
+	if (loco == NULL)
 	{
-		bool state = false;
-		Locomotive* loco = Locomotives::get(cab);
-		if (loco == NULL)
-		{
-			char name[10];
-			sprintf(name, "%04d", cab);
-			Locomotives::add(name, cab, 128);
-			loco = Locomotives::get(cab);
-		}
+		char name[10];
+		sprintf(name, "%04d", cab);
+		Locomotives::add(name, cab, 128);
+		loco = Locomotives::get(cab);
+	}
+#else
+	int loco = 0;
+#endif
 
-		/* Block 0
-		*
-		* To set functions F0 - F4 on(= 1) or off(= 0) :
-		*
-		* BYTE1 : 128 + F1 * 1 + F2 * 2 + F3 * 4 + F4 * 8 + F0 * 16
-		* BYTE2 : omitted
-	  */
-		if ((fByte & B11100000) == B10000000 && eByte == -1)
+	/* Block 0
+	*
+	* To set functions F0 - F4 on(= 1) or off(= 0) :
+	*
+	* BYTE1 : 128 + F1 * 1 + F2 * 2 + F3 * 4 + F4 * 8 + F0 * 16
+	* BYTE2 : omitted
+	*/
+	if ((fByte & B11100000) == B10000000 && eByte == -1)
+	{
+		fByte &= B01111111;		// remove bit 7.
+		for (int func = 0; func <= 4; func++)
 		{
-			fByte &= B01111111;		// remove bit 7.
-			for (int func = 0; func <= 4; func++)
+			if (func == 0)
 			{
-				if (func == 0)
-				{
-					state = (fByte & B00010000) > 0;
-				}
-				else
-				{
-					state = (fByte & (1 << (func - 1))) > 0;
-				}
-				hmi::CurrentInterface->ChangeFunction(cab, func, state);
-				if (loco != NULL)
-				{
-					loco->setFunction(func, state);
-				}
+				state = (fByte & B00010000) > 0;
 			}
-		}
-
-		/* Block 1
-		*	To set functions F5 - F8 on(= 1) or off(= 0) :
-		*
-		*	BYTE1 : 176 + F5 * 1 + F6 * 2 + F7 * 4 + F8 * 8
-		*	BYTE2 : omitted
-		*/
-		if ((fByte & B11110000) == B10110000 && eByte == -1)
-		{
-			fByte -= 176;
-			checkFunction(cab, fByte, 5, 8, loco);
-		}
-
-		/* Block 2
-		*	To set functions F9 - F12 on(= 1) or off(= 0) :
-		*
-		*	BYTE1 : 160 + F9 * 1 + F10 * 2 + F11 * 4 + F12 * 8
-		*	BYTE2 : omitted
-		*/
-		if ((fByte & B11110000) == B10100000 && eByte == -1)
-		{
-			fByte -= 160;
-			checkFunction(cab, fByte, 9, 12, loco);
-		}
-
-		/* Block 3
-		*	To set functions F13 - F20 on(= 1) or off(= 0) :
-		*
-		*	BYTE1 : 222
-		*	BYTE2 : F13 * 1 + F14 * 2 + F15 * 4 + F16 * 8 + F17 * 16 + F18 * 32 + F19 * 64 + F20 * 128
-		*/
-		if (fByte == 222 && eByte != -1)
-		{
-			checkFunction(cab, eByte, 13, 20, loco);
-		}
-
-		/* Block 4
-		* To set functions F21 - F28 on(= 1) of off(= 0) :
-
-		* BYTE1 : 223
-		* BYTE2 : F21 * 1 + F22 * 2 + F23 * 4 + F24 * 8 + F25 * 16 + F26 * 32 + F27 * 64 + F28 * 128
-		*/
-		if (fByte == 223 && eByte != -1)
-		{
-			checkFunction(cab, eByte, 21, 28, loco);
-		}
-
-		if (loco != NULL)
-		{
+			else
+			{
+				state = (fByte & (1 << (func - 1))) > 0;
+			}
+#ifdef USE_HMI
 			if (hmi::CurrentInterface != NULL)
+				hmi::CurrentInterface->ChangeFunction(cab, func, state);
+#endif
+#ifdef USE_LOCOMOTIVES
+			if (loco != NULL)
 			{
-				bool ret = false;
-				do {
-					ret = hmi::CurrentInterface->HmiInterfaceLoop();
-				} while (ret);
+				loco->setFunction(func, state);
 			}
-			loco->functions.statesSent();
+#endif
 		}
 	}
+
+	/* Block 1
+	*	To set functions F5 - F8 on(= 1) or off(= 0) :
+	*
+	*	BYTE1 : 176 + F5 * 1 + F6 * 2 + F7 * 4 + F8 * 8
+	*	BYTE2 : omitted
+	*/
+	if ((fByte & B11110000) == B10110000 && eByte == -1)
+	{
+		fByte -= 176;
+		checkFunction(cab, fByte, 5, 8, loco);
+	}
+
+	/* Block 2
+	*	To set functions F9 - F12 on(= 1) or off(= 0) :
+	*
+	*	BYTE1 : 160 + F9 * 1 + F10 * 2 + F11 * 4 + F12 * 8
+	*	BYTE2 : omitted
+	*/
+	if ((fByte & B11110000) == B10100000 && eByte == -1)
+	{
+		fByte -= 160;
+		checkFunction(cab, fByte, 9, 12, loco);
+	}
+
+	/* Block 3
+	*	To set functions F13 - F20 on(= 1) or off(= 0) :
+	*
+	*	BYTE1 : 222
+	*	BYTE2 : F13 * 1 + F14 * 2 + F15 * 4 + F16 * 8 + F17 * 16 + F18 * 32 + F19 * 64 + F20 * 128
+	*/
+	if (fByte == 222 && eByte != -1)
+	{
+		checkFunction(cab, eByte, 13, 20, loco);
+	}
+
+	/* Block 4
+	* To set functions F21 - F28 on(= 1) of off(= 0) :
+
+	* BYTE1 : 223
+	* BYTE2 : F21 * 1 + F22 * 2 + F23 * 4 + F24 * 8 + F25 * 16 + F26 * 32 + F27 * 64 + F28 * 128
+	*/
+	if (fByte == 223 && eByte != -1)
+	{
+		checkFunction(cab, eByte, 21, 28, loco);
+	}
+
+#ifdef USE_HMI
+	if (hmi::CurrentInterface != NULL)
+	{
+		bool ret = false;
+		do {
+			ret = hmi::CurrentInterface->HmiInterfaceLoop();
+		} while (ret);
+	}
+#endif
+#ifdef USE_LOCOMOTIVES
+	if (loco != NULL)
+	{
+		loco->functions.statesSent();
+	}
+#endif
 
 	/* NMRA DCC norm ask for two DCC packets instead of only one:
 	"Command Stations that generate these packets, and which are not periodically refreshing these functions,
@@ -410,7 +433,7 @@ void RegisterList::setFunction(const char *s, bool returnMessages) volatile
 
 } // RegisterList::setFunction(string)
 
-#ifdef DCCPP_DEBUG_MODE
+#if defined(DCCPP_DEBUG_MODE) && defined(USE_LOCOMOTIVES) && defined(USE_TEXTCOMMAND)
 void RegisterList::testFunctionCommands() volatile
 {
 	Locomotive* loco = Locomotives::get(3);

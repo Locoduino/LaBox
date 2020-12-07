@@ -5,6 +5,9 @@
  * @Author : Cedric Bellec
  * @Organization : Locoduino.org
  */
+#include "Labox.h"
+
+#ifdef USE_HMI
 #include "menuobject.h"
 #include "menuinformation.h"
 #include "globals.h"
@@ -106,3 +109,4 @@ void menuInformation::resetMenu()
   _HMIDEBUG_FCT_PRINTLN("menuInformation::resetMenu.. End"); 
   
 }
+#endif

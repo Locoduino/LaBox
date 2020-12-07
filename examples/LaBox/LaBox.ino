@@ -13,13 +13,13 @@ description: <LaBox Wifi Controller sample>
 // WIFI
 
 #ifdef USE_WIFI_EXTERNSSID
-const char* ssid = "*****";
-const char* password = "*****";
+const char* ssid = "VIDEOFUTUR_ED5939_2.4G";
+const char* password = "*********";
 
-IPAddress ip      (192,   168,  43,  100);   // fix IP of the server in client mode
-IPAddress gateway (192,   168,  43,  9);     // WiFi router's IP. If you are in AP mode, it's the ESP IP. If you are in client, it's your own gateway
+IPAddress ip      (192,   168,  0,  200);   // fix IP of the server in client mode
+IPAddress gateway (192,   168,  0,  1);     // WiFi router's IP. If you are in AP mode, it's the ESP IP. If you are in client, it's your own gateway
 IPAddress subnet  (255,   255,  255,  0);    // Subnet mask
-IPAddress dns     (192,   168,  43,  9);     // DNS server, generally, the WiFi access point is a DNS server, but we can define another one.
+IPAddress dns     (192,   168,  0,  1);     // DNS server, generally, the WiFi access point is a DNS server, but we can define another one.
 
 #endif
 #ifdef USE_WIFI_LOCALSSID
@@ -39,7 +39,9 @@ int wifiPort = 44444;
 SERIAL_INTERFACE(Serial, Normal);
 ThrottleSerial throttleSerial("Serial", SERIAL_INTERFACE_INSTANCE(Normal));
 
-//ThrottleWifi throttleWifi0("DCCpp", dccPPPort);
+ThrottleWifiJMRI throttleWifiJMRI;
+
+ThrottleWifi throttleWifi0("DCCpp", dccPPPort);
 
 ThrottleWifi throttleWifi1("Z21 - 1", Z21_UDPPORT);
 MessageConverterZ21 converter1;
@@ -68,12 +70,19 @@ void setup()
   //Locomotives::debugLocomotivesSet();
 
   //----------- Start Wifi
-  ThrottleWifi::connectWifi(ssid, password);//, ip, gateway, subnet, dns);
+#ifdef USE_WIFI_LOCALSSID
+  ThrottleWifi::connectWifi(ssid, password);
+#else
+  ThrottleWifi::connectWifi(ssid, password, ip, gateway, subnet, dns);
+#endif
 
   throttleSerial.begin();
 
+  // For JMRI connection
+  throttleWifiJMRI.begin();
+
   // For DCCpp syntax applications like DCCpp cab or RTDrive+
-  //throttleWifi0.begin(HTTP);
+  //throttleWifi0.begin(TCP);
 
   // Z21 applications
   throttleWifi1.begin(&converter1);

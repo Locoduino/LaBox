@@ -353,17 +353,21 @@ const char* passwordTest = "EenPghQD";
 
 void Throttle::test()
 {
+#ifdef USE_TEXTCOMMAND
 	ThrottleSerial throttleSerial("TestSerial 12", new SerialInterfaceTest());
 	throttleSerial.setId(12);
+#endif
 
 #if !defined(ARDUINO_ARCH_ESP32)
 	ThrottleEthernet throttleEthernet("TestEthernet 9", MacTest, IpTest, 2560, TCP);
 	throttleEthernet.setId(9);
 #endif
 
+#ifdef USE_WIFI
 	ThrottleWifi throttleWifi("TestWifi 567", 2560);
 	throttleWifi.begin(TCP);
 	throttleWifi.setId(567);
+#endif
 
 	Throttles::printThrottles();
 

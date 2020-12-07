@@ -5,8 +5,10 @@
 
 #include "DCCpp.h"
 #include "WString.h"
-#include "ArduinoJson.h"
 #include "FunctionsState.hpp"
+
+#ifdef USE_LOCOMOTIVES
+#include "ArduinoJson.h"
 #include "Registers.hpp"
 
 #define LOCOMOTIVE_NAME_SIZE	32
@@ -147,4 +149,5 @@ public:
 #endif
 };
 
+#endif
 #endif
