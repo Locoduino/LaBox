@@ -4,7 +4,7 @@ author: <Thierry PARIS>
 description: <Dcc Serial Controller sample>
 *************************************************************/
 
-#include "LaBox.h"
+#include "DCCpp.h"
 
 #ifndef USE_TEXTCOMMAND
 #error To be able to compile this sample,the line #define USE_TEXTCOMMAND must be uncommented in DCCpp.h
