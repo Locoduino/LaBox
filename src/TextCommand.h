@@ -12,6 +12,10 @@ Part of DCC++ BASE STATION for the Arduino
 
 #include "DCCpp.h"
 
+#ifdef USE_THROTTLES
+#include "LaBox.h"
+#endif
+
 /**	\defgroup commandsGroup Text Commands Syntax
 */
 
