@@ -9,9 +9,9 @@
 //#include "D:\Mes documents\Trusty\Arduino\Libraries\ArduinoJson\examples\JsonConfigFile\JsonConfigFile.ino"
 
 //#include "../examples/Autotest/Autotest.ino"
-#include "../examples/SerialDcc/SerialDcc.ino"
+//#include "../examples/SerialDcc/SerialDcc.ino"
 //#include "../examples/ThrottleSerialDcc/ThrottleSerialDcc.ino"
-//#include "../examples/LaBox/LaBox.ino"
+#include "../examples/LaBox/LaBox.ino"
 
 //const char* ssid = "VIDEOFUTUR_ED5939_2.4G";
 //const char* password = "2932003454";

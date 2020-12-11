@@ -14,7 +14,7 @@ description: <LaBox Wifi Controller sample>
 
 #ifdef USE_WIFI_EXTERNSSID
 const char* ssid = "VIDEOFUTUR_ED5939_2.4G";
-const char* password = "*********";
+const char* password = "2932003454";
 
 IPAddress ip      (192,   168,  0,  200);   // fix IP of the server in client mode
 IPAddress gateway (192,   168,  0,  1);     // WiFi router's IP. If you are in AP mode, it's the ESP IP. If you are in client, it's your own gateway
@@ -41,7 +41,7 @@ ThrottleSerial throttleSerial("Serial", SERIAL_INTERFACE_INSTANCE(Normal));
 
 ThrottleWifiJMRI throttleWifiJMRI;
 
-ThrottleWifi throttleWifi0("DCCpp", dccPPPort);
+//ThrottleWifi throttleWifi0("DCCpp", dccPPPort);
 
 ThrottleWifi throttleWifi1("Z21 - 1", Z21_UDPPORT);
 MessageConverterZ21 converter1;

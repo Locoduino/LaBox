@@ -254,12 +254,16 @@ void DCCpp::begin()
 
 void DCCpp::showConfiguration()
 {
-  Serial.println(F("*** DCCpp LIBRARY ***"));
-
-  Serial.print(F("VERSION DCC++:      "));
-  Serial.println(VERSION);
+#ifdef USE_THROTTLES
+  Serial.print(F("*** LaBox LIBRARY : "));
+  Serial.println(F(LABOX_LIBRARY_VERSION));
+#else
+  Serial.print(F("*** DCCpp LIBRARY : "));
   Serial.println(F(DCCPP_LIBRARY_VERSION));
-  Serial.print(F("COMPILED:     "));
+#endif
+  Serial.print(F("VERSION DCC++     : "));
+  Serial.println(VERSION);
+  Serial.print(F("COMPILED          : "));
   Serial.print(__DATE__);
   Serial.print(F(" "));
   Serial.println(__TIME__);
