@@ -464,11 +464,11 @@ Main include file of the library.*/
 //#define USE_ETHERNET_WIZNET_5500
 //#define USE_ETHERNET_WIZNET_5200
 //#define USE_ETHERNET_ENC28J60
-#define USE_WIFI_LOCALSSID
+//#define USE_WIFI_LOCALSSID
 //#define USE_WIFI_EXTERNSSID
-#define USE_LOCOMOTIVES
-#define USE_THROTTLES
-#define USE_HMI
+//#define USE_LOCOMOTIVES
+//#define USE_THROTTLES
+//#define USE_HMI
 
 #ifdef DOXYGEN_SPECIFIC
     // DO NOT CHANGE THESE LINES IN THIS BLOCK 'DOXYGEN_SPECIFIC' : Only here for documentation !
