@@ -671,13 +671,22 @@ bool TextCommand::parse(char *com)
 #endif
 			DCCPP_INTERFACE.println("");
 	  }
+#ifdef USE_THROTTLES
+		DCCPP_INTERFACE.print("<iLaBox LIBRARY FOR ARDUINO/ESP32 ");
+#else
 		DCCPP_INTERFACE.print("<iDCCpp LIBRARY BASE STATION FOR ARDUINO ");
+#endif
+
 		//DCCPP_INTERFACE.print("<iDCC++ BASE STATION FOR ARDUINO MEGA / L293D : BUILD ");
 	  //DCCPP_INTERFACE.print(ARDUINO_TYPE);
 	  //DCCPP_INTERFACE.print(" / ");
 	  //DCCPP_INTERFACE.print(MOTOR_SHIELD_NAME);
 	  DCCPP_INTERFACE.print(": V-");
-	  DCCPP_INTERFACE.print(VERSION);
+#ifdef USE_THROTTLES
+		DCCPP_INTERFACE.print(LABOX_LIBRARY_VERSION);
+#else
+		DCCPP_INTERFACE.print(VERSION);
+#endif
 	  DCCPP_INTERFACE.print(" / ");
 	  DCCPP_INTERFACE.print(__DATE__);
 	  DCCPP_INTERFACE.print(" ");
@@ -699,7 +708,7 @@ bool TextCommand::parse(char *com)
 			DCCPP_INTERFACE.println("");
 #else
 #if defined(USE_WIFI)
-		DCCPP_INTERFACE.print("ETHERNET :");
+		DCCPP_INTERFACE.print("WIFI :");
 		DCCPP_INTERFACE.print(WiFi.localIP());
 		DCCPP_INTERFACE.print(">");
 #else

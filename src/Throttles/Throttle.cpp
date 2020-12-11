@@ -23,6 +23,7 @@ Throttle::Throttle(const String& inName, unsigned int inTimeOutDelay)
 	this->endCommandCharacter = '>';
 
 	// Variable data
+	this->printMemo.reserve(100);
 	this->printMemo = "";
 	this->commandString[0] = 0;
 	this->contacted = false;
@@ -250,7 +251,7 @@ void Throttle::Print(IPAddress value)
 	for (int i = 0; i < 3; i++)
 	{
 		this->Print(value[i], DEC);
-		this->Print('.');
+		this->Print(".");
 	}
 	this->Print(value[3], DEC);
 }
