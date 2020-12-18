@@ -35,7 +35,7 @@ ThrottleEthernet::ThrottleEthernet(const String& inName, uint8_t* inMac, uint8_t
 
 bool ThrottleEthernet::begin(EthernetProtocol inProtocol)
 {
-
+	this->type = ThrottleType::Ethernet;
 	if (this->ethernetIp[0] == 0)
 		Ethernet.begin(this->ethernetMac);                  // Start networking using DHCP to get an IP Address
 	else
@@ -53,6 +53,9 @@ IPAddress ThrottleEthernet::remoteIP()
 bool ThrottleEthernet::loop()
 {
 	bool added = false;
+
+	if (this->type == ThrottleType::NotStartedThrottle)
+		return false;
 
 	EthernetClient client = this->pServer->available();
 
@@ -78,6 +81,9 @@ bool ThrottleEthernet::loop()
 
 bool ThrottleEthernet::sendMessage(const String&  inMessage)
 {
+	if (this->type == ThrottleType::NotStartedThrottle)
+		return false;
+
 	this->pServer->println(inMessage);
 	return true;
 }
@@ -88,6 +94,9 @@ void ThrottleEthernet::end()
 
 bool ThrottleEthernet::isConnected()
 {
+	if (this->type == ThrottleType::NotStartedThrottle)
+		return false;
+
 	return true;
 }
 

@@ -194,10 +194,10 @@ void hmiTrain::dashboard1T()
   {
     if(speed < ratioSpeed*(step))
     {
-      display->drawRect(x, offsetYBarresGraph - (5 + step + round(exp2(step)/(step*2))), HMITrain_RectWidth, (5 + step + round(exp2(step)/(step*2))), WHITE);
+      display->drawRect(x, offsetYBarresGraph - (int)(5 + step + round(exp2(step)/(step*2))), HMITrain_RectWidth, (int)(5 + step + round(exp2(step)/(step*2))), WHITE);
     }else
     {
-      display->fillRect(x, offsetYBarresGraph - (5 + step + round(exp2(step)/(step*2))), HMITrain_RectWidth, (5 + step + round(exp2(step)/(step*2))), WHITE);
+      display->fillRect(x, offsetYBarresGraph - (int)(5 + step + round(exp2(step)/(step*2))), HMITrain_RectWidth, (int)(5 + step + round(exp2(step)/(step*2))), WHITE);
     }      
     x += HMITrain_RectWidth+HMITrain_RectSpace ;
     step++;
@@ -272,10 +272,10 @@ void hmiTrain::drawLightSymbol(int pos_x, int pos_y, int starSize)
   display->fillCircle(pos_x, pos_y, starSize/3, WHITE);
   for(int i = 0; i < 8 ; i++ )
   {
-    display->drawLine(  pos_x + starSize*2/3  * cos(i*PI/4), 
-                        pos_y + starSize*2/3  * sin(i*PI/4), 
-                        pos_x + starSize      * cos(i*PI/4), 
-                        pos_y + starSize      * sin(i*PI/4), 
+    display->drawLine(  pos_x + ((int)(starSize*2/3  * cos(i*PI/4))), 
+                        pos_y + ((int)(starSize*2/3  * sin(i*PI/4))), 
+                        pos_x + ((int)(starSize      * cos(i*PI/4))), 
+                        pos_y + ((int)(starSize      * sin(i*PI/4))), 
                         WHITE); 
                         
   }

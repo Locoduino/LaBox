@@ -34,13 +34,7 @@ char TextCommand::commandString[MAX_COMMAND_LENGTH+1];
 void TextCommand::receiveCommands()
 {
 #ifdef USE_THROTTLES
-	 Throttle* pCurr = Throttles::getFirst();
-
-	 while (pCurr != NULL)
-	 {
-		 pCurr->loop();
-		 pCurr = pCurr->pNextThrottle;
-	 }
+	 Throttles::loop();
 #else
 
 	char c;

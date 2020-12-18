@@ -18,8 +18,8 @@ Throttle* Throttles::getFirst()
 }
 
 Throttle* Throttles::get(uint16_t inId)
-	{
-		Throttle* pCurr = pFirstThrottle;
+{
+	Throttle* pCurr = pFirstThrottle;
 
 	while (pCurr != NULL)
 	{
@@ -147,6 +147,23 @@ int Throttles::count()
 	return count;
 }
 
+bool Throttles::loop()
+{
+	Throttle* pCurr = Throttles::getFirst();
+	bool ret = true;
+
+	while (pCurr != NULL)
+	{
+		if (pCurr->type != ThrottleType::NotStartedThrottle)
+		{
+			ret &= pCurr->loop();
+			pCurr = pCurr->pNextThrottle;
+		}
+	}
+
+	return ret;
+}
+
 #ifdef DCCPP_DEBUG_MODE
 /** Print the list of assigned Throttles.
 @remark Only available if DCCPP_DEBUG_MODE is defined.
@@ -159,6 +176,10 @@ void Throttles::printThrottles()
 
 	while (pCurr != NULL)
 	{
+		if (pCurr->type == ThrottleType::NotStartedThrottle)
+		{
+			Serial.print("NotStarted ! ");
+		}
 		pCurr->printThrottle();
 		pCurr = pCurr->pNextThrottle;
 	}

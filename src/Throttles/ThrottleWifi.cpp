@@ -16,7 +16,6 @@ ThrottleWifi::ThrottleWifi(const String& inName, int inPort) : Throttle(inName)
 	this->port = inPort;
 	this->remoteIp = INADDR_NONE;
 	this->contacted = false;
-	this->type = ThrottleType::Wifi;
 }
 
 void ThrottleWifi::connectWifi(const char* inSsid, const char* inPassword, IPAddress inIp, IPAddress inGateway, IPAddress insubnet, IPAddress inDns)
@@ -123,6 +122,7 @@ void ThrottleWifi::connectWifi(const char* inSsid, const char* inPassword, IPAdd
 
 bool ThrottleWifi::begin(EthernetProtocol inProtocol)
 {
+	this->type = ThrottleType::Wifi;
 	this->protocol = inProtocol;
 
 	if (protocol == UDP)
@@ -152,6 +152,7 @@ bool ThrottleWifi::begin(EthernetProtocol inProtocol)
 
 bool ThrottleWifi::begin(MessageConverter *apConverter)
 {
+	this->type = ThrottleType::Wifi;
 	this->setConverter(apConverter);
 	return this->begin(apConverter->getProtocol());
 }
@@ -215,6 +216,9 @@ bool ThrottleWifi::readUdpPacket(ThrottleWifi *inpThrottle)
 bool ThrottleWifi::loop()
 {
 	bool added = false;
+
+	if (this->type == ThrottleType::NotStartedThrottle)
+		return false;
 
 	if (this->protocol == UDP)
 	{
@@ -321,7 +325,10 @@ bool ThrottleWifi::loop()
 
 bool ThrottleWifi::sendMessage(const String& inMessage)
 {
-	if (!this->dontReply)
+	if (this->type == ThrottleType::NotStartedThrottle)
+		return false;
+
+	if (!this->replyToCommands)
 	{
 		size_t size = 0;
 		switch (this->protocol)
@@ -399,6 +406,9 @@ void ThrottleWifi::end()
 
 bool ThrottleWifi::isConnected()
 {
+	if (this->type == ThrottleType::NotStartedThrottle)
+		return false;
+
 	return WiFi.status() == WL_CONNECTED || this->contacted;
 }
 

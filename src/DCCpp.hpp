@@ -14,6 +14,7 @@ class DCCpp
 	private:
 		static bool programMode;
 		static bool panicStopped;
+		static bool resendFunctions;
 
 		static bool setThrottle(volatile RegisterList *inReg, int nReg, int inLocoId, int inStepsNumber, int inNewSpeed, bool inForward);
 		static int readCvRaw(volatile RegisterList* inReg, int inCvId, int callBack = 100, int callBackSub = 200);
@@ -159,6 +160,16 @@ class DCCpp
 		@return Previous value.
 		*/
 		static byte setAckThreshold(byte inNewValue);
+
+		/** Set if the Throttle should reply to the controller.
+		@param inResendFunctions		False if the functions packets are not repeatedly resend on DCC track..
+		*/
+		static void setResendFunctions(bool inResendFunctions) { resendFunctions = inResendFunctions; }
+
+		/** Checks if the functions must be resent or not.
+		@return true if the functions must be resent on DCC track.
+		*/
+		static bool IsResendFunctions() { return resendFunctions; }
 
 		/** Set the maximum current value before an event 'too much current consumption detected !' for main track.
 		@param inMax	Maximum value between 0 and 1023. Default is 300.

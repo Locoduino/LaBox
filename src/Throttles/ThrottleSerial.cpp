@@ -14,6 +14,7 @@ ThrottleSerial::ThrottleSerial(const String& inName, SerialInterface* inpInterfa
 
 bool ThrottleSerial::begin(EthernetProtocol inProtocol)
 {
+	this->type = ThrottleType::SerialThrottle;
 	return true;
 }
 
@@ -24,6 +25,9 @@ void ThrottleSerial::end()
 bool ThrottleSerial::loop()
 {
 	bool added = false;
+
+	if (this->type == ThrottleType::NotStartedThrottle)
+		return false;
 
 	// Serial comm always active...
 	while (this->pInterface->available() > 0) 
@@ -36,17 +40,26 @@ bool ThrottleSerial::loop()
 
 bool ThrottleSerial::sendMessage(const String& inMessage)
 {
+	if (this->type == ThrottleType::NotStartedThrottle)
+		return false;
+
 	this->pInterface->println(inMessage);
 	return true;
 }
 
 bool ThrottleSerial::isConnected()
 {
+	if (this->type == ThrottleType::NotStartedThrottle)
+		return false;
+
 	return true;
 }
 
 bool ThrottleSerial::pushMessage(const String& inpCommand)
 {
+	if (this->type == ThrottleType::NotStartedThrottle)
+		return false;
+
 	return this->pushDccppMessage(inpCommand);
 }
 

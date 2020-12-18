@@ -212,9 +212,9 @@
     <ClCompile Include="..\src\CircularBuffer.cpp" />
     <ClCompile Include="..\src\DccSignalESP32.cpp" />
     <ClCompile Include="..\src\DccSignalUno.cpp" />
-    <ClCompile Include="..\src\HmiInterfaceBase.cpp" />
+    <ClCompile Include="..\src\HmiInterface.cpp" />
     <ClCompile Include="..\src\HMI\hmi.cpp" />
-    <ClCompile Include="..\src\HMI\HmiInterface.cpp" />
+    <ClCompile Include="..\src\HMI\hmi.Interface.cpp" />
     <ClCompile Include="..\src\HMI\hmiTrain.cpp" />
     <ClCompile Include="..\src\HMI\menuinformation.cpp" />
     <ClCompile Include="..\src\HMI\menumanagement.cpp" />
@@ -244,6 +244,9 @@
     <ClCompile Include="..\src\PacketRegister.cpp" />
     <ClCompile Include="..\src\Sensor.cpp" />
     <ClCompile Include="..\src\TextCommand.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Hmi.cd" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

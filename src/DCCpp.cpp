@@ -22,6 +22,7 @@ byte DCCpp::ackThreshold = 0;
 bool DCCpp::IsPowerOnMain = false;
 bool DCCpp::IsPowerOnProg = false;
 bool DCCpp::powerOnAtFirstClient = true;
+bool DCCpp::resendFunctions = true;
 
 #if defined(ARDUINO_ARCH_ESP32) && defined(USE_TEXTCOMMAND)
 TaskHandle_t Task1;
@@ -74,7 +75,8 @@ void DCCpp::loop()
 #endif
 
 #ifdef USE_LOCOMOTIVES
-  FunctionsState::functionsLoop();
+  if (resendFunctions)
+    FunctionsState::functionsLoop();
 #endif
 }
 

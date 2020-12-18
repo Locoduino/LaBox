@@ -61,12 +61,16 @@ bool ThrottleAutomation::begin(EthernetProtocol inProtocol)
 	this->currentItem = NULL;
 	this->timeValue = 0;
 	this->currentState = stopped;
+	this->type = ThrottleType::Automation;
 	return true;
 }
 
 bool ThrottleAutomation::loop()
 {
 	bool added = false;
+
+	if (this->type == ThrottleType::NotStartedThrottle)
+		return false;
 
 	if (this->currentState == started)
 	{

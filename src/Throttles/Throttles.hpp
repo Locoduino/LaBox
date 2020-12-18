@@ -56,6 +56,11 @@ public:
 	*/
 	static int count();
 
+	/** Execute all the declared throttles.
+	@return true if all throttles has been executed without problems.
+	*/
+	static bool loop();
+
 #ifdef DCCPP_DEBUG_MODE
 	/** Print the list of assigned throttle.
 	@remark Only available if DCCPP_DEBUG_MODE is defined.

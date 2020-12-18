@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="hmi" Collapsed="true">
+    <Position X="9.75" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABEEIBAQgAGACQAAFAAAEJoTgAAEDAAAmBAIBaAlACA=</HashCode>
+      <FileName>D:\Documents\Arduino\Libraries\LaBox\src\HMI\hmi.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HmiInterface" Collapsed="true">
+    <Position X="9.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQAAAgCAAAgAAAACCAwAARAEAAACAIABRAAgSABAQ=</HashCode>
+      <FileName>D:\Documents\Arduino\Libraries\LaBox\src\HmiInterface.hpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="menuObject" Collapsed="true">
+    <Position X="2.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>GAgIBAIAAAAAAgBAAJAAIAAQAAEBCCAAAQAEAAgEAAI=</HashCode>
+      <FileName>D:\Documents\Arduino\Libraries\LaBox\src\HMI\menuobject.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="menuSetValue" Collapsed="true">
+    <Position X="0.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAgAAIAAIAABAIAAIAAAAAQAAAAAAAAAAAAAAAEAAI=</HashCode>
+      <FileName>D:\Documents\Arduino\Libraries\LaBox\src\HMI\menusetvalue.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="menuTrainAddrRead" Collapsed="true">
+    <Position X="2.5" Y="1.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>CAAAAIIAAAAAAAAAAIAEAAAQAAAAAgAAAAAAAAAEICI=</HashCode>
+      <FileName>D:\Documents\Arduino\Libraries\LaBox\src\HMI\menuspecial.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MenuManagement" Collapsed="true">
+    <Position X="6.5" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>EAABJAQEEAAEAQiDGgCAABISAgFITQHgBAAAARAEoAo=</HashCode>
+      <FileName>D:\Documents\Arduino\Libraries\LaBox\src\HMI\menumanagement.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="menuInformation" Collapsed="true">
+    <Position X="4.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAIAAAAAAAAAAIAAAAAQAAAAAAAAAAAAAgAEAAI=</HashCode>
+      <FileName>D:\Documents\Arduino\Libraries\LaBox\src\HMI\menuinformation.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

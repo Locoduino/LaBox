@@ -17,9 +17,11 @@
 
 enum ThrottleType : byte
 {
+	NotStartedThrottle,
 	SerialThrottle,
 	Wifi,
 	Ethernet,
+	Automation,
 	UserDefined
 };
 
@@ -35,7 +37,7 @@ protected:
 	int startCommandCharacter, endCommandCharacter;
 	uint16_t id;
 	char commandString[THROTTLE_COMMAND_SIZE + 1];
-	bool dontReply;	// if true, the Throttle will not send replies to the controller.
+	bool replyToCommands;	// if false, the Throttle will not send replies to the commands sending throttle.
 
 public:
 	ThrottleType type;
@@ -63,9 +65,9 @@ public:
 	void setTimeOutDelay(unsigned int inTimeOutDelay) { this->timeOutDelay = inTimeOutDelay; }
 
 	/** Set if the Throttle should reply to the controller.
-	@param inpConverter		New converter, or NULL to remove the current converter.
+	@param inReplyToCommands		False if the commands do not answer to the throttle.
 	*/
-	void setDontReply(MessageConverter* inpConverter) { this->pConverter = inpConverter; }
+	void setReplyToCommands(bool inReplyToCommands) { this->replyToCommands = inReplyToCommands; }
 
 	/** Sets the throttle id
 	@param inId		Throttle new id.

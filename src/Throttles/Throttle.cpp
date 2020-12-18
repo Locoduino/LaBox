@@ -13,9 +13,9 @@ Throttle::Throttle(const String& inName, unsigned int inTimeOutDelay)
 	// 'static' data, not updated during the run.
 	this->name = inName;
 	this->timeOutDelay = inTimeOutDelay;
-	this->dontReply = false;
+	this->replyToCommands = false;
 	this->pBuffer = NULL;
-	this->type = ThrottleType::SerialThrottle;
+	this->type = ThrottleType::NotStartedThrottle;
 	this->id = 0;
 
 	// Default start/end characters for DCC++ syntax commands
@@ -67,6 +67,9 @@ Throttle* Throttle::getThrottleFromStackMessage(const String& inMessage)
 
 bool Throttle::getCharacter(char inC, Throttle* inpThrottle)
 {
+	if (inpThrottle->type == ThrottleType::NotStartedThrottle)
+		return false;
+
 	//Serial.println((int)inC);
 	if (inC == (char)inpThrottle->startCommandCharacter)                    // start of new command
 	{

@@ -268,7 +268,7 @@ void hmi::dashboard()
   _HMIDEBUG_FCT_PRINTLN("hmi::Dashboard().. Begin");
   static int toggleEffect = 0;
   static int toggleData = 0;
-  int effect;
+  int effect = 0;
 
   int core = xPortGetCoreID();
   if (core != this->executionCore)
@@ -285,7 +285,7 @@ void hmi::dashboard()
       break;
     default:;
   }
-  if (effect && millis() - millisEffect > effect)
+  if (effect && millis() - millisEffect > (unsigned long) effect)
   {
     toggleEffect = !toggleEffect;
     millisEffect = millis();
@@ -713,7 +713,7 @@ void hmi::addNotification(const char* msg)
   {
     memset(message, 0, LineCarNbMax);
     memcpy(message, msg, HMI_MessageSize - 1);
-    pushMessageOnStack(message, strlen(message) );
+    pushMessageOnStack(message, (uint8_t) strlen(message) );
   }
   _HMIDEBUG_FCT_PRINTLN("hmi::addNotification().. End");  
 }
@@ -727,7 +727,7 @@ void hmi::addNotification(const char* msg)
 void hmi::readVoltage()
 {
   _HMIDEBUG_FCT_PRINTLN("hmi::readVoltage().. Begin");  
-  voltage = analogRead(PIN_VOLTAGE_MES) * HMI_VoltageK ;
+  voltage = (float) (analogRead(PIN_VOLTAGE_MES) * HMI_VoltageK);
 #ifdef _HMIDEBUG_SIMUL
   voltage = ((float)random(175, 185)) / 10;
 #endif
@@ -748,10 +748,10 @@ void hmi::readCurrent()
   float base = 0;
 	for (int j = 0; j < 50; j++)
 	{
-		float val = analogRead(PIN_CURRENT_MES);
+		float val = (float) analogRead(PIN_CURRENT_MES);
 		base += val;
 	}
-	current = ((base / 50) * HMI_CurrentK) - HMI_deltaCurrent;
+	current = (float) (((base / 50) * HMI_CurrentK) - HMI_deltaCurrent);
 #ifdef _HMIDEBUG_SIMUL
   current = ((float)random(0, 410)) / 100;
 #endif  
