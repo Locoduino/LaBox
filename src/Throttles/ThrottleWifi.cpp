@@ -183,7 +183,7 @@ ThrottleWifi* ThrottleWifi::GetThrottle(IPAddress inRemoteIp, int inPort, Ethern
 	{
 		if (pCurr->type == Wifi)
 		{
-			if (pCurr->remoteIP() == INADDR_NONE)
+			if ((uint32_t) (pCurr->remoteIP()) == (uint32_t) (IPAddress) INADDR_NONE)
 			{
 				ThrottleWifi* pWifi = (ThrottleWifi*)pCurr;
 				if (inPort == pWifi->port && pWifi->protocol == inProtocol && pWifi->contacted == false)
