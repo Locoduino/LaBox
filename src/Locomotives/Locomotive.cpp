@@ -24,7 +24,7 @@ Locomotive::Locomotive(const String& inName, uint8_t inSpeedRegister, uint16_t i
 
 	// Variable data
 	this->currentSpeed = 0; // regular stop
-	this->direction = true;	// goes forward
+	this->forwardDirection = true;	// goes forward
 	this->tag = -1;
 	this->pNextLocomotive = NULL;
 }
@@ -39,7 +39,7 @@ void Locomotive::initialize()
 
 	// Variable data
 	this->currentSpeed = 0; // regular stop
-	this->direction = true;	// goes forward
+	this->forwardDirection = true;	// goes forward
 	this->tag = -1;
 	this->pNextLocomotive = NULL;
 	this->functions.clear();
@@ -55,35 +55,33 @@ void Locomotive::setFunction(uint8_t inFunction, bool inActivate)
 
 void Locomotive::setDCCSpeed(uint8_t speed)
 {
-	this->setSpeed(speed);
-	DCCpp::setSpeedMain(this->speedRegisterNumber, this->address, this->getSpeedMax(), this->currentSpeed, this->direction);
+	DCCpp::setSpeedMain(this->speedRegisterNumber, this->address, this->getSpeedMax(), this->currentSpeed, this->forwardDirection);
 	if (Locomotives::notifySpeedDir != NULL)
-		Locomotives::notifySpeedDir(this->address, speed, this->direction);
+		Locomotives::notifySpeedDir(this->address, speed, this->forwardDirection);
 }
 
 void Locomotive::setDCCDirection(bool inForward)
 {
-	if (this->direction != inForward)
+	if (this->forwardDirection != inForward)
 	{
 		this->setDirection(inForward);
-		DCCpp::setSpeedMain(this->speedRegisterNumber, this->address, this->getSpeedMax(), 0, this->direction);
+		DCCpp::setSpeedMain(this->speedRegisterNumber, this->address, this->getSpeedMax(), 0, this->forwardDirection);
 		if (Locomotives::notifySpeedDir != NULL)
-			Locomotives::notifySpeedDir(this->address, 0, this->direction);
+			Locomotives::notifySpeedDir(this->address, 0, this->forwardDirection);
 	}
 }
 
 void Locomotive::stop()
 {
-	this->setSpeed(0);
-	DCCpp::setSpeedMain(this->speedRegisterNumber, this->address, this->getSpeedMax(), this->currentSpeed, this->direction);
+	DCCpp::setSpeedMain(this->speedRegisterNumber, this->address, this->getSpeedMax(), this->currentSpeed, this->forwardDirection);
 	if (Locomotives::notifySpeedDir != NULL)
-		Locomotives::notifySpeedDir(this->address, this->currentSpeed, this->direction);
+		Locomotives::notifySpeedDir(this->address, this->currentSpeed, this->forwardDirection);
 }
 
 void Locomotive::emergencyStop()
 {
 	this->currentSpeed = 0;
-	DCCpp::setSpeedMain(this->speedRegisterNumber, this->address, this->getSpeedMax(), 1, this->direction);
+	DCCpp::setSpeedMain(this->speedRegisterNumber, this->address, this->getSpeedMax(), 1, this->forwardDirection);
 	if (Locomotives::notifyEmergencyStop!= NULL)
 		Locomotives::notifyEmergencyStop(this->address, true);
 }
@@ -103,7 +101,7 @@ bool Locomotive::Save(JsonObject inLoco)
 	inLoco["Register"] = this->speedRegisterNumber;
 	inLoco["SpeedMax"] = this->speedMax;
 	inLoco["Speed"] = this->currentSpeed;
-	inLoco["direction"] = this->direction;
+	inLoco["direction"] = this->forwardDirection;
 
 	this->functions.Save(inLoco);
 
@@ -122,7 +120,7 @@ void Locomotive::printLocomotive()
 	Serial.print(this->speedMax);
 
 	Serial.print("      +/-speed:");
-	Serial.print(this->currentSpeed * (this->direction == true ? 1 : -1));
+	Serial.print(this->currentSpeed * (this->forwardDirection == true ? 1 : -1));
 
 	Serial.print("      functions: ");
 	this->functions.printActivated();

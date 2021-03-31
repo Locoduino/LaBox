@@ -13,34 +13,33 @@
 
 #define LOCOMOTIVE_NAME_SIZE	32
 
-/** This is a class to handle decoder functions.
-An instance of this class handle the status of the functions of one decoder.
-A function can be active or not.
+/** This is a class to handle a locomotive.
+An instance of this class handle the status of one locomotive.
 */
 class Locomotive
 {
 private:
-	String name;
+	String name;			// User name of this locomotive
 	uint16_t address;	// 10239 is the DCC norm maximum.	9983 for Digitrax, 9999 for NCE and Lenz.
-	int8_t speedRegisterNumber;
-	uint8_t speedMax;
+	int8_t speedRegisterNumber;	// Speed DCCpp register number
+	uint8_t speedMax;	// Maximum speed for this loco : 14, 28 or 128.
 
 	uint8_t currentSpeed;
-	bool direction;
+	bool forwardDirection;	// true if the locomotive go forward.
 	
 public:
 	Locomotive* pNextLocomotive;					/**< Address of the next object of this class. NULL means end of the list of Locomotives. Do not change it !*/
-	FunctionsState functions;
-	long tag;
+	FunctionsState functions;							/**< Current sate of all functions of this locomotive. */
+	long tag;															/**< User data associated with this locomotive.*/
 
 	/** Creates a new instance by default.
 	*/
 	Locomotive();
 
-	/** Creates a new instance for only one register.
+	/** Creates a new instance.
 	@param inName	Locomotive new name.
 	@param inSpeedRegister	Locomotive DCC++ register.
-	@param inAddress	Locomotive new DCC address.
+	@param inAddress	Locomotive DCC address.
 	@param inSpeedMax	Locomotive max speed steps, default is 128.
 	*/
 	Locomotive(const String& inName, uint8_t speedRegister, uint16_t inAddress = 3, uint8_t inSpeedMax = 128);
@@ -78,18 +77,22 @@ public:
 	@remark	any other value than 14, 28 or 128 will result in a 128 speed steps value.
 	*/
 	void setSpeedMax(uint8_t inSpeedMax) { if (inSpeedMax == 14 || inSpeedMax == 28 || inSpeedMax == 128) this->speedMax = inSpeedMax; else this->speedMax = 128; }
-	/** Get the locomotive max speed : 14, 28 or 128.
+	/** Get the locomotive max speed.
 	@return	Locomotive max speed steps : 14, 28 or 128.
 	*/
 	uint8_t getSpeedMax() const { return this->speedMax; }
 
 	/** Set the locomotive current speed.
-	@param inSpeed	Locomotive new speed.
-	@remark	For 128 steps max, 0 is stop, 1 is emergency stop...
+	@param inSpeed	Locomotive new speed, from 0 to 127 : not DCC speed (see remark...)
+	@remark	For 128 steps max, 0 is stop, 1 is emergency stop... 
+	So user speed is coded from 0 (stopped) to 126, and DCC speed value is coded from 2 to 127, with 0 or 1 means stopped machine.
+
+	DCC 128 speed    : 0 1 2 3 4 ... 125 126 127
+	                   |\	 | | |			|		|		|
+	Loco currentSpeed: 0 0 1 2 3 ... 124 125 126
 	*/
-	void setSpeed(uint8_t speed) {
-		if (speed == 1) { speed = 2;	}
-		else if (speed > 127) {	speed = 127; }
+	void setSpeed(uint8_t speed) 
+	{
 		this->currentSpeed = speed;
 	}
 
@@ -101,11 +104,11 @@ public:
 	/** Set the locomotive direction.
 	@param inForward	True if the locomotive must go forward.
 	*/
-	void setDirection(bool inForward) {		this->direction = inForward;	}
+	void setDirection(bool inForward) {		this->forwardDirection = inForward;	}
 	/** Check if the locomotive direction is forward.
 	@return True if the locomotive direction is forward.
 	*/
-	bool isDirectionForward() const {		return this->direction;	}
+	bool isDirectionForward() const {		return this->forwardDirection;	}
 
 	/** Set the given function to the given state.
 	*/

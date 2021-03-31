@@ -2,6 +2,11 @@
 
 CircularBuffer::CircularBuffer(int inSize)
 {
+	this->head = 0;
+	this->tail = 0;
+	this->full = false;
+	this->peakCount = 0;
+	this->xSemaphore = NULL;
 	this->buffer = NULL;
 	this->size = inSize;
 }

@@ -5,30 +5,30 @@
 
 #include <Arduino.h>
 
-/** The message stack is a small location for a few messages received and ready to be send to the caller.
-This is a barely a list. If the string for the given index is empty, so no this index is free.
-Each PushMessage will push a new one in the first free index of the list.
-Each GetMessage will returns the first not free message content, and free the message list for this index.
-There is no priority in the list...
+/** This is a thread-safe buffer of bytes. Bytes are pushed on the top (its head), and got from the bottom of the 
+* buffer (its tail...).
 */
 class CircularBuffer
 {
 private:
-	byte *buffer;
-	int size;
-	int head;
-	int tail;
-	bool full;
-	int peakCount;
+	byte *buffer;	// buffer itself
+	int size;			// total size of this buffer
+	int head;			// index of the first free byte in the buffer
+	int tail;			// index of the next byte to get.
+	bool full;		// if true, no more space !
+	int peakCount;	// biggest occupancy size since the creation of the buffer.
 	SemaphoreHandle_t xSemaphore; // semaphore d'exclusion mutuelle
 
 public:
+	/** Constructor.
+	@param inSize	
+	*/
 	CircularBuffer(int inSize);
 
 	/** Initialize the list.
 	@param inMultiThread	If the buffer is used in multi-thread environnement, initialize the semaphore.
 	*/
-	void begin(bool inMultiThread);
+	void begin(bool inMultiThread = false);
 
 	/** Close the usage of this buffer and free the allocated memory.
 	*/
@@ -116,6 +116,8 @@ public:
 		return this->full;
 	}
 
+	/** Check if the begin has been called. If not, the buffer is not allocated and any usage will crash the system !
+	*/
 	bool CheckIfBeginDone();
 
 #ifdef DCCPP_DEBUG_MODE

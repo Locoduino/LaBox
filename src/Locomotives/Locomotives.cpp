@@ -272,7 +272,7 @@ void Locomotives::debugLocomotivesSet()
 	//pLoco->setFunction(28, true);
 
 	pLoco = Locomotives::add("CC72000", 72, 128);
-	pLoco->setSpeed(127);
+	pLoco->setSpeed(126);
 	pLoco->setDirection(0);
 	pLoco->setFunction(6, true);
 	pLoco->setFunction(11, true);

@@ -33,8 +33,8 @@ private:
 	*/
 	int dccFirstByte[5], dccSecondByte[5];
 
-	inline byte byteNumber(byte inFunctionNumber) { return inFunctionNumber / 8; }
-	inline byte bitNumber(byte inFunctionNumber) { return inFunctionNumber % 8; }
+	//inline byte byteNumber(byte inFunctionNumber) { return inFunctionNumber / 8; }
+	//inline byte bitNumber(byte inFunctionNumber) { return inFunctionNumber % 8; }
 
 #ifdef USE_LOCOMOTIVES
 	static Locomotive *currentLocomotive;
@@ -93,10 +93,25 @@ public:
 	*/
 	bool buildDCCbytes(byte blockNb, int* pByte1, int* pByte2, bool storeBytes = false);
 
+	/** Build the bytes to send to DCC according to modified functions of the first DCC block from F0 to F4.
+	@return True if at least one function is activated in the given block.
+	*/
 	bool buildDCCF0F4bytes();
+	/** Build the bytes to send to DCC according to modified functions of the first DCC block from F5 to F8.
+	@return True if at least one function is activated in the given block.
+	*/
 	bool buildDCCF5F8bytes();
+	/** Build the bytes to send to DCC according to modified functions of the first DCC block from F9 to F12.
+	@return True if at least one function is activated in the given block.
+	*/
 	bool buildDCCF9F12bytes();
+	/** Build the bytes to send to DCC according to modified functions of the first DCC block from F14 to F20.
+	@return True if at least one function is activated in the given block.
+	*/
 	bool buildDCCF13F20bytes();
+	/** Build the bytes to send to DCC according to modified functions of the first DCC block from F21 to F28.
+	@return True if at least one function is activated in the given block.
+	*/
 	bool buildDCCF21F28bytes();
 
 #ifdef USE_LOCOMOTIVES

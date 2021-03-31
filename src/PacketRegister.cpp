@@ -181,7 +181,10 @@ void RegisterList::setThrottle(int nReg, int cab, int tSpeed, int tDirection) vo
 	}
 	if (loco != NULL)
 	{
-		loco->setSpeed(tSpeed);
+		if (tSpeed < 2)
+			loco->setSpeed(0);
+		else
+			loco->setSpeed(tSpeed - 1);
 		loco->setDirection(tDirection);
 	}
 #endif
@@ -383,7 +386,7 @@ void RegisterList::setFunction(int nReg, int cab, int fByte, int eByte, bool ret
 	must send at least two repetitions of these commands when any function state is changed."
 	https://www.nmra.org/sites/default/files/s-9.2.1_2012_07.pdf
 	*/
-	loadPacket(nReg, b, nB, 4, 1);
+	loadPacket(nReg, b, nB, (DCCpp::IsResendFunctions() == true) ? 1 : 4, 1);
 } // RegisterList::setFunction(ints)
 
 #ifdef USE_TEXTCOMMAND

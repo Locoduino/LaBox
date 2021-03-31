@@ -241,10 +241,13 @@ void notifyCvRead(Throttle* inpThrottle, byte incvMSB, byte incvLSB, int inValue
 	notify(HEADER_LAN_XPRESS_NET, LAN_X_HEADER_CV_RESULT, 0x14, replyBuffer, 3, false, inpThrottle);
 }
 
+
+//
+// TODO Passer par un message texte pour éviter des bugs de collision core 1/0 !
+//
+
 void MessageConverterZ21::setSpeed(Throttle* inpThrottle, byte inNbSteps, byte inDB1, byte inDB2, byte inDB3)
 {
-	CircularBuffer* pBuffer = inpThrottle->getCircularBuffer();
-
 #ifdef DCCPP_DEBUG_MODE
 	Serial.print("Z21 Throttle ");
 	Serial.print(inpThrottle->getId());
@@ -267,10 +270,12 @@ void MessageConverterZ21::setSpeed(Throttle* inpThrottle, byte inNbSteps, byte i
 		notifyLocoInfo(inpThrottle, inDB1, inDB2);
 }
 
+//
+// TODO Passer par un message texte pour éviter des bugs de collision core 1/0 !
+//
+
 void MessageConverterZ21::setFunction(Throttle* inpThrottle, byte inDB1, byte inDB2, byte inDB3)
 {
-	CircularBuffer* pBuffer = inpThrottle->getCircularBuffer();
-
 	int locoAddress = ((inDB1 & 0x3F) << 8) + inDB2;
 	Locomotive* pLoco = Locomotives::get(locoAddress);
 
@@ -305,6 +310,10 @@ void MessageConverterZ21::setFunction(Throttle* inpThrottle, byte inDB1, byte in
 		notifyLocoInfo(inpThrottle, inDB1, inDB2);
 }
 
+//
+// TODO Passer par un message texte pour éviter des bugs de collision core 1/0 !
+//
+
 void MessageConverterZ21::cvReadProg(Throttle* inpThrottle, byte inDB1, byte inDB2)
 {
 	int cvAddress = ((inDB1 & 0x3F) << 8) + inDB2;
@@ -326,6 +335,10 @@ void MessageConverterZ21::cvReadProg(Throttle* inpThrottle, byte inDB1, byte inD
 	else
 		notifyCvRead(inpThrottle, inDB1, inDB2, val);
 }
+
+//
+// TODO Passer par un message texte pour éviter des bugs de collision core 1/0 !
+//
 
 void MessageConverterZ21::cvWriteProg(Throttle* inpThrottle, byte inDB1, byte inDB2, byte inDB3)
 {
@@ -448,6 +461,9 @@ bool MessageConverterZ21::processBuffer(Throttle* inpThrottle)
 #ifdef DCCPP_DEBUG_VERBOSE_MODE
 				Serial.println(" POWER_OFF");
 #endif
+				//
+				// TODO Passer par un message texte pour éviter des bugs de collision core 1/0 !
+				//
 				DCCpp::powerOff();
 				done = true;
 				break;
@@ -455,6 +471,9 @@ bool MessageConverterZ21::processBuffer(Throttle* inpThrottle)
 #ifdef DCCPP_DEBUG_VERBOSE_MODE
 				Serial.println(" POWER_ON");
 #endif
+				//
+				// TODO Passer par un message texte pour éviter des bugs de collision core 1/0 !
+				//
 				DCCpp::powerOn();
 				done = true;
 				break;
@@ -464,6 +483,9 @@ bool MessageConverterZ21::processBuffer(Throttle* inpThrottle)
 #ifdef DCCPP_DEBUG_VERBOSE_MODE
 			Serial.println(" EMERGENCY_STOP");
 #endif
+			//
+			// TODO Passer par un message texte pour éviter des bugs de collision core 1/0 !
+			//
 			Locomotives::emergencyStop();
 			done = true;
 			break;
