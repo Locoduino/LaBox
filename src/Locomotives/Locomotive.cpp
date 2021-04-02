@@ -55,6 +55,7 @@ void Locomotive::setFunction(uint8_t inFunction, bool inActivate)
 
 void Locomotive::setDCCSpeed(uint8_t speed)
 {
+	this->currentSpeed = speed;
 	DCCpp::setSpeedMain(this->speedRegisterNumber, this->address, this->getSpeedMax(), this->currentSpeed, this->forwardDirection);
 	if (Locomotives::notifySpeedDir != NULL)
 		Locomotives::notifySpeedDir(this->address, speed, this->forwardDirection);

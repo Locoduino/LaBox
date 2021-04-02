@@ -40,12 +40,11 @@ void DCCpp::loop()
 {
 #ifdef USE_THROTTLES
   Throttle* pCurr = Throttles::getFirst();
-  bool done = false;
 
   while (pCurr != NULL)
   {
     TextCommand::pCurrentThrottle = pCurr;
-    done = pCurr->processBuffer();
+    pCurr->processBuffer();
     pCurr = pCurr->pNextThrottle;
   }
 

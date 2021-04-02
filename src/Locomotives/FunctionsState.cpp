@@ -456,7 +456,7 @@ void FunctionsState::printActivated()
 	Serial.println("");
 }
 
-void FunctionsState::test()
+bool FunctionsState::test()
 {
 	FunctionsState test;
 	bool ret = false;
@@ -545,5 +545,7 @@ void FunctionsState::test()
 	ret = test.isFunctionBlockActivated(3);	// false;
 	ret = test.isFunctionBlockActivated(4);	// true;
 	test.inactivate(28);
+
+	return ret;
 }
 #endif

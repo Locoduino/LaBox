@@ -129,7 +129,7 @@ public:
 	*/
 	void printActivated();
 
-	static void test();
+	static bool test();
 #endif
 };
 

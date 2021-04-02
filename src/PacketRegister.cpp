@@ -9,8 +9,6 @@ Part of DCC++ BASE STATION for the Arduino
 
 #include "Arduino.h"
 
-static byte ackThreshold = 30;
-
 #include "DCCpp.h"
 //#include "DCCpp_Uno.h"
 //#include "PacketRegister.h"

@@ -927,18 +927,19 @@ bool TextCommand::parse(char *com)
 		returns: <b>\<f MEM\></b>
 		where MEM is the number of free bytes remaining in the Arduino's SRAM
 		*/
-
-	  int v; 
+	{
+		int v = 0;
 		DCCPP_INTERFACE.print("<f");
 #ifdef ARDUINO_ARCH_AVR
-		DCCPP_INTERFACE.print((int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval));
+		v = 1;
+		DCCPP_INTERFACE.print((int)&v - (__brkval == 0 ? (int)&__heap_start : (int)__brkval));
 #endif
 		DCCPP_INTERFACE.print(">");
 #ifdef USE_THROTTLES
 		if (DCCPP_INTERFACE.sendNewline())
 #endif
 			DCCPP_INTERFACE.println("");
-
+	}
 #ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
 #endif
