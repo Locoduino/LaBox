@@ -8,6 +8,10 @@ description: <Throttle Automation class>
 
 #if defined(USE_TEXTCOMMAND) && defined(USE_THROTTLES)
 
+#ifdef DCCPP_DEBUG_MODE
+static unsigned long automationDelay = 0;
+#endif
+
 // ITEM
 
 ThrottleAutomationItem::ThrottleAutomationItem(int inDelay, const char* inCommand, const char* inComment)
@@ -82,19 +86,63 @@ bool ThrottleAutomation::loop()
 			if (currentItem->delay >= AUTOMATIONIDSSTART)
 			{
 #ifdef USE_SENSOR
-				int id = SENSORID(currentItem->delay);
-				Sensor *pSensor = Sensor::get(id);
 
-				int state = SENSORSTATE(currentItem->delay);
-				if (state == HIGH && !pSensor->isActive())
+				if (ISSENSOR(currentItem->delay))
 				{
-					return false;
-				}
-				if (state == LOW && pSensor->isActive())
-				{
-					return false;
+					int id = SENSORID(currentItem->delay);
+
+					Sensor* pSensor = Sensor::get(id);
+
+					if (pSensor != NULL)
+					{
+						int state = SENSORSTATE(currentItem->delay);
+						if (state == HIGH && !pSensor->isActive())
+						{
+#ifdef DCCPP_DEBUG_MODE
+							if (millis() - automationDelay > 1000)
+							{
+								Serial.print(".");
+								automationDelay = millis();
+							}
+#endif
+							return false;
+						}
+						if (state == LOW && pSensor->isActive())
+						{
+#ifdef DCCPP_DEBUG_MODE
+							if (millis() - automationDelay > 1000)
+							{
+								Serial.print(".");
+								automationDelay = millis();
+							}
+#endif
+							return false;
+						}
+#ifdef DCCPP_DEBUG_MODE
+						Serial.println("");
+#endif
+					}
 				}
 #endif
+				if (ISPIN(currentItem->delay))
+				{
+					int pinState = digitalRead(PINNUMBER(currentItem->delay));
+					int state = PINSTATE(currentItem->delay);
+					if (state != pinState)
+					{
+#ifdef DCCPP_DEBUG_MODE
+						if (millis() - automationDelay > 1000)
+						{
+							Serial.print(".");
+							automationDelay = millis();
+						}
+#endif
+						return false;
+					}
+#ifdef DCCPP_DEBUG_MODE
+					Serial.println("");
+#endif
+				}
 			}
 			else
 			{
@@ -173,11 +221,24 @@ void ThrottleAutomation::printThrottleItems()
 	{
 		if (curr->delay >= AUTOMATIONIDSSTART)
 		{
-			Serial.print("  When sensor ");
-			Serial.print(SENSORID(curr->delay));
-			Serial.print(" is ");
-			Serial.print(SENSORSTATE(curr->delay) ? "HIGH" : "LOW");
-			Serial.print(" do ");
+#ifdef USE_SENSOR
+			if (ISSENSOR(curr->delay))
+			{
+				Serial.print("  When sensor ");
+				Serial.print(SENSORID(curr->delay));
+				Serial.print(" is ");
+				Serial.print(SENSORSTATE(curr->delay) ? "HIGH" : "LOW");
+				Serial.print(" do ");
+			}
+#endif
+			if (ISPIN(curr->delay))
+			{
+				Serial.print("  When pin ");
+				Serial.print(PINNUMBER(curr->delay));
+				Serial.print(" is ");
+				Serial.print(PINSTATE(curr->delay) ? "HIGH" : "LOW");
+				Serial.print(" do ");
+			}
 		}
 		else
 		{
