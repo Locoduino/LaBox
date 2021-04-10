@@ -8,6 +8,55 @@
 #pragma warning(disable:4005)
 #endif
 
+/** @file DCCpp.h
+Main include file of the library.*/
+
+//  Inclusion area
+// Remove the '//' at the beginning of the line to compile a particular part of the library.
+ 
+//#define USE_TURNOUT
+//#define USE_EEPROM
+//#define USE_OUTPUT
+//#define USE_SENSOR
+#define USE_TEXTCOMMAND
+//#define USE_ETHERNET_WIZNET_5100
+//#define USE_ETHERNET_WIZNET_5500
+//#define USE_ETHERNET_WIZNET_5200
+//#define USE_ETHERNET_ENC28J60
+#define USE_WIFI_LOCALSSID
+//#define USE_WIFI_EXTERNSSID
+#define USE_LOCOMOTIVES
+#define USE_THROTTLES
+#define USE_HMI
+
+#define DCCPP_LIBRARY_VERSION		"VERSION DCCpp library: 1.4.1"
+
+////////////////////////////////////////////////////////
+// Add a '//' at the beginning of the line to be in production mode.
+#define DCCPP_DEBUG_MODE
+
+///////////////////////////////////////////////////////
+// Verbose mode lets you see all actions done by the 
+// library, but with a real flood of text to console...
+// Has no effect if DCCPP_DEBUG_MODE is not activated.
+//#define DCCPP_DEBUG_VERBOSE_MODE
+
+///////////////////////////////////////////////////////
+// The function DCCpp::showConfiguration()
+// is very heavy in program memory. So to avoid problems
+// you can make this function available by uncomment the next line, only when necessary.
+#define DCCPP_PRINT_DCCPP
+
+///////////////////////////////////////////////////////
+// This define gets rid of 2 timers and uses only Timer2 to tick every 58us and change logic levels on both tracks. 
+// Zero bit is changed every 2 ticks, "one" bit changes every tick; this makes timings roughly equal to DCC specs.
+// This frees one timer and 2 pins to be used for something else, though PWM pins controlled by Timer2 
+// cannot be used for hardware - PWM(they can, however, be used to output DCC signal using proposed method since 
+// it is effectively a software - PWM).Jumpers for shields are not needed anymore. This is done at the RAM cost of 
+// 2 bytes per RegisterList and 2 extra pointers in DCCppConfig (pointers might not be needed, they are used for 
+// direct IO port manipulation to bypass arduino's digitalWrite).
+//#define USE_ONLY1_INTERRUPT
+
 /**	 @mainpage
 -------------------------------------------------------------------------------------------------------
 
@@ -424,57 +473,9 @@ _______________
 - DCCpp is the transcription of the DCC++ program into a library.
 */
 
-/** @file DCCpp.h
-Main include file of the library.*/
-
-#define DCCPP_LIBRARY_VERSION		"VERSION DCCpp library: 1.4.1"
-
-////////////////////////////////////////////////////////
-// Add a '//' at the beginning of the line to be in production mode.
-#define DCCPP_DEBUG_MODE
-
-///////////////////////////////////////////////////////
-// Verbose mode lets you see all actions done by the 
-// library, but with a real flood of text to console...
-// Has no effect if DCCPP_DEBUG_MODE is not activated.
-//#define DCCPP_DEBUG_VERBOSE_MODE
-
-///////////////////////////////////////////////////////
-// The function DCCpp::showConfiguration()
-// is very heavy in program memory. So to avoid problems
-// you can make this function available by uncomment the next line, only when necessary.
-#define DCCPP_PRINT_DCCPP
-
-///////////////////////////////////////////////////////
-// This define gets rid of 2 timers and uses only Timer2 to tick every 58us and change logic levels on both tracks. 
-// Zero bit is changed every 2 ticks, "one" bit changes every tick; this makes timings roughly equal to DCC specs.
-// This frees one timer and 2 pins to be used for something else, though PWM pins controlled by Timer2 
-// cannot be used for hardware - PWM(they can, however, be used to output DCC signal using proposed method since 
-// it is effectively a software - PWM).Jumpers for shields are not needed anymore. This is done at the RAM cost of 
-// 2 bytes per RegisterList and 2 extra pointers in DCCppConfig (pointers might not be needed, they are used for 
-// direct IO port manipulation to bypass arduino's digitalWrite).
-//#define USE_ONLY1_INTERRUPT
-
-//  Inclusion area
-//
-
-//#define USE_TURNOUT
-//#define USE_EEPROM
-//#define USE_OUTPUT
-//#define USE_SENSOR
-#define USE_TEXTCOMMAND
-//#define USE_ETHERNET_WIZNET_5100
-//#define USE_ETHERNET_WIZNET_5500
-//#define USE_ETHERNET_WIZNET_5200
-//#define USE_ETHERNET_ENC28J60
-#define USE_WIFI_LOCALSSID
-//#define USE_WIFI_EXTERNSSID
-#define USE_LOCOMOTIVES
-#define USE_THROTTLES
-#define USE_HMI
-
 #ifdef DOXYGEN_SPECIFIC
-    // DO NOT CHANGE THESE LINES IN THIS BLOCK 'DOXYGEN_SPECIFIC' : Only here for documentation !
+    // DO NOT CHANGE THESE LINES IN THIS BLOCK 'DOXYGEN_SPECIFIC' : Only here for documentation ! See the real defines on top of this file.
+    // Ne changez pas ça ! C'est juste de la documentation. Pour les vrais defines, voir tout en haut du fichier !
 
     /**Comment this line to avoid using and compiling Turnout.*/
     #define USE_TURNOUT
@@ -484,7 +485,7 @@ Main include file of the library.*/
     #define USE_OUTPUT
     /**Comment this line to avoid using and compiling Sensors.*/
     #define USE_SENSOR
-		/**Comment this line to avoid using and compiling Serial commands.*/
+		/**Comment this line to avoid using and compiling text commands.*/
 		#define USE_TEXTCOMMAND
 		/**Comment this line to avoid using and compiling Ethernet shield using Wiznet 5100 chip (Arduino Shield v1).*/
 		#define USE_ETHERNET_WIZNET_5100
@@ -500,6 +501,10 @@ Main include file of the library.*/
     #define USE_WIFI_EXTERNSSID
     /**Comment this line to avoid using and compiling all the Locomotives class part.*/
     #define USE_LOCOMOTIVES
+    /**Comment this line to avoid using and compiling all the Throttles class part (need also LOCOMOTIVES...) */
+    #define USE_THROTTLES
+    /**Comment this line to avoid using and compiling the HMI part */
+    #define USE_HMI
 
     #undef USE_TURNOUT
     #undef USE_EEPROM
@@ -510,6 +515,11 @@ Main include file of the library.*/
     #undef USE_ETHERNET_WIZNET_5500
     #undef USE_ETHERNET_WIZNET_5200
     #undef USE_ETHERNET_ENC28J60
+    #undef USE_WIFI_LOCALSSID
+    #undef USE_WIFI_EXTERNSSID
+    #undef USE_LOCOMOTIVES
+    #undef USE_THROTTLES
+    #undef USE_HMI
 
     /** If this is defined, the library will do many checks during setup and execution, and print errors, warnings and
     information messages on console. These messages can take a lot of memory, so be careful about the free memory of
@@ -545,8 +555,6 @@ Main include file of the library.*/
 #if defined(USE_WIFI_LOCALSSID) || defined(USE_WIFI_EXTERNSSID)
 #define USE_WIFI
 #endif
-
-    /////////////////////////////////////
 
 #include "DCCpp_Uno.h"
 #include "PacketRegister.h"

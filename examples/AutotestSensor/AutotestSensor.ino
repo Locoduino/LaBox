@@ -44,19 +44,19 @@ void setup()
   boxHMI.begin();
 #endif
 
-  sens.begin(25, PIN_BTN_SEL, true);
+  //sens.begin(25, PIN_BTN_BTNDWN, false);
   automation.begin();
 
   automation.AddItem(0, "t 1 3 0 1", "ON");       // On register 1, set direction to forward on cab 3
   automation.AddItem(0, "f 3 144", "Light on");     // Light FL (F0) on
   automation.AddItem(3000, "t 1 3 50 1", "Forward");  // On register 1, go forward at speed 30 on cab 3 for 3s
   automation.AddItem(1000, "t 1 3 0 1", "Stop");    // Stop cab 3 after 1 second
-//  automation.AddItem(AUTOMATIONSENSORID(25, HIGH), "", "Wait Sensor");    // Wait complete stop until pin 12 reach HIGH state
+  //automation.AddItem(AUTOMATIONSENSORID(25, HIGH), "", "Wait Sensor");    // Wait complete stop until pin 12 reach HIGH state
   automation.AddItem(AUTOMATIONPIN(PIN_BTN_SEL, HIGH), "", "Wait pin");    // Wait complete stop until pin 12 reach HIGH state
   automation.AddItem(1000, "t 1 3 0 0", "To bwd");    // On register 1, set direction to backward on cab 3
   automation.AddItem(3000, "t 1 3 50 0", "Backward"); // On register 1, go backward at speed 30 on cab 3
   automation.AddItem(1000, "t 1 3 0 0", "Stop");    // Stop cab 3 after 1 second
-  automation.AddItem(2000, "", "Wait");         // Wait complete stop
+  automation.AddItem(2000, "", "Tempo");         // Wait complete stop
   automation.AddItem(1000, "t 1 3 0 1", "To fwd");    // On register 1, set direction to forward on cab 3
   automation.AddItem(500, "f 3 128", "Light off");    // Light off : blink three times
   automation.AddItem(500, "f 3 144", "Light on");   // Light FL (F0) on

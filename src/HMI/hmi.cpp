@@ -87,7 +87,7 @@ void hmi::begin()
 void hmi::update()
 {
   int core = xPortGetCoreID();
-  if (core != this->executionCore)
+  if (CurrentInterface == NULL || core != this->executionCore)
     return;
 
   _HMIDEBUG_FCT_PRINTLN("hmi::update().. Begin");

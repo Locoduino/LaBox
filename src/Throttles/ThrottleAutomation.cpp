@@ -86,7 +86,6 @@ bool ThrottleAutomation::loop()
 			if (currentItem->delay >= AUTOMATIONIDSSTART)
 			{
 #ifdef USE_SENSOR
-
 				if (ISSENSOR(currentItem->delay))
 				{
 					int id = SENSORID(currentItem->delay);
@@ -96,7 +95,7 @@ bool ThrottleAutomation::loop()
 					if (pSensor != NULL)
 					{
 						int state = SENSORSTATE(currentItem->delay);
-						if (state == HIGH && !pSensor->isActive())
+						if (state == LOW && !pSensor->isActive())
 						{
 #ifdef DCCPP_DEBUG_MODE
 							if (millis() - automationDelay > 1000)
@@ -107,7 +106,7 @@ bool ThrottleAutomation::loop()
 #endif
 							return false;
 						}
-						if (state == LOW && pSensor->isActive())
+						if (state == HIGH && pSensor->isActive())
 						{
 #ifdef DCCPP_DEBUG_MODE
 							if (millis() - automationDelay > 1000)
@@ -142,6 +141,7 @@ bool ThrottleAutomation::loop()
 #ifdef DCCPP_DEBUG_MODE
 					Serial.println("");
 #endif
+					automationDelay = 0;
 				}
 			}
 			else
@@ -158,9 +158,9 @@ bool ThrottleAutomation::loop()
 #endif
 			}
 		}
-		if (currentItem->delay < AUTOMATIONIDSSTART)
-			timeValue = millis();
-		Throttle::pushMessageInStack(this->id, currentItem->command);
+		timeValue = millis();
+		if (currentItem->command[0] > 0)
+			Throttle::pushMessageInStack(this->id, currentItem->command);
 #ifdef DCCPP_DEBUG_MODE
 		Serial.println(currentItem->comment);
 #endif
