@@ -402,10 +402,7 @@ void DCCpp::powerOn(bool inMain, bool inProg)
     }
 #endif
     DCCPP_INTERFACE.print("<p1>");
-#ifdef USE_THROTTLES
-    if (DCCPP_INTERFACE.sendNewline())
-#endif
-      DCCPP_INTERFACE.println("");
+    DCCPP_INTERFACE.sendNewline();
   }
 
   DCCpp::powerOnAtFirstClient = false;
@@ -438,10 +435,7 @@ void DCCpp::powerOff(bool inMain, bool inProg)
       hmi::CurrentInterface->DCCOff();
 #endif
     DCCPP_INTERFACE.print("<p0>");
-#ifdef USE_THROTTLES
-    if (DCCPP_INTERFACE.sendNewline())
-#endif
-      DCCPP_INTERFACE.println("");
+    DCCPP_INTERFACE.sendNewline();
   }
 }
 

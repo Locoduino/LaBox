@@ -89,7 +89,7 @@ void setup()
   throttleWifi2.begin(&converter2);
   throttleWifi3.begin(&converter3);
 
-  // WiThrottle protocol (WiThrotlle and Engine Driver apps)
+  // WiThrottle protocol (WiThrottle and Engine Driver apps)
   throttleWifi4.begin(&converterWT1);
   throttleWifi5.begin(&converterWT2);
   throttleWifi6.begin(&converterWT3);

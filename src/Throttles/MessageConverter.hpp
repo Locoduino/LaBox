@@ -42,7 +42,7 @@ public:
 	/** Do what it is necessary to keep the owner Throttle alive.
 	@param inpThrottle Converter owner.
 	*/
-	virtual void stayAlive(Throttle* inpThrottle) {}
+	//virtual void stayAlive(Throttle* inpThrottle) {}
 	/** Get the used protocol for this converter.
 	*/
 	virtual EthernetProtocol getProtocol() = 0;

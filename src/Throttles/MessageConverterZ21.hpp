@@ -83,16 +83,29 @@
 #define BROADCAST_RAILCOM_AUTO			0x00040000
 #define BROADCAST_CAN								0x00080000
 
-/** This is a class to handle decoder functions.
-An instance of this class handle the status of the functions of one decoder.
-A function can be active or not.
+/** This is a class to handle smartphone application for z21 Roco/Fleischmann DCC centrale.
 */
 class MessageConverterZ21 : public MessageConverter
 {
 private:
 	int32_t broadcastFlags;
+	static byte commBuffer[100];
+	static byte replyBuffer[20];
+
+	static bool notify(unsigned int inHeader, byte* inpData, unsigned int inLengthData, bool inXorInData, Throttle* inpThrottle);
+	static bool notify(unsigned int inHeader, unsigned int inXHeader, byte* inpData, unsigned int inLengthData, bool inXorInData, Throttle* inpThrottle);
+	static bool notify(unsigned int inHeader, unsigned int inXHeader, byte inDB0, byte* inpData, unsigned int inLengthData, bool inXorInData, Throttle* inpThrottle);
+	static void notifyStatus(Throttle* inpThrottle);
+	static void notifyLocoInfo(Throttle* inpThrottle, byte inMSB, byte inLSB);
+	static void notifyTurnoutInfo(Throttle* inpThrottle, byte inMSB, byte inLSB);
+	static void notifyLocoMode(Throttle* inpThrottle, byte inMSB, byte inLSB);
+	static void notifyFirmwareVersion(Throttle* inpThrottle);
+	static void notifyHWInfo(Throttle* inpThrottle);
+	static void notifyCvNACK(Throttle* inpThrottle, byte incvMSB, byte incvLSB);
+	static void notifyCvRead(Throttle* inpThrottle, byte incvMSB, byte incvLSB, int inValue);
 
 public:
+
 	/** Creates a new instance for only one register.
 	@param inName	throttle new name.
 	*/

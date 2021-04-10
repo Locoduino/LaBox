@@ -86,7 +86,33 @@ void MessageConverterWiThrottle::clientStop(Throttle* inpThrottle)
 
 void MessageConverterWiThrottle::stayAlive(Throttle* inpThrottle)
 {
-	this->checkHeartbeat(inpThrottle);
+	if (heartbeatEnable)
+	{
+		for (int locoNumber = 0; locoNumber < WIMAXLOCOSNUMBER; locoNumber++)
+		{
+			if (pLocos[locoNumber] == NULL)
+				continue;
+
+			if (heartbeat[locoNumber] > 0 && millis() > heartbeat[locoNumber] + HEARTBEATTIMEOUT * 1000)
+			{
+				Serial.print("Too long heartbeat delay for the loco ");
+				Serial.println(pLocos[locoNumber]->getAddress());
+				pLocos[locoNumber]->setSpeed(0);
+				heartbeat[locoNumber] = 0;
+				String buff = "MTA";
+				buff += pLocos[locoNumber]->getAddress();
+				buff += "<;>V0";
+				inpThrottle->println(buff);
+			}
+			else
+			{
+				if (heartbeat[locoNumber] == 0)
+				{
+					heartbeat[locoNumber] = millis();
+				}
+			}
+		}
+	}
 }
 
 bool MessageConverterWiThrottle::convert(Throttle* inpThrottle, const String& inCommand)
@@ -271,37 +297,6 @@ void MessageConverterWiThrottle::locoAction(Throttle* inpThrottle, int inLocoNum
 	{  
 		pLoco->setDCCSpeed(0);
 	} //Q
-}
-
-void MessageConverterWiThrottle::checkHeartbeat(Throttle* inpThrottle)
-{
-	if (heartbeatEnable)
-	{
-		for (int locoNumber = 0; locoNumber < WIMAXLOCOSNUMBER; locoNumber++)
-		{
-			if (pLocos[locoNumber] == NULL)
-				continue;
-
-			if (heartbeat[locoNumber] > 0 && millis() > heartbeat[locoNumber] + HEARTBEATTIMEOUT * 1000)
-			{
-				Serial.print("Too long heartbeat delay for the loco ");
-				Serial.println(pLocos[locoNumber]->getAddress());
-				pLocos[locoNumber]->setSpeed(0);
-				heartbeat[locoNumber] = 0;
-				String buff = "MTA";
-				buff += pLocos[locoNumber]->getAddress();
-				buff += "<;>V0";
-				inpThrottle->println(buff);
-			}
-			else
-			{
-				if (heartbeat[locoNumber] == 0)
-				{
-					heartbeat[locoNumber] = millis();
-				}
-			}
-		}
-	}
 }
 
 void MessageConverterWiThrottle::locoAdd(Throttle* inpThrottle, int inLocoNumber, String name, String actionKey)

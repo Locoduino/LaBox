@@ -7,6 +7,8 @@
 
 #if defined(USE_TEXTCOMMAND) && defined(USE_THROTTLES) && defined(USE_WIFI)
 
+#define TYPEWIFI	'W'
+
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include <WiFiAP.h>
@@ -47,8 +49,7 @@ public:
 	bool sendMessage(const String& inMessage);
 	void end();
 	bool isConnected();
-	bool sendNewline();
-	CircularBuffer* getCircularBuffer() const;
+	bool SendNewline() const;
 	void write(byte* inpData, int inLengthData);
 	bool readUdpPacket(ThrottleWifi* inpThrottle);
 	IPAddress remoteIP();

@@ -9,6 +9,9 @@ description: <Message converter base class>
 
 #if defined(USE_THROTTLES) && defined (USE_WIFI)
 
+byte MessageConverterZ21::commBuffer[100];
+byte MessageConverterZ21::replyBuffer[20];
+
 MessageConverterZ21::MessageConverterZ21()
 {
 }
@@ -29,19 +32,17 @@ void MessageConverterZ21::stayAlive(Throttle* inpThrottle)
 {
 }
 
-byte notifyBuffer[100];
-
 // sizes : [       2        ][       2        ][inLengthData]
 // bytes : [length1, length2][Header1, Header2][Data........]
-bool notify(unsigned int inHeader, byte* inpData, unsigned int inLengthData, bool inXorInData, Throttle* inpThrottle)
+bool MessageConverterZ21::notify(unsigned int inHeader, byte* inpData, unsigned int inLengthData, bool inXorInData, Throttle* inpThrottle)
 {
 	int realLength = (inLengthData + 4 + (inXorInData == false ? 1 : 0));
 
-	notifyBuffer[0] = realLength % 256;
-	notifyBuffer[1] = realLength / 256;
-	notifyBuffer[2] = inHeader % 256;
-	notifyBuffer[3] = inHeader / 256;
-	memcpy(notifyBuffer + 4, inpData, inLengthData);
+	MessageConverterZ21::commBuffer[0] = realLength % 256;
+	MessageConverterZ21::commBuffer[1] = realLength / 256;
+	MessageConverterZ21::commBuffer[2] = inHeader % 256;
+	MessageConverterZ21::commBuffer[3] = inHeader / 256;
+	memcpy(MessageConverterZ21::commBuffer + 4, inpData, inLengthData);
 
 	if (!inXorInData)    // if xor byte not included in data, compute and write it !
 	{
@@ -50,26 +51,26 @@ bool notify(unsigned int inHeader, byte* inpData, unsigned int inLengthData, boo
 		{
 			xxor ^= inpData[i];
 		}
-		notifyBuffer[inLengthData+4] = xxor;
+		MessageConverterZ21::commBuffer[inLengthData+4] = xxor;
 	}
 
-	inpThrottle->write(notifyBuffer, realLength);
+	inpThrottle->write(MessageConverterZ21::commBuffer, realLength);
 
 	return true;
 }
 
 // sizes : [       2        ][       2        ][   1   ][inLengthData]
 // bytes : [length1, length2][Header1, Header2][XHeader][Data........]
-bool notify(unsigned int inHeader, unsigned int inXHeader, byte* inpData, unsigned int inLengthData, bool inXorInData, Throttle* inpThrottle)
+bool MessageConverterZ21::notify(unsigned int inHeader, unsigned int inXHeader, byte* inpData, unsigned int inLengthData, bool inXorInData, Throttle* inpThrottle)
 {
 	int realLength = (inLengthData + 5 + (inXorInData == false ? 1 : 0));
 
-	notifyBuffer[0] = realLength % 256;
-	notifyBuffer[1] = realLength / 256;
-	notifyBuffer[2] = inHeader % 256;
-	notifyBuffer[3] = inHeader / 256;
-	notifyBuffer[4] = inXHeader;
-	memcpy(notifyBuffer + 5, inpData, inLengthData);
+	MessageConverterZ21::commBuffer[0] = realLength % 256;
+	MessageConverterZ21::commBuffer[1] = realLength / 256;
+	MessageConverterZ21::commBuffer[2] = inHeader % 256;
+	MessageConverterZ21::commBuffer[3] = inHeader / 256;
+	MessageConverterZ21::commBuffer[4] = inXHeader;
+	memcpy(MessageConverterZ21::commBuffer + 5, inpData, inLengthData);
 
 	if (!inXorInData)    // if xor byte not included in data, compute and write it !
 	{
@@ -78,27 +79,27 @@ bool notify(unsigned int inHeader, unsigned int inXHeader, byte* inpData, unsign
 		{
 			xxor ^= inpData[i];
 		}
-		notifyBuffer[inLengthData + 5] = xxor;
+		MessageConverterZ21::commBuffer[inLengthData + 5] = xxor;
 	}
 
-	inpThrottle->write(notifyBuffer, realLength);
+	inpThrottle->write(MessageConverterZ21::commBuffer, realLength);
 
 	return true;
 }
 
 // sizes : [       2        ][       2        ][   1   ][ 1 ][inLengthData]
 // bytes : [length1, length2][Header1, Header2][XHeader][DB0][Data........]
-bool notify(unsigned int inHeader, unsigned int inXHeader, byte inDB0, byte* inpData, unsigned int inLengthData, bool inXorInData, Throttle* inpThrottle)
+bool MessageConverterZ21::notify(unsigned int inHeader, unsigned int inXHeader, byte inDB0, byte* inpData, unsigned int inLengthData, bool inXorInData, Throttle* inpThrottle)
 {
 	int realLength = (inLengthData + 6 + (inXorInData == false ? 1 : 0));
 
-	notifyBuffer[0] = realLength % 256;
-	notifyBuffer[1] = realLength / 256;
-	notifyBuffer[2] = inHeader % 256;
-	notifyBuffer[3] = inHeader / 256;
-	notifyBuffer[4] = inXHeader;
-	notifyBuffer[5] = inDB0;
-	memcpy(notifyBuffer + 6, inpData, inLengthData);
+	MessageConverterZ21::commBuffer[0] = realLength % 256;
+	MessageConverterZ21::commBuffer[1] = realLength / 256;
+	MessageConverterZ21::commBuffer[2] = inHeader % 256;
+	MessageConverterZ21::commBuffer[3] = inHeader / 256;
+	MessageConverterZ21::commBuffer[4] = inXHeader;
+	MessageConverterZ21::commBuffer[5] = inDB0;
+	memcpy(MessageConverterZ21::commBuffer + 6, inpData, inLengthData);
 
 	if (!inXorInData)    // if xor byte not included in data, compute and write it !
 	{
@@ -107,38 +108,36 @@ bool notify(unsigned int inHeader, unsigned int inXHeader, byte inDB0, byte* inp
 		{
 			xxor ^= inpData[i];
 		}
-		notifyBuffer[inLengthData + 6] = xxor;
+		MessageConverterZ21::commBuffer[inLengthData + 6] = xxor;
 	}
 
-	inpThrottle->write(notifyBuffer, realLength);
+	inpThrottle->write(MessageConverterZ21::commBuffer, realLength);
 
 	return true;
 }
 
-byte replyBuffer[100];
-
-void notifyStatus(Throttle* inpThrottle)
+void MessageConverterZ21::notifyStatus(Throttle* inpThrottle)
 {
-	replyBuffer[0] = 0;	// main current 1
-	replyBuffer[1] = 0; // main current 2
-	replyBuffer[2] = 0; // prog current 1
-	replyBuffer[3] = 0; // prog current 2
-	replyBuffer[4] = 0; // filtered main current 1
-	replyBuffer[5] = 0; // filtered main current 2
-	replyBuffer[6] = 0; // Temperature 1
-	replyBuffer[7] = 0; // Temperature 2
-	replyBuffer[8] = 5; // Supply voltage 1
-	replyBuffer[9] = 0; // supply voltage 2
-	replyBuffer[10] = 16; // VCC voltage 1 
-	replyBuffer[11] = 0; // VCC voltage 2
-	replyBuffer[12] = 0b00000000;	// CentralState 
-	replyBuffer[13] = 0b00000000; // CentralStateEx
-	replyBuffer[14] = 0;
-	replyBuffer[15] = 0;
-	notify(HEADER_LAN_SYSTEMSTATE, replyBuffer, 16, true, inpThrottle);
+	MessageConverterZ21::replyBuffer[0] = 0;	// main current 1
+	MessageConverterZ21::replyBuffer[1] = 0; // main current 2
+	MessageConverterZ21::replyBuffer[2] = 0; // prog current 1
+	MessageConverterZ21::replyBuffer[3] = 0; // prog current 2
+	MessageConverterZ21::replyBuffer[4] = 0; // filtered main current 1
+	MessageConverterZ21::replyBuffer[5] = 0; // filtered main current 2
+	MessageConverterZ21::replyBuffer[6] = 0; // Temperature 1
+	MessageConverterZ21::replyBuffer[7] = 0; // Temperature 2
+	MessageConverterZ21::replyBuffer[8] = 5; // Supply voltage 1
+	MessageConverterZ21::replyBuffer[9] = 0; // supply voltage 2
+	MessageConverterZ21::replyBuffer[10] = 16; // VCC voltage 1 
+	MessageConverterZ21::replyBuffer[11] = 0; // VCC voltage 2
+	MessageConverterZ21::replyBuffer[12] = 0b00000000;	// CentralState 
+	MessageConverterZ21::replyBuffer[13] = 0b00000000; // CentralStateEx
+	MessageConverterZ21::replyBuffer[14] = 0;
+	MessageConverterZ21::replyBuffer[15] = 0;
+	notify(HEADER_LAN_SYSTEMSTATE, MessageConverterZ21::replyBuffer, 16, true, inpThrottle);
 }
 
-void notifyLocoInfo(Throttle* inpThrottle, byte inMSB, byte inLSB)
+void MessageConverterZ21::notifyLocoInfo(Throttle* inpThrottle, byte inMSB, byte inLSB)
 {
 	int locoAddress = ((inMSB & 0x3F) << 8) + inLSB;
 	Locomotive* pLoco = Locomotives::get(locoAddress);
@@ -146,101 +145,100 @@ void notifyLocoInfo(Throttle* inpThrottle, byte inMSB, byte inLSB)
 	if (pLoco == NULL)
 		pLoco = Locomotives::add("Loco", locoAddress, 128);		// default
 
-	replyBuffer[0] = inMSB;	// loco address msb
-	replyBuffer[1] = inLSB; // loco address lsb
-	replyBuffer[2] = B00000100; // 0000CKKK	 C = already controlled    KKK = speed steps 000:14, 010:28, 100:128
-	replyBuffer[3] = pLoco->getSpeed(); // RVVVVVVV  R = forward    VVVVVVV = speed
-	if (pLoco->isDirectionForward()) bitSet(replyBuffer[3], 7);
+	MessageConverterZ21::replyBuffer[0] = inMSB;	// loco address msb
+	MessageConverterZ21::replyBuffer[1] = inLSB; // loco address lsb
+	MessageConverterZ21::replyBuffer[2] = B00000100; // 0000CKKK	 C = already controlled    KKK = speed steps 000:14, 010:28, 100:128
+	MessageConverterZ21::replyBuffer[3] = pLoco->getSpeed(); // RVVVVVVV  R = forward    VVVVVVV = speed
+	if (pLoco->isDirectionForward()) bitSet(MessageConverterZ21::replyBuffer[3], 7);
 
-	replyBuffer[4] = B00000000; // 0DSLFGHJ  D = double traction    S = Smartsearch   L = F0   F = F4   G = F3   H = F2   J = F1
-	if (pLoco->functions.isActivated(0)) bitSet(replyBuffer[4], 4);
-	if (pLoco->functions.isActivated(1)) bitSet(replyBuffer[4], 0);
-	if (pLoco->functions.isActivated(2)) bitSet(replyBuffer[4], 1);
-	if (pLoco->functions.isActivated(3)) bitSet(replyBuffer[4], 2);
-	if (pLoco->functions.isActivated(4)) bitSet(replyBuffer[4], 3);
+	MessageConverterZ21::replyBuffer[4] = B00000000; // 0DSLFGHJ  D = double traction    S = Smartsearch   L = F0   F = F4   G = F3   H = F2   J = F1
+	if (pLoco->functions.isActivated(0)) bitSet(MessageConverterZ21::replyBuffer[4], 4);
+	if (pLoco->functions.isActivated(1)) bitSet(MessageConverterZ21::replyBuffer[4], 0);
+	if (pLoco->functions.isActivated(2)) bitSet(MessageConverterZ21::replyBuffer[4], 1);
+	if (pLoco->functions.isActivated(3)) bitSet(MessageConverterZ21::replyBuffer[4], 2);
+	if (pLoco->functions.isActivated(4)) bitSet(MessageConverterZ21::replyBuffer[4], 3);
 
-	replyBuffer[5] = B00000000;	// function F5 to F12    F5 is bit0
-	if (pLoco->functions.isActivated(5)) bitSet(replyBuffer[5], 0);
-	if (pLoco->functions.isActivated(6)) bitSet(replyBuffer[5], 1);
-	if (pLoco->functions.isActivated(7)) bitSet(replyBuffer[5], 2);
-	if (pLoco->functions.isActivated(8)) bitSet(replyBuffer[5], 3);
-	if (pLoco->functions.isActivated(9)) bitSet(replyBuffer[5], 4);
-	if (pLoco->functions.isActivated(10)) bitSet(replyBuffer[5],5);
-	if (pLoco->functions.isActivated(11)) bitSet(replyBuffer[5],6);
-	if (pLoco->functions.isActivated(12)) bitSet(replyBuffer[5],7);
+	MessageConverterZ21::replyBuffer[5] = B00000000;	// function F5 to F12    F5 is bit0
+	if (pLoco->functions.isActivated(5)) bitSet(MessageConverterZ21::replyBuffer[5], 0);
+	if (pLoco->functions.isActivated(6)) bitSet(MessageConverterZ21::replyBuffer[5], 1);
+	if (pLoco->functions.isActivated(7)) bitSet(MessageConverterZ21::replyBuffer[5], 2);
+	if (pLoco->functions.isActivated(8)) bitSet(MessageConverterZ21::replyBuffer[5], 3);
+	if (pLoco->functions.isActivated(9)) bitSet(MessageConverterZ21::replyBuffer[5], 4);
+	if (pLoco->functions.isActivated(10)) bitSet(MessageConverterZ21::replyBuffer[5],5);
+	if (pLoco->functions.isActivated(11)) bitSet(MessageConverterZ21::replyBuffer[5],6);
+	if (pLoco->functions.isActivated(12)) bitSet(MessageConverterZ21::replyBuffer[5],7);
 
-	replyBuffer[6] = B00000000;	// function F13 to F20   F13 is bit0
-	if (pLoco->functions.isActivated(13)) bitSet(replyBuffer[6], 0);
-	if (pLoco->functions.isActivated(14)) bitSet(replyBuffer[6], 1);
-	if (pLoco->functions.isActivated(15)) bitSet(replyBuffer[6], 2);
-	if (pLoco->functions.isActivated(16)) bitSet(replyBuffer[6], 3);
-	if (pLoco->functions.isActivated(17)) bitSet(replyBuffer[6], 4);
-	if (pLoco->functions.isActivated(18)) bitSet(replyBuffer[6], 5);
-	if (pLoco->functions.isActivated(19)) bitSet(replyBuffer[6], 6);
-	if (pLoco->functions.isActivated(20)) bitSet(replyBuffer[6], 7);
+	MessageConverterZ21::replyBuffer[6] = B00000000;	// function F13 to F20   F13 is bit0
+	if (pLoco->functions.isActivated(13)) bitSet(MessageConverterZ21::replyBuffer[6], 0);
+	if (pLoco->functions.isActivated(14)) bitSet(MessageConverterZ21::replyBuffer[6], 1);
+	if (pLoco->functions.isActivated(15)) bitSet(MessageConverterZ21::replyBuffer[6], 2);
+	if (pLoco->functions.isActivated(16)) bitSet(MessageConverterZ21::replyBuffer[6], 3);
+	if (pLoco->functions.isActivated(17)) bitSet(MessageConverterZ21::replyBuffer[6], 4);
+	if (pLoco->functions.isActivated(18)) bitSet(MessageConverterZ21::replyBuffer[6], 5);
+	if (pLoco->functions.isActivated(19)) bitSet(MessageConverterZ21::replyBuffer[6], 6);
+	if (pLoco->functions.isActivated(20)) bitSet(MessageConverterZ21::replyBuffer[6], 7);
 
-	replyBuffer[7] = B00000000;	// function F21 to F28   F21 is bit0
-	if (pLoco->functions.isActivated(21)) bitSet(replyBuffer[7], 0);
-	if (pLoco->functions.isActivated(22)) bitSet(replyBuffer[7], 1);
-	if (pLoco->functions.isActivated(23)) bitSet(replyBuffer[7], 2);
-	if (pLoco->functions.isActivated(24)) bitSet(replyBuffer[7], 3);
-	if (pLoco->functions.isActivated(25)) bitSet(replyBuffer[7], 4);
-	if (pLoco->functions.isActivated(26)) bitSet(replyBuffer[7], 5);
-	if (pLoco->functions.isActivated(27)) bitSet(replyBuffer[7], 6);
-	if (pLoco->functions.isActivated(28)) bitSet(replyBuffer[7], 7);
+	MessageConverterZ21::replyBuffer[7] = B00000000;	// function F21 to F28   F21 is bit0
+	if (pLoco->functions.isActivated(21)) bitSet(MessageConverterZ21::replyBuffer[7], 0);
+	if (pLoco->functions.isActivated(22)) bitSet(MessageConverterZ21::replyBuffer[7], 1);
+	if (pLoco->functions.isActivated(23)) bitSet(MessageConverterZ21::replyBuffer[7], 2);
+	if (pLoco->functions.isActivated(24)) bitSet(MessageConverterZ21::replyBuffer[7], 3);
+	if (pLoco->functions.isActivated(25)) bitSet(MessageConverterZ21::replyBuffer[7], 4);
+	if (pLoco->functions.isActivated(26)) bitSet(MessageConverterZ21::replyBuffer[7], 5);
+	if (pLoco->functions.isActivated(27)) bitSet(MessageConverterZ21::replyBuffer[7], 6);
+	if (pLoco->functions.isActivated(28)) bitSet(MessageConverterZ21::replyBuffer[7], 7);
 
-	notify(HEADER_LAN_XPRESS_NET, LAN_X_HEADER_LOCO_INFO, replyBuffer, 8, false, inpThrottle);
+	notify(HEADER_LAN_XPRESS_NET, LAN_X_HEADER_LOCO_INFO, MessageConverterZ21::replyBuffer, 8, false, inpThrottle);
 }
 
-void notifyTurnoutInfo(Throttle* inpThrottle, byte inMSB, byte inLSB)
+void MessageConverterZ21::notifyTurnoutInfo(Throttle* inpThrottle, byte inMSB, byte inLSB)
 {
-	replyBuffer[0] = inMSB;	// turnout address msb
-	replyBuffer[1] = inLSB; // turnout address lsb
-	replyBuffer[2] = B00000000; // 000000ZZ	 ZZ : 00 not switched   01 pos1  10 pos2  11 invalid
-	notify(HEADER_LAN_XPRESS_NET, LAN_X_HEADER_TURNOUT_INFO, replyBuffer, 3, false, inpThrottle);
+	MessageConverterZ21::replyBuffer[0] = inMSB;	// turnout address msb
+	MessageConverterZ21::replyBuffer[1] = inLSB; // turnout address lsb
+	MessageConverterZ21::replyBuffer[2] = B00000000; // 000000ZZ	 ZZ : 00 not switched   01 pos1  10 pos2  11 invalid
+	notify(HEADER_LAN_XPRESS_NET, LAN_X_HEADER_TURNOUT_INFO, MessageConverterZ21::replyBuffer, 3, false, inpThrottle);
 }
 
-void notifyLocoMode(Throttle* inpThrottle, byte inMSB, byte inLSB)
+void MessageConverterZ21::notifyLocoMode(Throttle* inpThrottle, byte inMSB, byte inLSB)
 {
-	replyBuffer[0] = inMSB;	// loco address msb
-	replyBuffer[1] = inLSB; // loco address lsb
-	replyBuffer[2] = B00000000; // 00000000	DCC   00000001 MM
-	notify(HEADER_LAN_GET_LOCOMODE, replyBuffer, 3, true, inpThrottle);
+	MessageConverterZ21::replyBuffer[0] = inMSB;	// loco address msb
+	MessageConverterZ21::replyBuffer[1] = inLSB; // loco address lsb
+	MessageConverterZ21::replyBuffer[2] = B00000000; // 00000000	DCC   00000001 MM
+	notify(HEADER_LAN_GET_LOCOMODE, MessageConverterZ21::replyBuffer, 3, true, inpThrottle);
 }
 
-void notifyFirmwareVersion(Throttle* inpThrottle)
+void MessageConverterZ21::notifyFirmwareVersion(Throttle* inpThrottle)
 {
-	replyBuffer[0] = 0x01;	// Version major in BCD
-	replyBuffer[1] = 0x23;	// Version minor in BCD
-	notify(HEADER_LAN_XPRESS_NET, LAN_X_HEADER_FIRMWARE_VERSION, 0x0A, replyBuffer, 2, false, inpThrottle);
+	MessageConverterZ21::replyBuffer[0] = 0x01;	// Version major in BCD
+	MessageConverterZ21::replyBuffer[1] = 0x23;	// Version minor in BCD
+	notify(HEADER_LAN_XPRESS_NET, LAN_X_HEADER_FIRMWARE_VERSION, 0x0A, MessageConverterZ21::replyBuffer, 2, false, inpThrottle);
 }
 
-void notifyHWInfo(Throttle* inpThrottle)
+void MessageConverterZ21::notifyHWInfo(Throttle* inpThrottle)
 {
-	replyBuffer[0] = 0x00;	// Hardware type in BCD on int32
-	replyBuffer[1] = 0x02;	// Hardware type in BCD on int32
-	replyBuffer[2] = 0x00;	// Hardware type in BCD on int32
-	replyBuffer[3] = 0x00;	// Hardware type in BCD on int32
-	replyBuffer[4] = 0x23;	// Firmware version in BCD on int32
-	replyBuffer[5] = 0x01;	// Firmware version in BCD on int32
-	replyBuffer[6] = 0x00;	// Firmware version in BCD on int32
-	replyBuffer[7] = 0x00;	// Firmware version in BCD on int32
-	notify(HEADER_LAN_GET_HWINFO, replyBuffer, 8, true, inpThrottle);
+	MessageConverterZ21::replyBuffer[0] = 0x00;	// Hardware type in BCD on int32
+	MessageConverterZ21::replyBuffer[1] = 0x02;	// Hardware type in BCD on int32
+	MessageConverterZ21::replyBuffer[2] = 0x00;	// Hardware type in BCD on int32
+	MessageConverterZ21::replyBuffer[3] = 0x00;	// Hardware type in BCD on int32
+	MessageConverterZ21::replyBuffer[4] = 0x23;	// Firmware version in BCD on int32
+	MessageConverterZ21::replyBuffer[5] = 0x01;	// Firmware version in BCD on int32
+	MessageConverterZ21::replyBuffer[6] = 0x00;	// Firmware version in BCD on int32
+	MessageConverterZ21::replyBuffer[7] = 0x00;	// Firmware version in BCD on int32
+	notify(HEADER_LAN_GET_HWINFO, MessageConverterZ21::replyBuffer, 8, true, inpThrottle);
 }
 
-void notifyCvNACK(Throttle* inpThrottle, byte incvMSB, byte incvLSB)
+void MessageConverterZ21::notifyCvNACK(Throttle* inpThrottle, byte incvMSB, byte incvLSB)
 {
-	notify(HEADER_LAN_XPRESS_NET, LAN_X_HEADER_CV_NACK, LAN_X_DB0_CV_NACK, replyBuffer, 0, false, inpThrottle);
+	notify(HEADER_LAN_XPRESS_NET, LAN_X_HEADER_CV_NACK, LAN_X_DB0_CV_NACK, MessageConverterZ21::replyBuffer, 0, false, inpThrottle);
 }
 
-void notifyCvRead(Throttle* inpThrottle, byte incvMSB, byte incvLSB, int inValue)
+void MessageConverterZ21::notifyCvRead(Throttle* inpThrottle, byte incvMSB, byte incvLSB, int inValue)
 {
-	replyBuffer[0] = incvMSB;	// cv address msb
-	replyBuffer[1] = incvLSB; // cv address lsb
-	replyBuffer[2] = inValue; // cv value
-	notify(HEADER_LAN_XPRESS_NET, LAN_X_HEADER_CV_RESULT, 0x14, replyBuffer, 3, false, inpThrottle);
+	MessageConverterZ21::replyBuffer[0] = incvMSB;	// cv address msb
+	MessageConverterZ21::replyBuffer[1] = incvLSB; // cv address lsb
+	MessageConverterZ21::replyBuffer[2] = inValue; // cv value
+	notify(HEADER_LAN_XPRESS_NET, LAN_X_HEADER_CV_RESULT, 0x14, MessageConverterZ21::replyBuffer, 3, false, inpThrottle);
 }
-
 
 //
 // TODO Passer par un message texte pour éviter des bugs de collision core 1/0 !
@@ -402,7 +400,7 @@ bool MessageConverterZ21::processBuffer(Throttle* inpThrottle)
 {
 	bool done = false;
 	byte DB[100];
-	CircularBuffer* pBuffer = inpThrottle->getCircularBuffer();
+	CircularBuffer* pBuffer = inpThrottle->pBuffer;
 
 	if (pBuffer == NULL)
 		return false;

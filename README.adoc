@@ -1,9 +1,9 @@
 = LaBox : DCC/Wifi Controller for ESP32 =
 
-This is an adaptation of DCCpp project to build a DCC controller called LaBox.
+This is an adaptation of DCCpp project to build a DCC controller called LaBox with a dedicated hardware.
 
 For more information about this library please visit us at
-http://www.locoduino.org/spip.php?article228 in french or
+http://www.locoduino.org/spip.php?article228 in french (Thanks Google for the poor people not speaking french !)
 
 In extras folder, click on Doc/index.html to have a complete documentation in English in your browser.
 

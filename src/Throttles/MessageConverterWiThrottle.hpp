@@ -54,7 +54,6 @@ public:
 
 	void locoAdd(Throttle* inpThrottle, int inLocoNumber, String th, String actionKey);
 	void locoRelease(Throttle* inpThrottle, int inLocoNumber, String th, String actionKey);
-	void checkHeartbeat(Throttle* inpThrottle);
 
 #ifdef DCCPP_DEBUG_MODE
 	/** Print the status of the Converter.

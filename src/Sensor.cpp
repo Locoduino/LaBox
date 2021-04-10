@@ -20,7 +20,6 @@ Part of DCC++ BASE STATION for the Arduino
 #ifdef USE_EEPROM
 #include "EEPROM.h"
 #endif
-#include "Comm.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 

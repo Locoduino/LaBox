@@ -154,10 +154,7 @@ void RegisterList::setThrottle(int nReg, int cab, int tSpeed, int tDirection) vo
 	DCCPP_INTERFACE.print(tSpeed); DCCPP_INTERFACE.print(" ");
 	DCCPP_INTERFACE.print(tDirection);
 	DCCPP_INTERFACE.print(">");
-#ifdef USE_THROTTLES
-	if (DCCPP_INTERFACE.sendNewline())
-#endif
-		DCCPP_INTERFACE.println("");
+	DCCPP_INTERFACE.sendNewline();
 #endif
 	speedTable[nReg] = tDirection == 1 ? tSpeed : -tSpeed;
 
@@ -263,10 +260,7 @@ void RegisterList::setFunction(int nReg, int cab, int fByte, int eByte, bool ret
 		DCCPP_INTERFACE.print(fByte); DCCPP_INTERFACE.print(" ");
 		DCCPP_INTERFACE.print(eByte);
 		DCCPP_INTERFACE.print(">");
-#ifdef USE_THROTTLES
-		if (DCCPP_INTERFACE.sendNewline())
-#endif
-			DCCPP_INTERFACE.println("");
+		DCCPP_INTERFACE.sendNewline();
 	}
 #endif
 
@@ -534,10 +528,7 @@ void RegisterList::writeTextPacket(int nReg, byte *b, int nBytes) volatile
 
 	if (nBytes<2 || nBytes>5) {    // invalid valid packet
 		DCCPP_INTERFACE.print("<mInvalid Packet>");
-#ifdef USE_THROTTLES
-		if (DCCPP_INTERFACE.sendNewline())
-#endif
-			DCCPP_INTERFACE.println("");
+		DCCPP_INTERFACE.sendNewline();
 		return;
 	}
 
@@ -690,10 +681,7 @@ int RegisterList::readCVraw(int cv, int callBack, int callBackSub) volatile
 	DCCPP_INTERFACE.print(" ");
 	DCCPP_INTERFACE.print(bValue);
 	DCCPP_INTERFACE.print(">");
-#ifdef USE_THROTTLES
-	if (DCCPP_INTERFACE.sendNewline())
-#endif
-		DCCPP_INTERFACE.println("");
+	DCCPP_INTERFACE.sendNewline();
 #endif
 
 #ifdef DCCPP_DEBUG_MODE
@@ -801,10 +789,7 @@ bool RegisterList::writeCVByte(int cv, int bValue, int callBack, int callBackSub
 	else
 		DCCPP_INTERFACE.print("fail");
 
-#ifdef USE_THROTTLES
-	if (DCCPP_INTERFACE.sendNewline())
-#endif
-		DCCPP_INTERFACE.println("");
+	DCCPP_INTERFACE.sendNewline();
 #endif
 
 	return ok;
@@ -884,10 +869,7 @@ bool RegisterList::writeCVBit(int cv, int bNum, int bValue, int callBack, int ca
 	else
 		DCCPP_INTERFACE.print("fail");
 
-#ifdef USE_THROTTLES
-	if (DCCPP_INTERFACE.sendNewline())
-#endif
-		DCCPP_INTERFACE.println("");
+	DCCPP_INTERFACE.sendNewline();
 #endif
 
 	return ok;
@@ -1009,10 +991,7 @@ void RegisterList::printPacket(int nReg, byte *b, int nBytes, int nRepeat) volat
   DCCPP_INTERFACE.print(" / ");
   DCCPP_INTERFACE.print(nRepeat);
   DCCPP_INTERFACE.print(">");
-#ifdef USE_THROTTLES
-	if (DCCPP_INTERFACE.sendNewline())
-#endif
-		DCCPP_INTERFACE.println("");
+	DCCPP_INTERFACE.sendNewline();
 } // RegisterList::printPacket()
 #endif
 

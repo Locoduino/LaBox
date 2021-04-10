@@ -122,7 +122,7 @@ void ThrottleWifi::connectWifi(const char* inSsid, const char* inPassword, IPAdd
 
 bool ThrottleWifi::begin(EthernetProtocol inProtocol)
 {
-	this->type = ThrottleType::Wifi;
+	this->type = TYPEWIFI;
 	this->protocol = inProtocol;
 
 	if (protocol == UDP)
@@ -152,7 +152,7 @@ bool ThrottleWifi::begin(EthernetProtocol inProtocol)
 
 bool ThrottleWifi::begin(MessageConverter *apConverter)
 {
-	this->type = ThrottleType::Wifi;
+	this->type = TYPEWIFI;
 	this->setConverter(apConverter);
 	return this->begin(apConverter->getProtocol());
 }
@@ -169,7 +169,7 @@ ThrottleWifi* ThrottleWifi::GetThrottle(IPAddress inRemoteIp, int inPort, Ethern
 
 	if (pThrottle != NULL)
 	{
-		if (pThrottle->type == Wifi)
+		if (pThrottle->type == TYPEWIFI)
 		{
 			// If already mounted, use it !
 			return (ThrottleWifi*)pThrottle;
@@ -181,7 +181,7 @@ ThrottleWifi* ThrottleWifi::GetThrottle(IPAddress inRemoteIp, int inPort, Ethern
 
 	while (pCurr != NULL)
 	{
-		if (pCurr->type == Wifi)
+		if (pCurr->type == TYPEWIFI)
 		{
 			if ((uint32_t) (pCurr->remoteIP()) == (uint32_t) (IPAddress) INADDR_NONE)
 			{
@@ -217,7 +217,7 @@ bool ThrottleWifi::loop()
 {
 	bool added = false;
 
-	if (this->type == ThrottleType::NotStartedThrottle)
+	if (this->type == NOTSTARTEDTHROTTLE)
 		return false;
 
 	if (this->protocol == UDP)
@@ -302,7 +302,7 @@ bool ThrottleWifi::loop()
 
 				while (foundClient.available())
 				{        // while there is data on the network
-					added = Throttle::getCharacter(foundClient.read(), pWifi);
+					added = pWifi->getCharacter(foundClient.read());
 				}
 
 				foundClient.stop();
@@ -314,7 +314,7 @@ bool ThrottleWifi::loop()
 			{
 				while (pWifi->client.available())
 				{        // while there is data on the network
-					added = Throttle::getCharacter(pWifi->client.read(), pWifi);
+					added = pWifi->getCharacter(pWifi->client.read());
 				}
 			}
 		}
@@ -325,7 +325,7 @@ bool ThrottleWifi::loop()
 
 bool ThrottleWifi::sendMessage(const String& inMessage)
 {
-	if (this->type == ThrottleType::NotStartedThrottle)
+	if (this->type == NOTSTARTEDTHROTTLE)
 		return false;
 
 	if (!this->replyToCommands)
@@ -335,7 +335,10 @@ bool ThrottleWifi::sendMessage(const String& inMessage)
 		{
 		case TCP:		size = this->client.println(inMessage);	break;
 		case HTTP:	size = this->pServer->println(inMessage);	break;
-		case UDP:		return true;
+
+		case UDP:
+		case NOTSIGNIFICANT:		
+			return true;
 		}
 
 #ifdef DCCPP_DEBUG_MODE
@@ -406,22 +409,16 @@ void ThrottleWifi::end()
 
 bool ThrottleWifi::isConnected()
 {
-	if (this->type == ThrottleType::NotStartedThrottle)
+	if (this->type == NOTSTARTEDTHROTTLE)
 		return false;
 
 	return WiFi.status() == WL_CONNECTED || this->contacted;
 }
 
-bool ThrottleWifi::sendNewline()
+bool ThrottleWifi::SendNewline() const
 {
 	return false;
 }
-
-CircularBuffer* ThrottleWifi::getCircularBuffer() const
-{ 
-	return this->pBuffer; 
-}
-
 
 #ifdef DCCPP_DEBUG_MODE
 void ThrottleWifi::printThrottle()
@@ -434,6 +431,7 @@ void ThrottleWifi::printThrottle()
 	Serial.print("  WifiProtocol: ");
 	switch (this->protocol)
 	{
+	case NOTSIGNIFICANT: Serial.print("NOTSIGNIFICANT"); break;
 	case HTTP: Serial.print("HTTP"); break;
 	case TCP: Serial.print("TCP"); break;
 	case UDP: Serial.print("UDP"); break;

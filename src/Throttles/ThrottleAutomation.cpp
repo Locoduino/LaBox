@@ -61,7 +61,8 @@ bool ThrottleAutomation::begin(EthernetProtocol inProtocol)
 	this->currentItem = NULL;
 	this->timeValue = 0;
 	this->currentState = stopped;
-	this->type = ThrottleType::Automation;
+	this->type = TYPEAUTOMATION;
+
 	return true;
 }
 
@@ -69,7 +70,7 @@ bool ThrottleAutomation::loop()
 {
 	bool added = false;
 
-	if (this->type == ThrottleType::NotStartedThrottle)
+	if (this->type == NOTSTARTEDTHROTTLE)
 		return false;
 
 	if (this->currentState == started)
@@ -78,8 +79,28 @@ bool ThrottleAutomation::loop()
 			currentItem = this->first;
 		else
 		{
-			if ((int)(millis() - timeValue) < currentItem->delay)
-				return false;
+			if (currentItem->delay >= AUTOMATIONIDSSTART)
+			{
+#ifdef USE_SENSOR
+				int id = SENSORID(currentItem->delay);
+				Sensor *pSensor = Sensor::get(id);
+
+				int state = SENSORSTATE(currentItem->delay);
+				if (state == HIGH && !pSensor->isActive())
+				{
+					return false;
+				}
+				if (state == LOW && pSensor->isActive())
+				{
+					return false;
+				}
+#endif
+			}
+			else
+			{
+				if ((int)(millis() - timeValue) < currentItem->delay)
+					return false;
+			}
 			currentItem = currentItem->next;
 			if (currentItem == NULL)
 			{
@@ -89,7 +110,8 @@ bool ThrottleAutomation::loop()
 #endif
 			}
 		}
-		timeValue = millis();
+		if (currentItem->delay < AUTOMATIONIDSSTART)
+			timeValue = millis();
 		Throttle::pushMessageInStack(this->id, currentItem->command);
 #ifdef DCCPP_DEBUG_MODE
 		Serial.println(currentItem->comment);
@@ -149,9 +171,20 @@ void ThrottleAutomation::printThrottleItems()
 	ThrottleAutomationItem* curr = first;
 	while (curr != NULL && curr->next != NULL)
 	{
-		Serial.print("  After ");
-		Serial.print(curr->delay);
-		Serial.print("ms do ");
+		if (curr->delay >= AUTOMATIONIDSSTART)
+		{
+			Serial.print("  When sensor ");
+			Serial.print(SENSORID(curr->delay));
+			Serial.print(" is ");
+			Serial.print(SENSORSTATE(curr->delay) ? "HIGH" : "LOW");
+			Serial.print(" do ");
+		}
+		else
+		{
+			Serial.print("  After ");
+			Serial.print(curr->delay);
+			Serial.print("ms do ");
+		}
 		Serial.print(curr->command);
 		Serial.print(" (");
 		Serial.print(curr->comment);

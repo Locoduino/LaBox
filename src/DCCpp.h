@@ -3,6 +3,11 @@
 #define __DCCpp_H__
 //-------------------------------------------------------------------
 
+#ifdef VISUALSTUDIO
+#pragma warning(push)
+#pragma warning(disable:4005)
+#endif
+
 /**	 @mainpage
 -------------------------------------------------------------------------------------------------------
 
@@ -527,6 +532,10 @@ Main include file of the library.*/
 		2 bytes per RegisterList and 2 extra pointers in DCCppConfig (pointers might not be needed, they are used for 
 		direct IO port manipulation to bypass arduino's digitalWrite).*/
 		#define USE_ONLY1_INTERRUPT
+#endif
+
+#ifdef VISUALSTUDIO
+#pragma warning(pop)
 #endif
 
 #if defined(USE_ETHERNET_WIZNET_5100) || defined(USE_ETHERNET_WIZNET_5500) || defined(USE_ETHERNET_WIZNET_5200) || defined(USE_ETHERNET_ENC28J60)

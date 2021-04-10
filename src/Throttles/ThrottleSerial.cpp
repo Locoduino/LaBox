@@ -14,7 +14,7 @@ ThrottleSerial::ThrottleSerial(const String& inName, SerialInterface* inpInterfa
 
 bool ThrottleSerial::begin(EthernetProtocol inProtocol)
 {
-	this->type = ThrottleType::SerialThrottle;
+	this->type = TYPESERIAL;
 	return true;
 }
 
@@ -26,13 +26,13 @@ bool ThrottleSerial::loop()
 {
 	bool added = false;
 
-	if (this->type == ThrottleType::NotStartedThrottle)
+	if (this->type == NOTSTARTEDTHROTTLE)
 		return false;
 
 	// Serial comm always active...
 	while (this->pInterface->available() > 0) 
 	{    // while there is data on the serial line
-		added = Throttle::getCharacter(this->pInterface->read(), this);
+		added = this->getCharacter(this->pInterface->read());
 	} // while
 	
 	return added;
@@ -40,7 +40,7 @@ bool ThrottleSerial::loop()
 
 bool ThrottleSerial::sendMessage(const String& inMessage)
 {
-	if (this->type == ThrottleType::NotStartedThrottle)
+	if (this->type == NOTSTARTEDTHROTTLE)
 		return false;
 
 	this->pInterface->println(inMessage);
@@ -49,7 +49,7 @@ bool ThrottleSerial::sendMessage(const String& inMessage)
 
 bool ThrottleSerial::isConnected()
 {
-	if (this->type == ThrottleType::NotStartedThrottle)
+	if (this->type == NOTSTARTEDTHROTTLE)
 		return false;
 
 	return true;
@@ -57,7 +57,7 @@ bool ThrottleSerial::isConnected()
 
 bool ThrottleSerial::pushMessage(const String& inpCommand)
 {
-	if (this->type == ThrottleType::NotStartedThrottle)
+	if (this->type == NOTSTARTEDTHROTTLE)
 		return false;
 
 	return this->pushDccppMessage(inpCommand);

@@ -26,6 +26,8 @@
 
 #endif
 
+#define TYPEETHERNET	'E'
+
 /** This is a class to handle an ethernet connection.
 */
 class ThrottleEthernet : public Throttle
@@ -49,7 +51,7 @@ public:
 	bool sendMessage(const String& inMessage);
 	void end();
 	bool isConnected();
-	bool sendNewline();
+	bool SendNewline() const;
 	IPAddress remoteIP();
 
 #ifdef DCCPP_DEBUG_MODE

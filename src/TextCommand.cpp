@@ -179,9 +179,9 @@ bool TextCommand::parse(char *com)
 #endif
 #endif
 
-  switch(com[0]){
+	switch (com[0]) {
 
-	case 't':       
+	case 't':
 		/**	\addtogroup commandsGroup
 		SET ENGINE THROTTLES USING 128-STEP SPEED CONTROL
 		-------------------------------------------------
@@ -191,28 +191,28 @@ bool TextCommand::parse(char *com)
 		<t REGISTER CAB SPEED DIRECTION>
 		\endverbatim
 		</b>
-	
-	   sets the throttle for a given register/cab combination 
-	   
-	   - <b>REGISTE%R</b>: an internal register number, from 1 through MAX_MAIN_REGISTERS (inclusive), to store the DCC packet used to control this throttle setting
-	   - <b>CAB</b>:  the short (1-127) or long (128-10293) address of the engine decoder
-	   - <b>SPEED</b>: throttle speed from 0-126, or -1 for emergency stop (resets SPEED to 0)
-	   - <b>DIRECTION</b>: 1=forward, 0=reverse.  Setting direction when speed=0 or speed=-1 only effects directionality of cab lighting for a stopped train
-	   
-	   returns: <b>\<T REGISTE%R SPEED DIRECTION\></b>
-	   */
 
-	  DCCpp::mainRegs.setThrottle(com+1);
+		 sets the throttle for a given register/cab combination
+
+		 - <b>REGISTE%R</b>: an internal register number, from 1 through MAX_MAIN_REGISTERS (inclusive), to store the DCC packet used to control this throttle setting
+		 - <b>CAB</b>:  the short (1-127) or long (128-10293) address of the engine decoder
+		 - <b>SPEED</b>: throttle speed from 0-126, or -1 for emergency stop (resets SPEED to 0)
+		 - <b>DIRECTION</b>: 1=forward, 0=reverse.  Setting direction when speed=0 or speed=-1 only effects directionality of cab lighting for a stopped train
+
+		 returns: <b>\<T REGISTE%R SPEED DIRECTION\></b>
+		 */
+
+		DCCpp::mainRegs.setThrottle(com + 1);
 #ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
 #endif
 		return true;
 
-	case 'f':       
+	case 'f':
 		/**	\addtogroup commandsGroup
 		OPERATE ENGINE DECODER FUNCTIONS F0-F28
 		---------------------------------------
-		
+
 		<b>
 		\verbatim
 		<f CAB BYTE1 [BYTE2]>
@@ -222,51 +222,51 @@ bool TextCommand::parse(char *com)
 		\endverbatim
 		</b>
 
-		turns on and off engine decoder functions F0-F28 (F0 is sometimes called FL)  
+		turns on and off engine decoder functions F0-F28 (F0 is sometimes called FL)
 		NOTE: setting requests transmitted directly to mobile engine decoder --- current state of engine functions is not stored by this program
-   
+
 		- <b>REGISTE%R</b>: an internal register number, from 1 through MAX_MAIN_REGISTERS (inclusive), to store the DCC packet used to control these functions. REGISTER is only used if the first argument is -1.
 		- <b>CAB</b>:  the short (1-127) or long (128-10293) address of the engine decoder
-   
+
 		To set functions F0-F4 on (=1) or off (=0):
-     
+
 		- <b>BYTE1</b>:  128 + F1*1 + F2*2 + F3*4 + F4*8 + F0*16
 		- <b>BYTE2</b>:  omitted
-  
+
 		To set functions F5-F8 on (=1) or off (=0):
-  
+
 		- <b>BYTE1</b>:  176 + F5*1 + F6*2 + F7*4 + F8*8
 		- <b>BYTE2</b>:  omitted
-  
+
 		To set functions F9-F12 on (=1) or off (=0):
-  
+
 		- <b>BYTE1</b>:  160 + F9*1 +F10*2 + F11*4 + F12*8
 		- <b>BYTE2</b>:  omitted
-  
+
 		To set functions F13-F20 on (=1) or off (=0):
-  
-		- <b>BYTE1</b>: 222 
+
+		- <b>BYTE1</b>: 222
 		- <b>BYTE2</b>: F13*1 + F14*2 + F15*4 + F16*8 + F17*16 + F18*32 + F19*64 + F20*128
-  
+
 		To set functions F21-F28 on (=1) of off (=0):
-  
+
 		- <b>BYTE1</b>: 223
 		- <b>BYTE2</b>: F21*1 + F22*2 + F23*4 + F24*8 + F25*16 + F26*32 + F27*64 + F28*128
-  
+
 		returns: NONE
 		*/
 
-		DCCpp::mainRegs.setFunction(com+1);
+		DCCpp::mainRegs.setFunction(com + 1);
 #ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
 #endif
 		return true;
 
-	case 'a':       
+	case 'a':
 		/**	\addtogroup commandsGroup
-		OPERATE STATIONARY ACCESSORY DECODERS 
+		OPERATE STATIONARY ACCESSORY DECODERS
 		-------------------------------------
-		
+
 		<b>
 		\verbatim
 		<a ADDRESS SUBADDRESS ACTIVATE>
@@ -274,31 +274,31 @@ bool TextCommand::parse(char *com)
 		</b>
 
 		turns an accessory (stationary) decoder on or off
-   
+
 		- <b>ADDRESS</b>:  the primary address of the decoder (0-511)
 		- <b>SUBADDRESS</b>: the sub-address of the decoder (0-3)
 		- <b>ACTIVATE</b>: 1=on (set), 0=off (clear)
-   
+
 		Note that many decoders and controllers combine the ADDRESS and SUBADDRESS into a single number, N,
 		from  1 through a max of 2044, where
-   
+
 		N = (ADDRESS - 1) * 4 + SUBADDRESS + 1, for all ADDRESS>0
-   
+
 		OR
-   
+
 		- <b>ADDRESS</b> = INT((N - 1) / 4) + 1
 		- <b>SUBADDRESS</b> = (N - 1) % 4
-   
+
 		However, this general command simply sends the appropriate DCC instruction packet to the main tracks
 		to operate connected accessories.  It does not store or retain any information regarding the current
-		status of that accessory. To have this sketch store and retain the direction of DCC-connected turnouts, as 
-		well as automatically invoke the required <b>\<a\></b> command as needed, first define/edit/delete turnouts 
+		status of that accessory. To have this sketch store and retain the direction of DCC-connected turnouts, as
+		well as automatically invoke the required <b>\<a\></b> command as needed, first define/edit/delete turnouts
 		using the following variations of the "T" command.
 
 		returns: NONE
 		*/
 
-	  DCCpp::mainRegs.setAccessory(com+1);
+		DCCpp::mainRegs.setAccessory(com + 1);
 
 #ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
@@ -307,47 +307,52 @@ bool TextCommand::parse(char *com)
 
 #ifdef USE_TURNOUT
 	case 'T':
-/*
-* *** SEE TURNOUT.CPP FOR COMPLETE INFO ON THE DIFFERENT VARIATIONS OF THE "T" COMMAND
-* USED TO CREATE/EDIT/REMOVE/SHOW TURNOUT DEFINITIONS
-*/
+	{
+		/*
+		* *** SEE TURNOUT.CPP FOR COMPLETE INFO ON THE DIFFERENT VARIATIONS OF THE "T" COMMAND
+		* USED TO CREATE/EDIT/REMOVE/SHOW TURNOUT DEFINITIONS
+		*/
 
-	  bool ret = Turnout::parse(com+1);
+		bool retTurnout = Turnout::parse(com + 1);
 
 #ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
 #endif
-		return ret;
+		return retTurnout;
+	}
 #endif
 
 #ifdef USE_OUTPUT
 
 	case 'Z':
-/**** SEE OUTPUT.CPP FOR COMPLETE INFO ON THE DIFFERENT VARIATIONS OF THE "Z" COMMAND
-*   USED TO CREATE / EDIT / REMOVE / SHOW OUTPUT DEFINITIONS
-*/
+	{
+		/**** SEE OUTPUT.CPP FOR COMPLETE INFO ON THE DIFFERENT VARIATIONS OF THE "Z" COMMAND
+		*   USED TO CREATE / EDIT / REMOVE / SHOW OUTPUT DEFINITIONS
+		*/
 
-	  bool ret = Output::parse(com+1);
+		bool retOutput = Output::parse(com + 1);
 
 #ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
 #endif
-		return ret;
+		return retOutput;
+	}
 #endif
-
 #ifdef USE_SENSOR
 
-	case 'S': 
-/*   
- *   *** SEE SENSOR.CPP FOR COMPLETE INFO ON THE DIFFERENT VARIATIONS OF THE "S" COMMAND
- *   USED TO CREATE/EDIT/REMOVE/SHOW SENSOR DEFINITIONS
- */
-	  bool ret = Sensor::parse(com+1);	  
+	case 'S':
+	{
+		/*
+		 *   *** SEE SENSOR.CPP FOR COMPLETE INFO ON THE DIFFERENT VARIATIONS OF THE "S" COMMAND
+		 *   USED TO CREATE/EDIT/REMOVE/SHOW SENSOR DEFINITIONS
+		 */
+		bool retSensor = Sensor::parse(com + 1);
 
 #ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
 #endif
-		return ret;
+		return retSensor;
+	}
 
 #ifdef DCCPP_PRINT_DCCPP
 	case 'Q':
@@ -612,10 +617,7 @@ bool TextCommand::parse(char *com)
 	  DCCPP_INTERFACE.print("<a");
 	  DCCPP_INTERFACE.print(int(DCCpp::getCurrentMain()));
 	  DCCPP_INTERFACE.print(">");
-#ifdef USE_THROTTLES
-		if (DCCPP_INTERFACE.sendNewline())
-#endif
-			DCCPP_INTERFACE.println("");
+		DCCPP_INTERFACE.sendNewline();
 
 #ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
@@ -643,10 +645,7 @@ bool TextCommand::parse(char *com)
 			DCCPP_INTERFACE.print("<p0>");
 		if (DCCppConfig::SignalEnablePinProg == UNDEFINED_PIN || digitalRead(DCCppConfig::SignalEnablePinProg) == HIGH)
 			DCCPP_INTERFACE.print("<p1>");
-#ifdef USE_THROTTLES
-		if (DCCPP_INTERFACE.sendNewline())
-#endif
-			DCCPP_INTERFACE.println("");
+		DCCPP_INTERFACE.sendNewline();
 
 	  for(int i=1;i<=MAX_MAIN_REGISTERS;i++){
 		if(DCCpp::mainRegs.speedTable[i]==0)
@@ -660,11 +659,8 @@ bool TextCommand::parse(char *com)
 		  DCCPP_INTERFACE.print(- DCCpp::mainRegs.speedTable[i]);
 		  DCCPP_INTERFACE.print(" 0>");
 		}          
-#ifdef USE_THROTTLES
-		if (DCCPP_INTERFACE.sendNewline())
-#endif
-			DCCPP_INTERFACE.println("");
-	  }
+		DCCPP_INTERFACE.sendNewline();
+		}
 #ifdef USE_THROTTLES
 		DCCPP_INTERFACE.print("<iLaBox LIBRARY FOR ARDUINO/ESP32 ");
 #else
@@ -686,20 +682,14 @@ bool TextCommand::parse(char *com)
 	  DCCPP_INTERFACE.print(" ");
 	  DCCPP_INTERFACE.print(__TIME__);
 	  DCCPP_INTERFACE.print(">");
-#ifdef USE_THROTTLES
-		if (DCCPP_INTERFACE.sendNewline())
-#endif
-			DCCPP_INTERFACE.println("");
+		DCCPP_INTERFACE.sendNewline();
 
 	  DCCPP_INTERFACE.print("<N ");
 #if defined(USE_ETHERNET)
 		DCCPP_INTERFACE.print("ETHERNET :");
 		DCCPP_INTERFACE.print(Ethernet.localIP());
 		DCCPP_INTERFACE.print(">");
-#ifdef USE_THROTTLES
-		if (DCCPP_INTERFACE.sendNewline())
-#endif
-			DCCPP_INTERFACE.println("");
+		DCCPP_INTERFACE.sendNewline();
 #else
 #if defined(USE_WIFI)
 		DCCPP_INTERFACE.print("WIFI :");
@@ -758,8 +748,7 @@ bool TextCommand::parse(char *com)
 		DCCPP_INTERFACE.print(" ");
 		DCCPP_INTERFACE.print(EEStore::data.nOutputs);
 		DCCPP_INTERFACE.print(">");
-		if (DCCPP_INTERFACE.sendNewline())
-			DCCPP_INTERFACE.println("");
+		DCCPP_INTERFACE.sendNewline();
 
 #ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
@@ -784,8 +773,7 @@ bool TextCommand::parse(char *com)
 	 
 		EEStore::clear();
 		DCCPP_INTERFACE.print("<O>");
-		if (DCCPP_INTERFACE.sendNewline())
-			DCCPP_INTERFACE.println("");
+		DCCPP_INTERFACE.sendNewline();
 
 #ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;
@@ -935,10 +923,7 @@ bool TextCommand::parse(char *com)
 		DCCPP_INTERFACE.print((int)&v - (__brkval == 0 ? (int)&__heap_start : (int)__brkval));
 #endif
 		DCCPP_INTERFACE.print(">");
-#ifdef USE_THROTTLES
-		if (DCCPP_INTERFACE.sendNewline())
-#endif
-			DCCPP_INTERFACE.println("");
+		DCCPP_INTERFACE.sendNewline();
 	}
 #ifdef USE_THROTTLES
 		TextCommand::pCurrentThrottle = NULL;

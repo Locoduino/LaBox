@@ -28,14 +28,13 @@ ThrottleEthernet::ThrottleEthernet(const String& inName, uint8_t* inMac, uint8_t
 
 	this->port = inPort;
 	this->protocol = inProtocol;
-	this->type = Ethernet;
 
 	this->pServer = new EthernetServer(inPort);
 }
 
 bool ThrottleEthernet::begin(EthernetProtocol inProtocol)
 {
-	this->type = ThrottleType::Ethernet;
+	this->type = TYPEETHERNET;
 	if (this->ethernetIp[0] == 0)
 		Ethernet.begin(this->ethernetMac);                  // Start networking using DHCP to get an IP Address
 	else
@@ -54,7 +53,7 @@ bool ThrottleEthernet::loop()
 {
 	bool added = false;
 
-	if (this->type == ThrottleType::NotStartedThrottle)
+	if (this->type == NOTSTARTEDTHROTTLE)
 		return false;
 
 	EthernetClient client = this->pServer->available();
@@ -81,7 +80,7 @@ bool ThrottleEthernet::loop()
 
 bool ThrottleEthernet::sendMessage(const String&  inMessage)
 {
-	if (this->type == ThrottleType::NotStartedThrottle)
+	if (this->type == NOTSTARTEDTHROTTLE)
 		return false;
 
 	this->pServer->println(inMessage);
@@ -94,13 +93,13 @@ void ThrottleEthernet::end()
 
 bool ThrottleEthernet::isConnected()
 {
-	if (this->type == ThrottleType::NotStartedThrottle)
+	if (this->type == NOTSTARTEDTHROTTLE)
 		return false;
 
 	return true;
 }
 
-bool ThrottleEthernet::sendNewline()
+bool ThrottleEthernet::SendNewline() const
 {
 	return false;
 }

@@ -7,6 +7,19 @@
 
 #if defined(USE_TEXTCOMMAND) && defined(USE_THROTTLES)
 
+#define TYPEAUTOMATION	'A'
+
+#define AUTOMATIONIDSSTART		4000000000ul
+
+#ifdef USE_SENSOR
+// Sensor is ID of Sensor class 0 < id < 32767
+// State is HIGH(1) or LOW(0)
+#define AUTOMATIONSENSORID(Sensor, State)	(AUTOMATIONIDSSTART + (Sensor * 2 + State))
+#define SENSORID(AutomationID)	((AutomationID - AUTOMATIONIDSSTART) / 2)
+#define SENSORSTATE(AutomationID)	((AutomationID - AUTOMATIONIDSSTART) % 2)
+#endif
+
+
 enum AutomationState
 {
 	stopped,	// All stopped. If start is wanted, start from the first item.

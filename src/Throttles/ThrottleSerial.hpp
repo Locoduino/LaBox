@@ -7,6 +7,8 @@
 
 #if defined(USE_TEXTCOMMAND) && defined(USE_THROTTLES)
 
+#define TYPESERIAL	'S'
+
 /** This is a class to handle Serial communications.
 */
 class ThrottleSerial : public Throttle

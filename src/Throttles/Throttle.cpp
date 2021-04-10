@@ -15,7 +15,7 @@ Throttle::Throttle(const String& inName, unsigned int inTimeOutDelay)
 	this->timeOutDelay = inTimeOutDelay;
 	this->replyToCommands = false;
 	this->pBuffer = NULL;
-	this->type = ThrottleType::NotStartedThrottle;
+	this->type = NOTSTARTEDTHROTTLE;
 	this->id = 0;
 
 	// Default start/end characters for DCC++ syntax commands
@@ -65,42 +65,42 @@ Throttle* Throttle::getThrottleFromStackMessage(const String& inMessage)
 	return Throttles::get(id);
 }
 
-bool Throttle::getCharacter(char inC, Throttle* inpThrottle)
+bool Throttle::getCharacter(char inC)
 {
-	if (inpThrottle->type == ThrottleType::NotStartedThrottle)
+	if (this->type == NOTSTARTEDTHROTTLE)
 		return false;
 
 	//Serial.println((int)inC);
-	if (inC == (char)inpThrottle->startCommandCharacter)                    // start of new command
+	if (inC == (char)this->startCommandCharacter)                    // start of new command
 	{
-		inpThrottle->commandString[0] = 0;
+		this->commandString[0] = 0;
 	}
 	else
 	{
 #ifdef DCCPP_DEBUG_MODE
-		if (inpThrottle->endCommandCharacter > 31 && inC <= 13)		// message, not command !
+		if (this->endCommandCharacter > 31 && inC <= 13)		// message, not command !
 		{
-			Serial.print(inpThrottle->id);
+			Serial.print(this->id);
 			Serial.print(" Message From Throttle : ");
-			Serial.println(inpThrottle->commandString);
+			Serial.println(this->commandString);
 		}
 #endif
 
-		if (inC == (char)inpThrottle->endCommandCharacter)               // end of new command
+		if (inC == (char)this->endCommandCharacter)               // end of new command
 		{
 #ifdef DCCPP_DEBUG_MODE
-			Serial.print(inpThrottle->id);
+			Serial.print(this->id);
 			Serial.print(" From Throttle : ");
-			Serial.println(inpThrottle->commandString);
+			Serial.println(this->commandString);
 #endif
-			inpThrottle->pushMessage(inpThrottle->commandString);
-			inpThrottle->commandString[0] = 0;
+			this->pushMessage(this->commandString);
+			this->commandString[0] = 0;
 			return true;
 		}
 		else
 		{
-			if (inC >= ' ' && strlen(inpThrottle->commandString) < MAX_COMMAND_LENGTH)    // if comamndString still has space, append character just read from network
-				sprintf(inpThrottle->commandString, "%s%c", inpThrottle->commandString, inC);     // otherwise, character is ignored (but continue to look for start or end characters)}
+			if (inC >= ' ' && strlen(this->commandString) < MAX_COMMAND_LENGTH)    // if comamndString still has space, append character just read from network
+				sprintf(this->commandString, "%s%c", this->commandString, inC);     // otherwise, character is ignored (but continue to look for start or end characters)}
 		}
 	}
 
@@ -113,7 +113,7 @@ void Throttle::setCommandCharacters(int inStartCharacter, int inEndCharacter)
 	this->endCommandCharacter = inEndCharacter;
 }
 
-bool Throttle::sendNewline() const
+bool Throttle::SendNewline() const
 {
 	return true;
 }
@@ -344,6 +344,14 @@ void Throttle::println(int value, int i)
 		TextCommand::pCurrentThrottle->Println(value, i);
 	else
 		Serial.println(value, i);
+}
+
+void Throttle::sendNewline()
+{
+	if (TextCommand::pCurrentThrottle != NULL)
+		TextCommand::pCurrentThrottle->SendNewline();
+	else
+		Serial.println("");
 }
 
 #ifdef VISUALSTUDIO

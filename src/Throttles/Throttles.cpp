@@ -154,7 +154,7 @@ bool Throttles::loop()
 
 	while (pCurr != NULL)
 	{
-		if (pCurr->type != ThrottleType::NotStartedThrottle)
+		if (pCurr->type != NOTSTARTEDTHROTTLE)
 		{
 			ret &= pCurr->loop();
 			pCurr = pCurr->pNextThrottle;
@@ -176,7 +176,7 @@ void Throttles::printThrottles()
 
 	while (pCurr != NULL)
 	{
-		if (pCurr->type == ThrottleType::NotStartedThrottle)
+		if (pCurr->type == NOTSTARTEDTHROTTLE)
 		{
 			Serial.print("NotStarted ! ");
 		}
