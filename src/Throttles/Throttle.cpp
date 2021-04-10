@@ -349,9 +349,14 @@ void Throttle::println(int value, int i)
 void Throttle::sendNewline()
 {
 	if (TextCommand::pCurrentThrottle != NULL)
-		TextCommand::pCurrentThrottle->SendNewline();
-	else
-		Serial.println("");
+	{
+		if (TextCommand::pCurrentThrottle->SendNewline())
+		{
+			TextCommand::pCurrentThrottle->Println("");
+		}
+		return;
+	}
+	Serial.println("");
 }
 
 #ifdef VISUALSTUDIO
