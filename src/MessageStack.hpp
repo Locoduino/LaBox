@@ -19,7 +19,9 @@ class MessageStack
 private:
 	char messages[MESSAGE_MAXNUMBER][MESSAGE_MAXSIZE];
 	byte peakCount;
+#ifdef ARDUINO_ARCH_ESP32
 	SemaphoreHandle_t xSemaphore; // semaphore d'exclusion mutuelle
+#endif
 
 	MessageStack();
 	void FreeMessage(byte inMessageIndex); 
@@ -35,8 +37,6 @@ public:
   
 	/** Add a new message	to the stack.
 	@param inMessage	Message to add to the stack.
-	@param inType	type
-	@param inData	associated data
   @return true if the massage has been pushed. false if it is lost due to max stack size reached...
 	*/
 	bool PushMessage(const char *inMessage);
@@ -79,6 +79,7 @@ public:
 #endif
 };
 
+#ifdef ARDUINO_ARCH_ESP32
 #define START_SEMAPHORE()	\
 	{ \
 		byte semaphoreTaken = this->xSemaphore == NULL?1:0; \
@@ -93,6 +94,11 @@ public:
 
 #define ABORT_SEMAPHORE()	\
 		xSemaphoreGive(this->xSemaphore);
+#else
+#define START_SEMAPHORE()
+#define END_SEMAPHORE()
+#define ABORT_SEMAPHORE()
+#endif
 
 
 #endif

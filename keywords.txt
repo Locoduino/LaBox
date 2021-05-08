@@ -16,7 +16,7 @@ RegisterList	KEYWORD1
 Sensor	KEYWORD1
 Turnout	KEYWORD1
 TextCommand	KEYWORD1
-FunctionsState	KEYWORD1
+Functions	KEYWORD1
 EthernetProtocol	KEYWORD1
 
 Throttle	KEYWORD1
@@ -42,6 +42,8 @@ activate	KEYWORD2
 inactivate	KEYWORD2
 isActivated	KEYWORD2
 isActive	KEYWORD2
+setModal	KEYWORD2
+unsetModal	KEYWORD2
 
 begin	KEYWORD2
 beginMain	KEYWORD2

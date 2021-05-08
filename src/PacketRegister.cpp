@@ -128,7 +128,7 @@ void RegisterList::loadPacket(int nReg, byte *b, int nBytes, int nRepeat, int pr
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void RegisterList::setThrottle(int nReg, int cab, int tSpeed, int tDirection) volatile 
+void RegisterList::setThrottle(int nReg, int cab, int tSpeed, int tDirection, bool inDccPacketOnly) volatile
 {
 	byte b[5];                      // save space for checksum byte
 	byte nB = 0;
@@ -146,6 +146,7 @@ void RegisterList::setThrottle(int nReg, int cab, int tSpeed, int tDirection) vo
 	}
 
 	loadPacket(nReg, b, nB, 0, 1);
+	speedTable[nReg] = tDirection == 1 ? tSpeed : -tSpeed;
 
 #if defined(USE_TEXTCOMMAND)
 	DCCPP_INTERFACE.print("<T");
@@ -156,7 +157,9 @@ void RegisterList::setThrottle(int nReg, int cab, int tSpeed, int tDirection) vo
 	DCCPP_INTERFACE.print(">");
 	DCCPP_INTERFACE.sendNewline();
 #endif
-	speedTable[nReg] = tDirection == 1 ? tSpeed : -tSpeed;
+
+	if (inDccPacketOnly)
+		return;
 
 #ifdef USE_HMI
 	if (hmi::CurrentInterface != NULL)
@@ -233,7 +236,7 @@ void checkFunction(int cab, int theByte, int startFunc, int endFunc,
 	}
 }
 
-void RegisterList::setFunction(int nReg, int cab, int fByte, int eByte, bool returnMessages) volatile
+void RegisterList::setFunction(int nReg, int cab, int fByte, int eByte, bool returnMessages, bool inDccPacketOnly) volatile
 {
 	byte b[5];                      // save space for checksum byte
 	byte nB = 0;
@@ -263,6 +266,16 @@ void RegisterList::setFunction(int nReg, int cab, int fByte, int eByte, bool ret
 		DCCPP_INTERFACE.sendNewline();
 	}
 #endif
+
+	/* NMRA DCC norm ask for two DCC packets instead of only one:
+	"Command Stations that generate these packets, and which are not periodically refreshing these functions,
+	must send at least two repetitions of these commands when any function state is changed."
+	https://www.nmra.org/sites/default/files/s-9.2.1_2012_07.pdf
+	*/
+	loadPacket(nReg, b, nB, (DCCpp::IsResendFunctions() == true) ? 1 : 4, 1);
+
+	if (inDccPacketOnly)
+		return;
 
 	bool state = false;
 #ifdef USE_LOCOMOTIVES
@@ -372,13 +385,6 @@ void RegisterList::setFunction(int nReg, int cab, int fByte, int eByte, bool ret
 		loco->functions.statesSent();
 	}
 #endif
-
-	/* NMRA DCC norm ask for two DCC packets instead of only one:
-	"Command Stations that generate these packets, and which are not periodically refreshing these functions,
-	must send at least two repetitions of these commands when any function state is changed."
-	https://www.nmra.org/sites/default/files/s-9.2.1_2012_07.pdf
-	*/
-	loadPacket(nReg, b, nB, (DCCpp::IsResendFunctions() == true) ? 1 : 4, 1);
 } // RegisterList::setFunction(ints)
 
 #ifdef USE_TEXTCOMMAND
@@ -490,7 +496,7 @@ void RegisterList::testFunctionCommands() volatile
 
   ///////////////////////////////////////////////////////////////////////////////
 
-void RegisterList::setAccessory(int aAdd, int aNum, int activate) volatile 
+void RegisterList::setAccessory(int aAdd, int aNum, int activate, bool inDccPacketOnly) volatile 
 {
 	byte b[3];                      // save space for checksum byte
 

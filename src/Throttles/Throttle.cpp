@@ -376,8 +376,10 @@ void Throttle::test()
 #endif
 
 #if !defined(ARDUINO_ARCH_ESP32)
+#if USE_ETHERNET
 	ThrottleEthernet throttleEthernet("TestEthernet 9", MacTest, IpTest, 2560, TCP);
 	throttleEthernet.setId(9);
+#endif
 #endif
 
 #ifdef USE_WIFI

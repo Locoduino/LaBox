@@ -17,7 +17,9 @@ private:
 	int tail;			// index of the next byte to get.
 	bool full;		// if true, no more space !
 	int peakCount;	// biggest occupancy size since the creation of the buffer.
+#ifdef ARDUINO_ARCH_ESP32
 	SemaphoreHandle_t xSemaphore; // semaphore d'exclusion mutuelle
+#endif
 
 public:
 	/** Constructor.
@@ -74,16 +76,22 @@ public:
 	bool GetBytes(byte* inpData, int inDataLength);
 
 	/** Get the next two bytes from the given buffer starting from the given position, to form an integer.
+	@param pBuffer	buffer to scan.
+	@param inPos	Position of the first useful byte.
 	@return integer created from two available bytes, or 0.
 	*/
 	static int16_t GetInt16(byte* pBuffer, int inPos);
 
 	/** Get the next four bytes from the given buffer starting from the given position, to form a 32 bits integer.
+	@param pBuffer	buffer to scan.
+	@param inPos	Position of the first useful byte.
 	@return integer created from four available bytes, or 0.
 	*/
 	static int32_t GetInt32(byte* pBuffer, int inPos);
 
 	/** Get some bytes from the given buffer starting from the given position.
+	@param pBuffer	buffer to scan.
+	@param inPos	Position of the first useful byte.
 	@param inpData	buffer to fill.
 	@param inDataLength	number of bytes to get.
 	@return true if all bytes have been get. false if there were not enough bytes in th buffer.
@@ -134,6 +142,7 @@ public:
 #endif
 };
 
+#ifdef ARDUINO_ARCH_ESP32
 #define START_SEMAPHORE()	\
 	{ \
 		byte semaphoreTaken = this->xSemaphore == NULL?1:0; \
@@ -148,6 +157,10 @@ public:
 
 #define ABORT_SEMAPHORE()	\
 		xSemaphoreGive(this->xSemaphore);
-
+#else
+#define START_SEMAPHORE()
+#define END_SEMAPHORE()
+#define ABORT_SEMAPHORE()
+#endif
 
 #endif

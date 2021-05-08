@@ -75,7 +75,7 @@ void DCCpp::loop()
 
 #ifdef USE_LOCOMOTIVES
   if (resendFunctions)
-    FunctionsState::functionsLoop();
+    Functions::functionsLoop();
 #endif
 }
 
@@ -473,7 +473,7 @@ bool DCCpp::setThrottle(volatile RegisterList *inpRegs, int nReg,  int inLocoId,
 }
 
 #ifdef USE_LOCOMOTIVES
-void DCCpp::setFunctions(volatile RegisterList *inpRegs, int nReg, int inLocoId, FunctionsState &inStates)
+void DCCpp::setFunctions(volatile RegisterList *inpRegs, int nReg, int inLocoId, Functions &inStates)
 {
 #ifdef DCCPP_DEBUG_MODE
   if (inpRegs == &mainRegs)

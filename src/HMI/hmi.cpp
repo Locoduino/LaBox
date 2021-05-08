@@ -43,7 +43,9 @@ void hmi::begin()
 
   if (CurrentInterface == NULL) CurrentInterface = this;
 
+#ifdef ARDUINO_ARCH_ESP32
   this->executionCore = xPortGetCoreID();
+#endif
 
   BtnUp = new OneButton(PIN_BTN_BTNUP, true);
   BtnDown = new OneButton(PIN_BTN_BTNDWN, true);
@@ -86,9 +88,11 @@ void hmi::begin()
 */
 void hmi::update()
 {
+#ifdef ARDUINO_ARCH_ESP32
   int core = xPortGetCoreID();
   if (CurrentInterface == NULL || core != this->executionCore)
     return;
+#endif
 
   _HMIDEBUG_FCT_PRINTLN("hmi::update().. Begin");
 
@@ -119,9 +123,11 @@ void hmi::update()
 */
 void hmi::stateMachine()
 {
+#ifdef ARDUINO_ARCH_ESP32
   int core = xPortGetCoreID();
   if (core != this->executionCore)
     return;
+#endif
 
   _HMIDEBUG_FCT_PRINTLN("hmi::stateMachine().. Begin");
   // Time out in menu, back to dashboard
@@ -270,9 +276,11 @@ void hmi::dashboard()
   static int toggleData = 0;
   int effect = 0;
 
+#ifdef ARDUINO_ARCH_ESP32
   int core = xPortGetCoreID();
   if (core != this->executionCore)
     return;
+#endif
 
   // --------------- Icons blinking effect -----------------------
   switch (laBoxState)
@@ -343,9 +351,11 @@ void hmi::dashboard()
 */
 void hmi::dashboard3TrainsView()
 {
+#ifdef ARDUINO_ARCH_ESP32
   int core = xPortGetCoreID();
   if (core != this->executionCore)
     return;
+#endif
 
   _HMIDEBUG_FCT_PRINTLN("hmi::dashboard3TrainsView().. Begin");
     clearDisplay();
@@ -379,9 +389,11 @@ void hmi::dashboard3TrainsView()
 */
 void hmi::dashboard2TrainsView()
 {
+#ifdef ARDUINO_ARCH_ESP32
   int core = xPortGetCoreID();
   if (core != this->executionCore)
     return;
+#endif
 
   _HMIDEBUG_FCT_PRINTLN("hmi::dashboard2TrainsView().. Begin");
     clearDisplay();
@@ -414,9 +426,11 @@ void hmi::dashboard2TrainsView()
 */
 void hmi::dashboard1TrainView()
 {
+#ifdef ARDUINO_ARCH_ESP32
   int core = xPortGetCoreID();
   if (core != this->executionCore)
     return;
+#endif
 
   _HMIDEBUG_FCT_PRINTLN("hmi::dashboard1TrainView().. Begin");
     if(tabTrains[0].addr > 0)
@@ -438,9 +452,11 @@ void hmi::dashboard1TrainView()
 */
 void hmi::ParametersMenu()
 {
+#ifdef ARDUINO_ARCH_ESP32
   int core = xPortGetCoreID();
   if (core != this->executionCore)
     return;
+#endif
 
   _HMIDEBUG_FCT_PRINTLN("hmi::ParametersMenu().. Begin");
   
@@ -471,9 +487,11 @@ void hmi::ParametersMenu()
 */
 void hmi::BrowseEventLst()
 {
+#ifdef ARDUINO_ARCH_ESP32
   int core = xPortGetCoreID();
   if (core != this->executionCore)
     return;
+#endif
 
   _HMIDEBUG_FCT_PRINTLN("hmi::BrowseEventLst().. Begin");
   static int firtIdToShow  = 0;
@@ -529,9 +547,11 @@ void hmi::addNotification(uint8_t order)
 */
 void hmi::addNotification(int addr, uint8_t order, uint8_t value, bool functionState)
 {
+#ifdef ARDUINO_ARCH_ESP32
   int core = xPortGetCoreID();
   if (core != this->executionCore)
     return;
+#endif
 
   _HMIDEBUG_FCT_PRINTLN("hmi::addNotification().. Begin");
   _HMIDEBUG_PARAMS_PRINT("hmi::addNotification, addr :  ");_HMIDEBUG_PARAMS_PRINT(addr); _HMIDEBUG_PARAMS_PRINT(", order : ");_HMIDEBUG_PARAMS_PRINT(order);_HMIDEBUG_PARAMS_PRINT(", value : ");_HMIDEBUG_PARAMS_PRINTLN(value);
@@ -647,9 +667,11 @@ void hmi::addNotification(int addr, uint8_t order, uint8_t value, bool functionS
 */ 
 void hmi::setTrainState(int addr, uint8_t order, uint8_t value, bool state)
 {
+#ifdef ARDUINO_ARCH_ESP32
   int core = xPortGetCoreID();
   if (core != this->executionCore)
     return;
+#endif
 
   _HMIDEBUG_FCT_PRINTLN("hmi::setTrainState().. Begin");
   _HMIDEBUG_PARAMS_PRINT("hmi::setTrainState, addr :  ");_HMIDEBUG_PARAMS_PRINT(addr); _HMIDEBUG_PARAMS_PRINT(", order : ");_HMIDEBUG_PARAMS_PRINT(order);_HMIDEBUG_PARAMS_PRINT(", value : ");_HMIDEBUG_PARAMS_PRINTLN(value);

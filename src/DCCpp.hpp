@@ -21,16 +21,25 @@ class DCCpp
 		static bool writeCv(volatile RegisterList *inReg, int inCvId, byte inCvValue, int callBack = 100, int callBackSub = 200);
 		static int identifyLocoId(volatile RegisterList *inReg);
 #ifdef USE_LOCOMOTIVES
-		static void setFunctions(volatile RegisterList *inReg, int nReg, int inLocoId, FunctionsState &inStates);
+		static void setFunctions(volatile RegisterList *inReg, int nReg, int inLocoId, Functions &inStates);
 #endif
 
 	public:
+		/** The threshold that the exponentially-smoothed analogRead samples (after subtracting the baseline current) must cross to establish ACKNOWLEDGEMENT.*/
 		static byte ackThreshold;
-		static volatile RegisterList mainRegs, progRegs;
+		/** Registers for the main track.*/
+		static volatile RegisterList mainRegs;
+		/** Registers for the prog track.*/
+		static volatile RegisterList progRegs;
+		/** Current monitor class for the main track.*/
 		static CurrentMonitor mainMonitor;
+		/** Current monitor class for the prog track.*/
 		static CurrentMonitor progMonitor;
+		/** True if the main track is powered. */
 		static bool IsPowerOnMain;
+		/** True if the prog track is powered. */
 		static bool IsPowerOnProg;
+		/** True if the main track must be powered on at first Wifi client connection. */
 		static bool powerOnAtFirstClient;
 	
 	public:
@@ -71,14 +80,12 @@ class DCCpp
 #endif
 #else
 		/** Initializes the main track.
-		@param inOptionalDirectionMotor	Pin for the rerouting of shields direction pin, set it to UNDEFINED_PIN if not used.
 		@param inSignalPin	Pin for the signal pin, the one driven by an interruption, set it to UNDEFINED_PIN if not used (but the line will be always down...).
 		@param inSignalEnablePin	Pin for the enable/PWM pin, set it to UNDEFINED_PIN if not used.
 		@param inCurrentMonitor	Pin for the current monitor analog pin, set it to UNDEFINED_PIN if not used.
 		*/
 		static void beginMain(uint8_t inSignalPin, uint8_t inSignalEnablePin, uint8_t inCurrentMonitor);
 		/** Initializes the programming track.
-		@param inOptionalDirectionMotor	Pin for the rerouting of shields direction pin, set it to UNDEFINED_PIN if not used.
 		@param inSignalPin	Pin for the signal pin, the one driven by an interruption, set it to UNDEFINED_PIN if not used (but the line will be always down...).
 		@param inSignalEnablePin	Pin for the enable/PWM pin, set it to UNDEFINED_PIN if not used.
 		@param inCurrentMonitor	Pin for the current monitor analog pin, set it to UNDEFINED_PIN if not used.
@@ -231,7 +238,7 @@ class DCCpp
 		@param inLocoId	Decoder address in short or long format.
 		@param inStates	FunctionsState class with the wanted new status.
 		*/
-		static inline void setFunctionsMain(int nReg, int inLocoId, FunctionsState &inStates) { setFunctions(&(mainRegs), nReg, inLocoId, inStates); }
+		static inline void setFunctionsMain(int nReg, int inLocoId, Functions &inStates) { setFunctions(&(mainRegs), nReg, inLocoId, inStates); }
 #endif
 
 		// Programming track functions
@@ -273,7 +280,7 @@ class DCCpp
 		@param inLocoId	Decoder address in short or long format.
 		@param inStates	FunctionsState class with the wanted new status.
 		*/
-		static inline void setFunctionsProg(int nReg, int inLocoId, FunctionsState &inStates) { setFunctions(&(progRegs), nReg, inLocoId, inStates); }
+		static inline void setFunctionsProg(int nReg, int inLocoId, Functions &inStates) { setFunctions(&(progRegs), nReg, inLocoId, inStates); }
 #endif
 
 		// Accessories

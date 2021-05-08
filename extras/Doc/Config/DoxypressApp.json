@@ -168,7 +168,7 @@
         "optimize-fortran": false,
         "optimize-java": false,
         "optimize-python": false,
-        "output-dir": "D:/Documents/Arduino/Libraries/LaBox/extras/Doc",
+        "output-dir": "",
         "output-language": "English",
         "strip-from-inc-path": [
             ""
@@ -194,8 +194,7 @@
             ""
         ],
         "exclude-files": [
-            "D:/Mes documents/Trusty/Arduino/Libraries/Commanders/src/DCC_Decoder.hpp",
-            "D:/Mes documents/Trusty/Arduino/Libraries/Commanders/src/DCC_Decoder.cpp"
+            ""
         ],
         "exclude-patterns": [
             ""
@@ -435,9 +434,9 @@
         "skip-function-macros": true
     },
     "project": {
-        "project-brief": "DCC++ on ESP32 with Samrtphones as Throttles",
+        "project-brief": "DCC++ on ESP32 with Smartphones as Throttles",
         "project-logo": "",
-        "project-name": "Labox",
+        "project-name": "LaBox",
         "project-version": ""
     },
     "source": {

@@ -4,10 +4,12 @@ MessageStack MessageStack::MessagesStack;
 
 void MessageStack::begin(bool inMultiThread)
 {
+#ifdef ARDUINO_ARCH_ESP32
 	if (inMultiThread)
 	{
 		this->xSemaphore = xSemaphoreCreateMutex();
 	}
+#endif
 }
 
 MessageStack::MessageStack()

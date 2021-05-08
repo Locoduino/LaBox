@@ -68,14 +68,19 @@ Part of DCC++ BASE STATION for the Arduino
 // SELECT MOTOR SHIELD
 /////////////////////////////////////////////////////////////////////////////////////
 
-/** Interruption pin for main track.*/
+/** Enable pin for main track : if HIGH, DCC power is on.*/
 #define MOTOR_SHIELD_SIGNAL_ENABLE_PIN_MAIN 3
+/** Enable pin for prog track : if HIGH, DCC power is on.*/
 #define MOTOR_SHIELD_SIGNAL_ENABLE_PIN_PROG 11
 
+/** Current sensor pin for main track.*/
 #define MOTOR_SHIELD_CURRENT_MONITOR_PIN_MAIN A0
+/** Current sensor pin for prog track.*/
 #define MOTOR_SHIELD_CURRENT_MONITOR_PIN_PROG A1
 
+/** Interruption pin for main track.*/
 #define MOTOR_SHIELD_DIRECTION_MOTOR_CHANNEL_PIN_A 12
+/** Interruption pin for prog track.*/
 #define MOTOR_SHIELD_DIRECTION_MOTOR_CHANNEL_PIN_B 13
 
 #define POLOLU_SIGNAL_ENABLE_PIN_MAIN 9
@@ -87,25 +92,35 @@ Part of DCC++ BASE STATION for the Arduino
 #define POLOLU_DIRECTION_MOTOR_CHANNEL_PIN_A 7
 #define POLOLU_DIRECTION_MOTOR_CHANNEL_PIN_B 8
 
+/** Struct with pins configuration for DCC++. */
 struct DCCppConfig
 {
 #ifdef USE_ONLY1_INTERRUPT
+	/** Binary port mask for Main track signal */
 	static uint8_t SignalPortMaskMain;
+	/** Binary port mask for Prog track signal */
 	static uint8_t SignalPortMaskProg;
+	/** Pin for Main track signal */
 	static volatile uint8_t *SignalPortInMain;
+	/** Pin for Prog track signal */
 	static volatile uint8_t *SignalPortInProg;
 #endif
 
-	static byte SignalEnablePinMain;	// PWM : *_SIGNAL_ENABLE_PIN_MAIN
-	static byte CurrentMonitorMain;		// Current sensor : *_CURRENT_MONITOR_PIN_MAIN
+	/** PWM : *_SIGNAL_ENABLE_PIN_MAIN : Pin to enable/disable the main track power. */
+	static byte SignalEnablePinMain;	
+	/** Current sensor : *_CURRENT_MONITOR_PIN_MAIN : Pin for main track current monitor. */
+	static byte CurrentMonitorMain;		
 
-	static byte SignalEnablePinProg;	// PWM : *_SIGNAL_ENABLE_PIN_PROG
-	static byte CurrentMonitorProg;		// Current sensor : *_CURRENT_MONITOR_PIN_PROG
+	/** PWM : *_SIGNAL_ENABLE_PIN_PROG : Pin to enable/disable the prog track power. */
+	static byte SignalEnablePinProg;
+	/** Current sensor : *_CURRENT_MONITOR_PIN_PROG : Pin for prog track current monitor. */
+	static byte CurrentMonitorProg;
 
 #ifndef USE_ONLY1_INTERRUPT
-	// Only for shields : indirection of the signal from SignalPinMain to DirectionMotor of the shield
-	static byte DirectionMotorA;		// *_DIRECTION_MOTOR_CHANNEL_PIN_A
-	static byte DirectionMotorB;		// *_DIRECTION_MOTOR_CHANNEL_PIN_B
+	/** *_DIRECTION_MOTOR_CHANNEL_PIN_A : Only for shields : indirection of the signal from SignalPinMain to DirectionMotor of the shield. */
+	static byte DirectionMotorA;		
+	/** *_DIRECTION_MOTOR_CHANNEL_PIN_B : Only for shields : indirection of the signal from SignalPinProg to DirectionMotor of the shield. */
+	static byte DirectionMotorB;
 #endif
 };
 

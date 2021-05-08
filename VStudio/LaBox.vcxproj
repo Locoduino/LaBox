@@ -174,7 +174,7 @@
     <ClInclude Include="..\src\HMI\menusetvalue.h" />
     <ClInclude Include="..\src\HMI\menuspecial.h" />
     <ClInclude Include="..\src\LaBox.h" />
-    <ClInclude Include="..\src\Locomotives\FunctionsState.hpp" />
+    <ClInclude Include="..\src\Locomotives\Functions.hpp" />
     <ClInclude Include="..\src\Locomotives\Locomotive.hpp" />
     <ClInclude Include="..\src\Locomotives\Locomotives.hpp" />
     <ClInclude Include="..\src\Locomotives\Registers.hpp" />
@@ -221,7 +221,7 @@
     <ClCompile Include="..\src\HMI\menuobject.cpp" />
     <ClCompile Include="..\src\HMI\menusetvalue.cpp" />
     <ClCompile Include="..\src\HMI\menuspecial.cpp" />
-    <ClCompile Include="..\src\Locomotives\FunctionsState.cpp" />
+    <ClCompile Include="..\src\Locomotives\Functions.cpp" />
     <ClCompile Include="..\src\Locomotives\Locomotive.cpp" />
     <ClCompile Include="..\src\Locomotives\Locomotives.cpp" />
     <ClCompile Include="..\src\Locomotives\Registers.cpp" />

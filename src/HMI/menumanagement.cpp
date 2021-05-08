@@ -221,8 +221,10 @@ void MenuManagement::BtnSelectPressed()
               _HMIDEBUG_LEVEL1_PRINT("Choice menu found for ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->caption);
               _HMIDEBUG_LEVEL1_PRINT(": Choice is ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->caption);
               _HMIDEBUG_LEVEL1_PRINT(" (value : ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->value);_HMIDEBUG_LEVEL1_PRINTLN(")");
+#ifdef ARDUINO_ARCH_ESP32
               // !! Only for ESP !!
               ESP.restart();
+#endif
             }else
             {
               if(activeMenu == factoryResetConfirm)
@@ -232,8 +234,10 @@ void MenuManagement::BtnSelectPressed()
                 _HMIDEBUG_LEVEL1_PRINT(" (value : ");_HMIDEBUG_LEVEL1_PRINT(activeMenu->subMenu[activeMenu->SelectListIndex]->value);_HMIDEBUG_LEVEL1_PRINTLN(")");
                 // Restore default setting
 
+#ifdef ARDUINO_ARCH_ESP32
                 // !! Only for ESP !!
                 ESP.restart();
+#endif
               }else
               {
                 if(activeMenu == lstEvent)

@@ -19,11 +19,14 @@ Part of DCC++ BASE STATION for the Arduino
 #define  ACK_SAMPLE_SMOOTHING      0.2      /**< Exponential smoothing to use in processing the analogRead samples after a CV verify (bit or byte) has been sent.*/
 #define  ACK_SAMPLE_THRESHOLD      DCCpp::ackThreshold		/**< The threshold that the exponentially-smoothed analogRead samples (after subtracting the baseline current) must cross to establish ACKNOWLEDGEMENT.*/
 
+/** Memory area to store a DCC packet content. */
 struct Packet{
   byte buf[10];
   byte nBits;
 }; // Packet
 
+/** Define one register which contains a DCC packet to send repeatedly.
+ */
 struct Register{
   Packet packet[2];
   Packet *activePacket;
@@ -81,9 +84,9 @@ struct RegisterList{
 
 	byte setAckThreshold(byte inNewValue);
 
-  void setThrottle(int nReg, int cab, int tSpeed, int tDirection) volatile;
-  void setFunction(int nReg, int cab, int fByte, int eByte, bool returnMessages = true) volatile;
-  void setAccessory(int aAdd, int aNum, int activate) volatile;
+  void setThrottle(int nReg, int cab, int tSpeed, int tDirection, bool inDccPacketOnly = false) volatile;
+  void setFunction(int nReg, int cab, int fByte, int eByte, bool returnMessages = true, bool inDccPacketOnly = false) volatile;
+  void setAccessory(int aAdd, int aNum, int activate, bool inDccPacketOnly = false) volatile;
   void writeTextPacket(int nReg, byte *b, int nBytes) volatile;
   int readCV(int cv, int callBack, int callBackSub) volatile;
   int readCVmain(int cv, int callBack, int callBackSub) volatile;

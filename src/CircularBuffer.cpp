@@ -6,17 +6,21 @@ CircularBuffer::CircularBuffer(int inSize)
 	this->tail = 0;
 	this->full = false;
 	this->peakCount = 0;
-	this->xSemaphore = NULL;
 	this->buffer = NULL;
 	this->size = inSize;
+#ifdef ARDUINO_ARCH_ESP32
+	this->xSemaphore = NULL;
+#endif
 }
 
 void CircularBuffer::begin(bool inMultiThread)
 {
+#ifdef ARDUINO_ARCH_ESP32
 	if (inMultiThread)
 	{
 		this->xSemaphore = xSemaphoreCreateMutex();
 	}
+#endif
 	this->buffer = new byte[this->size];
 	this->clear();
 }

@@ -5,7 +5,7 @@
 
 #include "DCCpp.h"
 #include "WString.h"
-#include "FunctionsState.hpp"
+#include "Functions.hpp"
 
 #ifdef USE_LOCOMOTIVES
 #include "ArduinoJson.h"
@@ -29,7 +29,7 @@ private:
 	
 public:
 	Locomotive* pNextLocomotive;					/**< Address of the next object of this class. NULL means end of the list of Locomotives. Do not change it !*/
-	FunctionsState functions;							/**< Current sate of all functions of this locomotive. */
+	Functions functions;							/**< Current sate of all functions of this locomotive. */
 	long tag;															/**< User data associated with this locomotive.*/
 
 	/** Creates a new instance by default.

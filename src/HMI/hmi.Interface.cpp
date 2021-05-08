@@ -9,9 +9,11 @@ bool hmi::HmiInterfaceLoop()
 {
   _HMIDEBUG_FCT_PRINTLN("hmi::HmiInterfaceLoop().. Begin");
 
+#ifdef ARDUINO_ARCH_ESP32
   int core = xPortGetCoreID();
   if (core != this->executionCore || this->pHmiInterfaceEventBuffer == NULL)
     return false;
+#endif
 
   HmiInterfaceMessage msg;
   char mess[LineCarNbMax];
