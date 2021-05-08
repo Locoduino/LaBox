@@ -27,7 +27,7 @@ enum enumWifiMode :byte {wifiAp, wifiClient};
 // Take care, to much informations is not good for the ESP32.
 #define _HMIDEBUG                 // Global debugging traces. <<< Log levels only work if _HMIDEBUG is active >>>
 #define _HMIDEBUG_CRITICAL           // Critical error level
-#define _HMIDEBUG_ERROR              // Error level
+#define _HMIDEBUG_ERROR              // Error level 
 //#define _HMIDEBUG_FUNCTION           // Log begin and exit function
 //#define _HMIDEBUG_PARAMS             // Log parameters at function beginning 
 //#define _HMIDEBUG_LEVEL1             // Level 1 Log
