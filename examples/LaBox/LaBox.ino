@@ -65,7 +65,7 @@ void setup()
   Serial.println(LABOX_LIBRARY_VERSION);
 
   //----------- Start HMI -------------
-  //boxHMI.begin();
+ /boxHMI.begin();
   
   //Locomotives::debugLocomotivesSet();
 
@@ -98,15 +98,6 @@ void setup()
 
   // configuration pour L6203 La Box
   DCCpp::beginMain(UNDEFINED_PIN, 33, 32, 36);
-  //DCCpp::setResendFunctions(false);
-
-  Locomotives::add("Test", 3);
-  Locomotive* pLoco = Locomotives::get(3);
-
-  pLoco->functions.setModal(1);
-  pLoco->functions.setModal(2);
-  pLoco->functions.setModal(3);
-  pLoco->functions.setModal(4);
 }
 
 void loop()
