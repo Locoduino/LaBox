@@ -213,6 +213,7 @@ protected:
 #include "ThrottleWifi.hpp"
 #ifdef USE_TEXTCOMMAND
 #include "ThrottleWifiJMRI.hpp"
+#include "ThrottleWifiWebServer.hpp"
 #endif
 #endif
 	

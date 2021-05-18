@@ -295,7 +295,7 @@ void MessageConverterWiThrottle::locoAction(Throttle* inpThrottle, int inLocoNum
 
 	if (inActionVal.startsWith("Q")) // the loco QUIT, set speed to 0
 	{  
-		pLoco->setDCCSpeed(0);
+		pLoco->stop();
 	} //Q
 }
 

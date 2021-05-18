@@ -74,9 +74,7 @@ void Locomotive::setDCCDirection(bool inForward)
 
 void Locomotive::stop()
 {
-	DCCpp::setSpeedMain(this->speedRegisterNumber, this->address, this->getSpeedMax(), this->currentSpeed, this->forwardDirection);
-	if (Locomotives::notifySpeedDir != NULL)
-		Locomotives::notifySpeedDir(this->address, this->currentSpeed, this->forwardDirection);
+	this->setDCCSpeed(0);
 }
 
 void Locomotive::emergencyStop()

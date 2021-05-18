@@ -18,7 +18,11 @@ ThrottleWifi::ThrottleWifi(const String& inName, int inPort) : Throttle(inName)
 	this->contacted = false;
 }
 
-void ThrottleWifi::connectWifi(const char* inSsid, const char* inPassword, IPAddress inIp, IPAddress inGateway, IPAddress insubnet, IPAddress inDns)
+void ThrottleWifi::connectWifi(const char* inSsid, const char* inPassword, 
+					const IPAddress &inIp, 
+					const IPAddress &inGateway, 
+					const IPAddress &insubnet, 
+					const IPAddress &inDns)
 {
 	bool connected = false;
 
@@ -46,7 +50,7 @@ void ThrottleWifi::connectWifi(const char* inSsid, const char* inPassword, IPAdd
 #ifdef VISUALSTUDIO
 	connected = false;
 #else
-	if (!(inIp == INADDR_NONE))
+	if (!(inIp == (const IPAddress &) INADDR_NONE))
 	{
 		// Force ip if necessary
 		WiFi.config(inIp, inGateway, insubnet, inDns);

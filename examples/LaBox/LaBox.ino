@@ -14,7 +14,7 @@ description: <LaBox Wifi Controller sample>
 
 #ifdef USE_WIFI_EXTERNSSID
 const char* ssid = "VIDEOFUTUR_ED5939_2.4G";
-const char* password = "*****";
+const char* password = "*******";
 
 IPAddress ip      (192,   168,  0,  200);   // fix IP of the server in client mode
 IPAddress gateway (192,   168,  0,  1);     // WiFi router's IP. If you are in AP mode, it's the ESP IP. If you are in client, it's your own gateway
@@ -41,8 +41,6 @@ ThrottleSerial throttleSerial("Serial", SERIAL_INTERFACE_INSTANCE(Normal));
 
 ThrottleWifiJMRI throttleWifiJMRI;
 
-//ThrottleWifi throttleWifi0("DCCpp", dccPPPort);
-
 ThrottleWifi throttleWifi1("Z21 - 1", Z21_UDPPORT);
 MessageConverterZ21 converter1;
 ThrottleWifi throttleWifi2("Z21 - 2", Z21_UDPPORT);
@@ -61,11 +59,15 @@ void setup()
 {
   Serial.begin(115200);
 
+  // setup led !
+  pinMode(PIN_LEDBUILTIN, OUTPUT);
+  digitalWrite(PIN_LEDBUILTIN, HIGH);
+
   Serial.print("LaBox ");
   Serial.println(LABOX_LIBRARY_VERSION);
 
   //----------- Start HMI -------------
- /boxHMI.begin();
+  boxHMI.begin();
   
   //Locomotives::debugLocomotivesSet();
 
@@ -98,6 +100,10 @@ void setup()
 
   // configuration pour L6203 La Box
   DCCpp::beginMain(UNDEFINED_PIN, 33, 32, 36);
+  DCCpp::setResendFunctions(false);
+
+  digitalWrite(PIN_LEDBUILTIN, LOW);
+  //DCCpp::setCurrentSampleMaxMain(4000);
 }
 
 void loop()

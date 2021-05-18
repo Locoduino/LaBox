@@ -14,6 +14,7 @@ class Throttles
 private:
 	static Throttle* pFirstThrottle;	/**< Address of the first object of this class. NULL means empty list of Locomotives. Do not change it !*/
 	static uint16_t throttlesCounter;	/**< When a throttle is created, affect this number as its id, and increments the counter. No id must be reused ! */
+	static bool suspendTimeOuts;			/**< If true, all connexions timeouts of throttle are suspended. Mainly used during cv reading/writing. */
 
 public:
 	static int executionCore;	/**< Core number for the execution of the receiving commands loop ! */
@@ -60,6 +61,17 @@ public:
 	@return true if all throttles has been executed without problems.
 	*/
 	static bool loop();
+
+	/** Suspend all connexions throttles timeouts.
+	*/
+	static bool SuspendTimeouts() { suspendTimeOuts = true; }
+	/** Restore all connexions throttles timeouts.
+	*/
+	static bool RestoreTimeouts() {	suspendTimeOuts = false;	}	 	
+	/** Check if connexions throttles timeouts are suspended.
+	@return True if connexions throttles timeouts are suspended.
+	*/
+	static bool AreTimeoutsSuspended() { return suspendTimeOuts;	}
 
 #ifdef DCCPP_DEBUG_MODE
 	/** Print the list of assigned throttle.

@@ -11,6 +11,7 @@ description: <FunctionsState class>
 Throttle* Throttles::pFirstThrottle = NULL;
 uint16_t Throttles::throttlesCounter = 0;
 int Throttles::executionCore = -1;
+bool Throttles::suspendTimeOuts = false;
 
 Throttle* Throttles::getFirst()
 {		

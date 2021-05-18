@@ -212,7 +212,7 @@ class DCCpp
 		/** Try to identify the address of a decoder on the main track. Be sure there is only one loco on the track to call this function !
 		@return CV 1 value: the loco decoder Id or -1 if no decoder identified.
 		*/
-		static inline int identifyLocoIdMain() { return identifyLocoId(&(mainRegs)); }
+		static inline int identifyLocoIdMain() { if (!IsPowerOnMain) powerOn(true); return identifyLocoId(&(mainRegs)); }
 
 		/** Try to read a CV from a decoder on the main track.
 		Be sure there is only one loco on the track before calling this function !
@@ -255,7 +255,7 @@ class DCCpp
 		/** Try to identify the address of a decoder on the programming track. Be sure there is only one loco on the track to call this function !
 		@return CV 1 value: the loco decoder Id or -1 if no decoder identified.
 		*/
-		static inline int identifyLocoIdProg() { return identifyLocoId(&(progRegs)); }
+		static inline int identifyLocoIdProg() { if (!IsPowerOnProg) powerOn(true, true); return identifyLocoId(&(progRegs)); }
 
 		/** Try to read a CV from a decoder on the programming track.
 		Be sure there is only one loco on the track before calling this function !

@@ -132,17 +132,20 @@ bool Throttle::processBuffer()
 	{
 		if (this->lastActivityDate != 0)
 		{
-			if (millis() - this->lastActivityDate > this->timeOutDelay)
+			if (!Throttles::AreTimeoutsSuspended())
 			{
-				if (this->pConverter != NULL)
-					this->pConverter->clientStop(this);
-				else
-					this->end();
+				if (millis() - this->lastActivityDate > this->timeOutDelay)
+				{
+					if (this->pConverter != NULL)
+						this->pConverter->clientStop(this);
+					else
+						this->end();
 #ifdef DCCPP_DEBUG_MODE
-				Serial.print(this->id);
-				Serial.println(" disconnected !");
-				Throttles::printThrottles();
+					Serial.print(this->id);
+					Serial.println(" disconnected !");
+					Throttles::printThrottles();
 #endif
+				}
 			}
 		}
 	}

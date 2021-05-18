@@ -19,27 +19,27 @@
 */
 class ThrottleWifi : public Throttle
 {
-private:
+protected:
 	static IPAddress wifiIp;
 	static WiFiUDP _ClientUDP;
 	static bool socketsStarted;
-
 
 	int port = 0;
 	enum EthernetProtocol protocol = EthernetProtocol::TCP;
 
 	IPAddress remoteIp;
 	
-	WiFiServer *pServer;
+	WiFiServer* pServer;
 	WiFiClient client;
 	WiFiUDP ClientUDP;
 
 public:
-	static void connectWifi(const char* inSsid, const char* inPassword, IPAddress inIp = INADDR_NONE, IPAddress inGateway = INADDR_NONE, IPAddress insubnet = INADDR_NONE, IPAddress inDns = INADDR_NONE);
+	static void connectWifi(const char* inSsid, const char* inPassword, const IPAddress &inIp = INADDR_NONE, const IPAddress &inGateway = INADDR_NONE, const IPAddress &insubnet = INADDR_NONE, const IPAddress &inDns = INADDR_NONE);
 	static ThrottleWifi* GetThrottle(IPAddress inRemoteIp, int inPort, EthernetProtocol inProtocol);
 
 	/** Creates a new instance of this wifi class.
-	@param inName	throttle new name.
+	@param inName	throttle name.
+	@param inPort	Communication port.
 	*/
 	ThrottleWifi(const String& inName, int inPort);
 
