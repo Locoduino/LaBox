@@ -241,7 +241,7 @@ void RegisterList::setFunction(int nReg, int cab, int fByte, int eByte, bool ret
 	byte b[5];                      // save space for checksum byte
 	byte nB = 0;
 
-	if (cab > 127)
+		if (cab > 127)
 		b[nB++] = highByte(cab) | 0xC0;      // convert train number into a two-byte address
 
 	b[nB++] = lowByte(cab);

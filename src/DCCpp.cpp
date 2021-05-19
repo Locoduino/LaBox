@@ -473,6 +473,28 @@ bool DCCpp::setThrottle(volatile RegisterList *inpRegs, int nReg,  int inLocoId,
 }
 
 #ifdef USE_LOCOMOTIVES
+
+int GetFunctionBlock(int inFunc)
+{
+  int blockNb = 0;
+  if (inFunc > 4)
+  {
+    blockNb++;
+    if (inFunc > 8)
+    {
+      blockNb++;
+      if (inFunc > 12)
+      {
+        blockNb++;
+        if (inFunc > 20)
+          blockNb++;
+      }
+    }
+  }
+  return blockNb;
+}
+
+
 void DCCpp::setFunctions(volatile RegisterList *inpRegs, int nReg, int inLocoId, Functions &inStates)
 {
 #ifdef DCCPP_DEBUG_MODE
@@ -498,26 +520,15 @@ void DCCpp::setFunctions(volatile RegisterList *inpRegs, int nReg, int inLocoId,
       if (hmi::CurrentInterface != NULL)
       {
         hmi::CurrentInterface->ChangeFunction(inLocoId, func, inStates.isActivated(func));
+        int blockNb = GetFunctionBlock(func);
+
+        send[blockNb] = true;
       }
 #endif
       // in case of desactivation of one function, mark the good block to send.
       if (!inStates.isActivated(func))
       {
-        int blockNb = 0;
-        if (func > 4)
-        {
-          blockNb++;
-          if (func > 8)
-          {
-            blockNb++;
-            if (func > 12)
-            {
-              blockNb++;
-              if (func > 20)
-                blockNb++;
-            }
-          }
-        }
+        int blockNb = GetFunctionBlock(func);
 
         send[blockNb] = true;
       }
@@ -571,7 +582,10 @@ int DCCpp::identifyLocoId(volatile RegisterList *inReg)
 
 int DCCpp::readCvMain(int inCvId, int callBack, int callBackSub)
 {
+#ifdef DEBUG
   Serial.println("main");
+#endif // DEBUG
+
   int cvValue;
   cvValue = mainRegs.readCVmain(inCvId, callBack, callBackSub);
 #ifdef USE_HMI
@@ -593,7 +607,10 @@ bool DCCpp::writeCvMain(int inCvId, byte cvValue, int callBack, int callBackSub)
 
 int DCCpp::readCvProg(int inCvId, int callBack, int callBackSub) 
 { 
+#ifdef DEBUG
   Serial.println("prog");
+#endif // DEBUG
+
   int cvValue;
   cvValue = progRegs.readCV(inCvId, callBack, callBackSub);
 #ifdef USE_HMI

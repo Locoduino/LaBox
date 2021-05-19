@@ -233,8 +233,11 @@ void MessageConverterWiThrottle::locoAction(Throttle* inpThrottle, int inLocoNum
 
 	if (inActionVal[0] == 'F')
 	{
-		uint8_t function = (uint8_t)inActionVal.substring(2).toInt(); // numero de fonction dans la commande
+		uint8_t function = (uint8_t)inActionVal.substring(2).toInt(); // Function number
 		bool activate = inActionVal[1] == '1';
+
+		if (!activate)
+			return;
 
 		// Special case for WiThrottle : 
 		// WiThrottle protocol does not handle both kind of functions, JMRI interprets the function messages
@@ -244,12 +247,9 @@ void MessageConverterWiThrottle::locoAction(Throttle* inpThrottle, int inLocoNum
 		
 		// Specific case for F0 : the loco will store the current state of this function, and each press of F0 in the app
 		// must be transformed to a switch change.
-		if (function == 0)
+		if (function == 0 || pLoco->functions.isModalFunction(function))
 		{	// Do not handle inactivate message from app. Only activating messages are handled.
-			if (!activate)
-					return;
-
-			pLoco->setDCCFunction(0, !pLoco->functions.isActivated(0));
+			pLoco->setDCCFunction(function, !pLoco->functions.isActivated(function));
 		}
 		else
 		{ // All other functions are handled as push buttons.
