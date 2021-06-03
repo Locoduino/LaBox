@@ -6,6 +6,42 @@
 #include "DCCpp.h"
 
 /**
+This structure describes a DCC decoder manufacturer information.
+A global constant list of this structure DecoderManufacturers is available.
+It should be updated periodicaly with NMRA list : https://www.nmra.org/sites/default/files/standards/sandrp/pdf/appendix_a_s-9_2_2_5.pdf
+The indix of the manufacturer in this list is its cv8 corresponding value !
+*/
+struct DecoderManufacturer
+{
+	/** Decoder manufacturer name according to NMRA.*/
+	String NMRAName;
+	/** Decoder manufacturer unic identifier.*/
+	byte Cv8;
+	/** Decoder manufacturer country.*/
+	String Country;
+	/** Decoder manufacturer name according to JMRI xml files. Empty if the manufacturer do not exist in the JMRI list. */
+	String JMRIName;
+};
+
+/**
+This structure describes a DCC decoder model information.
+This include its manufacturer, and the additionnal cv7 information.
+TODO:	A global list of this structure could be built from xml files of JMRI : https://www.jmri.org/xml/decoders/
+			We can do this using the SPIFFS of ESP32 and read the xml files only when necessary !
+			The name of these files start with the manufacturer name, but the NMRA and JMRI names doest not match !
+			So if we want to build this list, we must add a JMRIName inside the DecoderManufacturer struct...
+*/
+struct DecoderModel
+{
+	/** Indix of the Decoder manufacturer in global DecoderManufacturers static list.*/
+	int ManufacturerCv8;
+	/** additional data to identify the model of Decoder.*/
+	int Cv7;
+	//byte Cv7mini, Cv7Maxi;
+	//String Model;
+};
+
+/**
 This is the main class of the library. All data and functions are static.
 There is no needs to instantiate this class.
 */
@@ -25,8 +61,10 @@ class DCCpp
 #endif
 
 	public:
+		static DecoderManufacturer DecoderManufacturers[];
+
 		/** The threshold that the exponentially-smoothed analogRead samples (after subtracting the baseline current) must cross to establish ACKNOWLEDGEMENT.*/
-		static byte ackThreshold;
+		static int ackThreshold;
 		/** Registers for the main track.*/
 		static volatile RegisterList mainRegs;
 		/** Registers for the prog track.*/
@@ -166,7 +204,7 @@ class DCCpp
 		@param inNewValue	Maximum value between 0 and 1023. Default is 30. The threshold that the exponentially-smoothed analogRead samples (after subtracting the baseline current) must cross to establish ACKNOWLEDGEMENT.
 		@return Previous value.
 		*/
-		static byte setAckThreshold(byte inNewValue);
+		static int setAckThreshold(int inNewValue);
 
 		/** Set if the Throttle should reply to the controller.
 		@param inResendFunctions		False if the functions packets are not repeatedly resend on DCC track..
@@ -198,6 +236,16 @@ class DCCpp
 		*/
 		static inline float getCurrentProg() { return progMonitor.pin == UNDEFINED_PIN ? 0 : progMonitor.current; }
 
+		/** Try to read a CV from a decoder.
+		Be sure there is only one loco on the track before calling this function !
+		@param apRegs RegisterList to check.
+		@param inCvId	CV id from 0 to 255.
+		@param callBack		an arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs that call this function. Default 100.
+		@param callBackSub	a second arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs (e.g. DCC++ Interface) that call this function. Default 200
+		@return CV value: the CV value or -1 if the value cannot be read.
+		*/
+		static int readCv(volatile RegisterList* apRegs, int inCvId, int callBack = 100, int callBackSub = 200);
+
 		// Main track functions
 
 		/** For the given decoder id, set the speed and the direction on the main track.
@@ -221,7 +269,7 @@ class DCCpp
 		@param callBackSub	a second arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs (e.g. DCC++ Interface) that call this function. Default 200
 		@return CV value: the CV value or -1 if the value cannot be read.
 		*/
-		static int readCvMain(int inCvId, int callBack = 100, int callBackSub = 200);
+		static int readCvMain(int inCvId, int callBack = 100, int callBackSub = 200) { DCCpp::readCv(&(mainRegs), inCvId, callBack, callBackSub); }
 
 		/** Write the given CV on the main track.
 		Be sure there is only one loco on the track before calling this function !
@@ -264,7 +312,7 @@ class DCCpp
 		@param callBackSub	a second arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs (e.g. DCC++ Interface) that call this function. Default 200
 		@return CV value: the CV value or -1 if the value cannot be read.
 		*/
-		static int readCvProg(int inCvId, int callBack = 100, int callBackSub = 200);
+		static int readCvProg(int inCvId, int callBack = 100, int callBackSub = 200) { DCCpp::readCv(&(progRegs), inCvId, callBack, callBackSub); }
 
 		/** Write the given CV on the programming track.
 		@param inCvId	CV id from 0 to 255.
@@ -273,6 +321,20 @@ class DCCpp
 		@param callBackSub	a second arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs (e.g. DCC++ Interface) that call this function. Default 200
 		*/
 		static bool writeCvProg(int inCvId, byte inValue, int callBack = 100, int callBackSub = 200);
+
+		/** Retrieve informations from the DCC decoder on the track by reading cvs 7 and 8.
+		@param apRegs RegisterList to use.
+		@return NULL if the reading failed, or a DecoderModel information structure pointer.
+		*/
+		static DecoderModel* getDecoderInfo(volatile RegisterList* inpRegs);
+		/** Retrieve informations from the DCC decoder on the main track by reading cvs 7 and 8.
+		@return NULL if the reading failed, or a DecoderModel information structure pointer.
+		*/
+		static DecoderModel* getDecoderInfoMain() { return getDecoderInfo(&(mainRegs)); }
+		/** Retrieve informations from the DCC decoder on the prog track by reading cvs 7 and 8.
+		@return NULL if the reading failed, or a DecoderModel information structure pointer.
+		*/
+		static DecoderModel* getDecoderInfoProg() { return getDecoderInfo(&(progRegs)); }
 
 #ifdef USE_LOCOMOTIVES
 		/** Set the functions states of the given decoder on the programming track.
@@ -293,7 +355,6 @@ class DCCpp
 		static void setAccessory(int inAddress, byte inSubAddress, byte inActivate);
 
 public:
-
 #ifdef DCCPP_DEBUG_MODE
 		/** BEFORE activating the DCC mode, this function will check for power connections by setting the voltage alternatively in one side and the other for the given delay.
 		If two leds are connected to the power module to check the DCC signal, they will go on alternatively.

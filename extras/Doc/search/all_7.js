@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['loop',['loop',['../classDCCpp.html#a8061f7091ace39caa6742915ca728478',1,'DCCpp']]]
+  ['jmriname',['JMRIName',['../structDecoderManufacturer.html#a9e0d5f5c706fdf51ecd7fef086df495c',1,'DecoderManufacturer']]]
 ];

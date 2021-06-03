@@ -11,6 +11,7 @@ Part of DCC++ BASE STATION for the Arduino
 #define PacketRegister_h
 
 #include "Arduino.h"
+#include "driver/adc.h"
 
 // Define constants used for reading CVs from the Programming Track
 
@@ -69,8 +70,8 @@ struct RegisterList{
 #endif
 
   int readCVraw(int cv, int callBack, int callBackSub) volatile;
-	int buildBaseAcknowlegde(int inMonitorPin) volatile;
-	int checkAcknowlegde(int inMonitorPin,  int inBase) volatile;
+	int buildBaseAcknowlegde(adc1_channel_t inChannel) volatile;
+	int checkAcknowlegde(int inBit, adc1_channel_t inChannel, int inBase) volatile;
 
 #ifdef USE_TEXTCOMMAND
   int readCV(const char *) volatile;
@@ -83,6 +84,18 @@ struct RegisterList{
 #endif
 
 	byte setAckThreshold(byte inNewValue);
+	// ACK management
+	int ackThresholdValue;					// minimal value of a real ack
+	int ackMaxValue;
+
+	unsigned long ackPulseDuration;  // micros - duration of ack
+	unsigned long ackPulseStart; // micros - date of ack start
+
+	unsigned int minAckPulseDuration; // micros - minimal duration of a ack
+	unsigned int maxAckPulseDuration; // micros - maximal duration of a ack
+
+	uint16_t numAckGaps;			// number of found gaps
+	uint16_t numAckSamples;	// number of checks...
 
   void setThrottle(int nReg, int cab, int tSpeed, int tDirection, bool inDccPacketOnly = false) volatile;
   void setFunction(int nReg, int cab, int fByte, int eByte, bool returnMessages = true, bool inDccPacketOnly = false) volatile;
@@ -95,6 +108,7 @@ struct RegisterList{
   void writeCVByteMain(int cab, int cv, int bvalue) volatile;
   void writeCVBitMain(int cab, int cv, int bNum, int bValue) volatile;
   bool isRegisterEmpty() volatile { return this->nextReg == NULL; }
+  void powerOn() volatile {  delay(200);  }
 
 #ifdef DCCPP_DEBUG_MODE
   void printPacket(int, byte *, int, int) volatile;

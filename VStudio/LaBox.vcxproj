@@ -211,6 +211,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\CircularBuffer.cpp" />
+    <ClCompile Include="..\src\DCCpp.DecoderInfo.cpp" />
     <ClCompile Include="..\src\DccSignalESP32.cpp" />
     <ClCompile Include="..\src\DccSignalUno.cpp" />
     <ClCompile Include="..\src\HmiInterface.cpp" />

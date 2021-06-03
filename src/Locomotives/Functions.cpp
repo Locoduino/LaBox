@@ -144,8 +144,6 @@ long dateTime = 0;
 #ifdef USE_LOCOMOTIVES
 void Functions::functionsLoop()
 {
-	Serial.println("Functions::functionsLoop");
-
 	if (!DCCpp::mainRegs.isRegisterEmpty())  // do not add a new packet if there is a Register already waiting to be updated -- nextReg will be reset to NULL by interrupt when prior Register updated fully processed
 		return;
 

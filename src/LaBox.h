@@ -8,4 +8,4 @@
 
 #include "DCCpp.h"
 
-#define LABOX_LIBRARY_VERSION		"0.8.2"
+#define LABOX_LIBRARY_VERSION		"0.9.0"

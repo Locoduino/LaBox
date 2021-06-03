@@ -7,6 +7,8 @@ var searchData=
   ['dccpp_5flibrary_5fversion',['DCCPP_LIBRARY_VERSION',['../DCCpp_8h.html#a8d9814dec9adda6df580a7f8fbebfa01',1,'DCCPP_LIBRARY_VERSION():&#160;DCCpp.h'],['../DCCpp_8h.html#a8d9814dec9adda6df580a7f8fbebfa01',1,'DCCPP_LIBRARY_VERSION():&#160;DCCpp.h']]],
   ['dccpp_5fprint_5fdccpp',['DCCPP_PRINT_DCCPP',['../DCCpp_8h.html#a974da9ef1ab28fef455505016a3caa57',1,'DCCPP_PRINT_DCCPP():&#160;DCCpp.h'],['../DCCpp_8h.html#a974da9ef1ab28fef455505016a3caa57',1,'DCCPP_PRINT_DCCPP():&#160;DCCpp.h']]],
   ['dccppconfig',['DCCppConfig',['../structDCCppConfig.html',1,'']]],
+  ['decodermanufacturer',['DecoderManufacturer',['../structDecoderManufacturer.html',1,'']]],
+  ['decodermodel',['DecoderModel',['../structDecoderModel.html',1,'']]],
   ['directionmotora',['DirectionMotorA',['../structDCCppConfig.html#a829009e0d1a84b87bcec3a125bc757cf',1,'DCCppConfig']]],
   ['directionmotorb',['DirectionMotorB',['../structDCCppConfig.html#a46b237303713bca7c18a1d2ace3d4c4c',1,'DCCppConfig']]]
 ];

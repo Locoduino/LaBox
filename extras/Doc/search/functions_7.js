@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['readcvmain',['readCvMain',['../classDCCpp.html#a0e139f73e947151f78b63b56d8912141',1,'DCCpp']]],
-  ['readcvprog',['readCvProg',['../classDCCpp.html#a25a5aaef48f3ba6c8861a6c3059c585e',1,'DCCpp']]]
+  ['readcv',['readCv',['../classDCCpp.html#aa0a7265f5833367c6af288bf18e0df6f',1,'DCCpp']]],
+  ['readcvmain',['readCvMain',['../classDCCpp.html#af968257654a924b231839e93c3427c1e',1,'DCCpp']]],
+  ['readcvprog',['readCvProg',['../classDCCpp.html#acf4ae6d18713fa0d37dbcf6d3f4ef6a3',1,'DCCpp']]]
 ];

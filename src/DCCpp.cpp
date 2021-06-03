@@ -18,7 +18,7 @@ CurrentMonitor DCCpp::progMonitor;  // create monitor for current on Program Tra
 
 bool DCCpp::programMode;
 bool DCCpp::panicStopped;
-byte DCCpp::ackThreshold = 0;
+int DCCpp::ackThreshold = 0;
 bool DCCpp::IsPowerOnMain = false;
 bool DCCpp::IsPowerOnProg = false;
 bool DCCpp::powerOnAtFirstClient = true;
@@ -384,6 +384,7 @@ void DCCpp::powerOn(bool inMain, bool inProg)
     digitalWrite(DCCppConfig::SignalEnablePinProg, HIGH);
     done = true;
     IsPowerOnProg = true;
+    progRegs.powerOn();
   }
 
   if (inMain && DCCppConfig::SignalEnablePinMain != UNDEFINED_PIN)
@@ -391,6 +392,7 @@ void DCCpp::powerOn(bool inMain, bool inProg)
     digitalWrite(DCCppConfig::SignalEnablePinMain, HIGH);
     done = true;
     IsPowerOnMain = true;
+    mainRegs.powerOn();
   }
 
   if (done)
@@ -439,7 +441,7 @@ void DCCpp::powerOff(bool inMain, bool inProg)
   }
 }
 
-byte DCCpp::setAckThreshold(byte inNewValue)
+int DCCpp::setAckThreshold(int inNewValue)
 {
   byte old = DCCpp::ackThreshold;
   DCCpp::ackThreshold = inNewValue;
@@ -557,42 +559,24 @@ void DCCpp::setFunctions(volatile RegisterList *inpRegs, int nReg, int inLocoId,
 }
 #endif
 
-int DCCpp::identifyLocoId(volatile RegisterList *inReg)
+int DCCpp::readCv(volatile RegisterList *inpRegs, int inCvId, int callBack, int callBackSub)
 {
-  int  id = -1;
-  int temp;
-  temp = inReg->readCVraw(29, 100, 200);
-  if ((temp != -1) && (bitRead(temp, 5))) {
-    // long address : get CV#17 and CV#18
-    id = inReg->readCVraw(18, 100, 200);
-    if (id != -1) {
-      temp = inReg->readCVraw(17, 100, 200);
-      if (temp != -1) {
-        id = id + ((temp - 192) << 8);
-      }
-    }
-  }
-  else {
-    // short address: read only CV#1
-    id = inReg->readCVraw(1, 100, 200);
-  }
-
-  return (id);
-}
-
-int DCCpp::readCvMain(int inCvId, int callBack, int callBackSub)
-{
-#ifdef DEBUG
-  Serial.println("main");
-#endif // DEBUG
-
-  int cvValue;
-  cvValue = mainRegs.readCVmain(inCvId, callBack, callBackSub);
+  // Try three times. The first good abort the loop.
+  for (int i = 0; i < 3; i++)
+  {
+      int cvValue;
+      cvValue = inpRegs->readCVmain(inCvId, callBack, callBackSub);
+      if (cvValue != -1)
+      {
 #ifdef USE_HMI
-  if (hmi::CurrentInterface != NULL)
-    hmi::CurrentInterface->ReadCV(true, inCvId, cvValue, cvValue != -1);
+          if (hmi::CurrentInterface != NULL)
+              hmi::CurrentInterface->ReadCV(true, inCvId, cvValue, cvValue != -1);
 #endif
-  return cvValue;
+          return cvValue;
+      }
+  }
+
+  return -1;
 }
 
 bool DCCpp::writeCvMain(int inCvId, byte cvValue, int callBack, int callBackSub)
@@ -603,21 +587,6 @@ bool DCCpp::writeCvMain(int inCvId, byte cvValue, int callBack, int callBackSub)
     hmi::CurrentInterface->WriteCV(true, inCvId, cvValue, ret);
 #endif
   return ret;
-}
-
-int DCCpp::readCvProg(int inCvId, int callBack, int callBackSub) 
-{ 
-#ifdef DEBUG
-  Serial.println("prog");
-#endif // DEBUG
-
-  int cvValue;
-  cvValue = progRegs.readCV(inCvId, callBack, callBackSub);
-#ifdef USE_HMI
-  if (hmi::CurrentInterface != NULL)
-    hmi::CurrentInterface->ReadCV(false, inCvId, cvValue, cvValue != -1);
-#endif
-  return cvValue;
 }
 
 bool DCCpp::writeCvProg(int inCvId, byte cvValue, int callBack, int callBackSub) 

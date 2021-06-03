@@ -10,6 +10,7 @@ Part of DCC++ BASE STATION for the Arduino
 #include "Arduino.h"
 
 #include "DCCpp.h"
+//#include <esp32-hal-log.h>
 //#include "DCCpp_Uno.h"
 //#include "PacketRegister.h"
 //#include "Comm.h"
@@ -558,47 +559,86 @@ void RegisterList::writeTextPacket(const char *s) volatile
 
   ///////////////////////////////////////////////////////////////////////////////
 
-int RegisterList::buildBaseAcknowlegde(int inMonitorPin) volatile
+adc1_channel_t getADC1Channel(int inPin)
+{
+	if (inPin <= 35)
+		return (adc1_channel_t)(inPin - 32 + 4);
+	return (adc1_channel_t)(inPin - 36);
+}
+
+int RegisterList::buildBaseAcknowlegde(adc1_channel_t inChannel) volatile
 {
 	int base = 0;
 	for (int j = 0; j < ACK_BASE_COUNT; j++)
 	{
-		int val = (int)analogRead(inMonitorPin);
-		base += val;
+		base += (int)adc1_get_raw(inChannel);
+		vTaskDelay(pdMS_TO_TICKS(1));
 	}
 
 	return base / ACK_BASE_COUNT;
 }
 
-int RegisterList::checkAcknowlegde(int inMonitorPin, int inBase) volatile
+int RegisterList::checkAcknowlegde(int inBit, adc1_channel_t inChannel, int inBase) volatile
 {
-	int c = 0;
-	int max = 0;
-	int loop = 0;
+	unsigned long start = micros();
+	bool endOfGap = false;
 
-	for (int a = 0; a < 20; a++)
+	ackMaxValue = 0;
+
+	ackPulseDuration = 0;
+	ackPulseStart = 0;
+
+	numAckGaps = 0;
+	numAckSamples = 0;
+
+	// Run during 100ms !
+	while(micros()-start < 100 * 1000UL)
 	{
-		c = 0;
-		for (int j = 0; j < ACK_SAMPLE_COUNT; j++)
+		int val = (int)adc1_get_raw(inChannel);
+		if (val > ACK_SAMPLE_THRESHOLD + inBase)
 		{
-			int val = (int)analogRead(inMonitorPin);
-			c = (int)((val - inBase) * ACK_SAMPLE_SMOOTHING + c * (1.0 - ACK_SAMPLE_SMOOTHING));
-			if (c > max)
+			numAckGaps++;
+			ackMaxValue = val;
+			if (ackPulseStart == 0)
+				ackPulseStart = micros() - start;
+		}
+		else
+		{
+			if (endOfGap == false)
 			{
-				max = c;
-				loop = a;
+				if (ackPulseStart > 0)
+				{
+					ackPulseDuration = micros() - start - ackPulseStart;
+					endOfGap = true;	//	Do not mark the following base values...
+					break;
+				}
 			}
 		}
+		vTaskDelay(pdMS_TO_TICKS(1));
+		numAckSamples++;
 	}
 
+	ackMaxValue -= inBase;
+
 #ifdef DCCPP_DEBUG_MODE
-	Serial.print(F(" iter : "));
-	Serial.print(loop);
+	Serial.print(F(inBit > 7 ? "Verif:  ":"Bit  : "));
+	if (inBit < 8)
+		Serial.print(inBit);
+	Serial.print(ackMaxValue > ACK_SAMPLE_THRESHOLD ? F(", ACK   ") : F(", NO-ACK"));
+	Serial.print(F(", samples : "));
+	Serial.print(numAckSamples);
+	Serial.print(F(", gaps : "));
+	Serial.print(numAckGaps);
 	Serial.print(", max : ");
-	Serial.println(max);
+	Serial.print(ackMaxValue);
+	Serial.print(", start : ");
+	Serial.print(ackPulseStart);
+	Serial.print("us, duration : ");
+	Serial.print(ackPulseDuration);
+	Serial.println("us");
 #endif
 
-	return (max > ACK_SAMPLE_THRESHOLD);
+	return (ackMaxValue > ACK_SAMPLE_THRESHOLD);
 }
 
 int RegisterList::readCVraw(int cv, int callBack, int callBackSub) volatile
@@ -607,15 +647,17 @@ int RegisterList::readCVraw(int cv, int callBack, int callBackSub) volatile
 	int bValue;
 	int ret, base;
 
-	cv--;                              // actual CV addresses are cv-1 (0-1023)
+	cv--;   // actual CV addresses are cv-1 (0-1023)
 
-	byte MonitorPin = DCCppConfig::CurrentMonitorProg;
+	byte monitorPin = DCCppConfig::CurrentMonitorProg;
 	if (DCCpp::IsMainTrack(this))
-		MonitorPin = DCCppConfig::CurrentMonitorMain;
+		monitorPin = DCCppConfig::CurrentMonitorMain;
 
 	// A read cannot be done if a monitor pin is not defined !
-	if (MonitorPin == UNDEFINED_PIN)
+	if (monitorPin == UNDEFINED_PIN)
 		return -1;
+
+	adc1_channel_t channel = getADC1Channel(monitorPin);
 
 #ifdef DCCPP_DEBUG_MODE
 	Serial.print(F("readCVraw : start reading cv "));
@@ -627,11 +669,12 @@ int RegisterList::readCVraw(int cv, int callBack, int callBackSub) volatile
 
 	bValue = 0;
 
+	base = buildBaseAcknowlegde(channel);
+
+	// Verify each bit
 	for (int i = 0; i<8; i++) {
 
-		base = RegisterList::buildBaseAcknowlegde(MonitorPin);
-        
-    delay(10);
+		delay(10);
 
 		bRead[2] = 0xE8 + i;
 
@@ -639,37 +682,28 @@ int RegisterList::readCVraw(int cv, int callBack, int callBackSub) volatile
 		loadPacket(0, bRead, 3, 5);                // NMRA recommends 5 verify packets
 //		loadPacket(0, resetPacket, 2, 1);          // forces code to wait until all repeats of bRead are completed (and decoder begins to respond)
 		loadPacket(0, idlePacket, 2, 6);          // NMRA recommends 6 idle or reset packets for decoder recovery time
-#ifdef DCCPP_DEBUG_MODE
-    Serial.print(F("bit : "));
-    Serial.print(i);
-#endif
-    delay(2);	        
 
-		ret = RegisterList::checkAcknowlegde(MonitorPin, base);
+		ret = RegisterList::checkAcknowlegde(i, channel, base);
 
 		bitWrite(bValue, i, ret);
 	}
-  delay(10);
 
-	base = RegisterList::buildBaseAcknowlegde(MonitorPin);
+	delay(10);
 
-  delay(10);
-
+	// Then verify the byte built with the verified bits
 	bRead[0] = 0x74 + (highByte(cv) & 0x03);   // set-up to re-verify entire byte
 	bRead[2] = bValue;
+
+	base = buildBaseAcknowlegde(channel);
 
 	loadPacket(0, resetPacket, 2, 3);       // NMRA recommends starting with 3 reset packets
 	loadPacket(0, bRead, 3, 5);             // NMRA recommends 5 verify packets
 	//loadPacket(0, resetPacket, 2, 1);     // forces code to wait until all repeats of bRead are completed (and decoder begins to respond)
 	loadPacket(0, idlePacket, 2, 6);				// NMRA recommends 6 idle or reset packets for decoder recovery time
-#ifdef DCCPP_DEBUG_MODE
-  Serial.print(F("verif : "));
-#endif
-  delay(2);
 
-	ret = RegisterList::checkAcknowlegde(MonitorPin, base);
+	ret = RegisterList::checkAcknowlegde(10, channel, base);
 
-	if (ret == 0)    // verify unsuccessful
+	if (ret == 0)    // No ack, verify unsuccessful
 		bValue = -1;
 
 #ifdef USE_THROTTLES
@@ -698,7 +732,6 @@ int RegisterList::readCVraw(int cv, int callBack, int callBackSub) volatile
 
 int RegisterList::readCV(int cv, int callBack, int callBackSub) volatile 
 {
-	Serial.println("RegisterList::readCv");
 	return RegisterList::readCVraw(cv, callBack, callBackSub);
 } // RegisterList::readCV(ints)
 
@@ -763,7 +796,9 @@ bool RegisterList::writeCVByte(int cv, int bValue, int callBack, int callBackSub
 	// If monitor pin undefined, write cv without any confirmation...
 	if (DCCppConfig::CurrentMonitorProg != UNDEFINED_PIN)
 	{
-		base = RegisterList::buildBaseAcknowlegde(DCCppConfig::CurrentMonitorProg);
+		adc1_channel_t channel = getADC1Channel(DCCppConfig::CurrentMonitorProg);
+
+		base = RegisterList::buildBaseAcknowlegde(channel);
 
 		bWrite[0] = 0x74 + (highByte(cv) & 0x03);   // set-up to re-verify entire byte
 
@@ -771,7 +806,7 @@ bool RegisterList::writeCVByte(int cv, int bValue, int callBack, int callBackSub
 		loadPacket(0, bWrite, 3, 5);               // NMRA recommends 5 verify packets
 		loadPacket(0, bWrite, 3, 6);               // NMRA recommends 6 write or reset packets for decoder recovery time
 
-		ret = RegisterList::checkAcknowlegde(DCCppConfig::CurrentMonitorProg, base);
+		ret = RegisterList::checkAcknowlegde(10, channel, base);
 
 		loadPacket(0, resetPacket, 2, 1);        // Final reset packet (and decoder begins to respond)
 
@@ -841,7 +876,9 @@ bool RegisterList::writeCVBit(int cv, int bNum, int bValue, int callBack, int ca
 	// If monitor pin undefined, write cv without any confirmation...
 	if (DCCppConfig::CurrentMonitorProg != UNDEFINED_PIN)
 	{
-		base = RegisterList::buildBaseAcknowlegde(DCCppConfig::CurrentMonitorProg);
+		adc1_channel_t channel = getADC1Channel(DCCppConfig::CurrentMonitorProg);
+
+		base = RegisterList::buildBaseAcknowlegde(channel);
 
 		bitClear(bWrite[2], 4);              // change instruction code from Write Bit to Verify Bit
 
@@ -849,7 +886,7 @@ bool RegisterList::writeCVBit(int cv, int bNum, int bValue, int callBack, int ca
 		loadPacket(0, bWrite, 3, 5);               // NMRA recommends 5 verfy packets
 		loadPacket(0, bWrite, 3, 6);           // NMRA recommends 6 write or reset packets for decoder recovery time
 
-		ret = RegisterList::checkAcknowlegde(DCCppConfig::CurrentMonitorProg, base);
+		ret = RegisterList::checkAcknowlegde(10, channel, base);
 
 		loadPacket(0, resetPacket, 2, 1);      // Final reset packetcompleted (and decoder begins to respond)
 
