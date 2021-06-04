@@ -260,7 +260,7 @@ class DCCpp
 		/** Try to identify the address of a decoder on the main track. Be sure there is only one loco on the track to call this function !
 		@return CV 1 value: the loco decoder Id or -1 if no decoder identified.
 		*/
-		static inline int identifyLocoIdMain() { if (!IsPowerOnMain) powerOn(true); return identifyLocoId(&(mainRegs)); }
+		static inline int identifyLocoIdMain() { return identifyLocoId(&(mainRegs)); }
 
 		/** Try to read a CV from a decoder on the main track.
 		Be sure there is only one loco on the track before calling this function !
@@ -269,7 +269,7 @@ class DCCpp
 		@param callBackSub	a second arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs (e.g. DCC++ Interface) that call this function. Default 200
 		@return CV value: the CV value or -1 if the value cannot be read.
 		*/
-		static int readCvMain(int inCvId, int callBack = 100, int callBackSub = 200) { DCCpp::readCv(&(mainRegs), inCvId, callBack, callBackSub); }
+		static int readCvMain(int inCvId, int callBack = 100, int callBackSub = 200) { return DCCpp::readCv(&(mainRegs), inCvId, callBack, callBackSub); }
 
 		/** Write the given CV on the main track.
 		Be sure there is only one loco on the track before calling this function !
@@ -303,7 +303,7 @@ class DCCpp
 		/** Try to identify the address of a decoder on the programming track. Be sure there is only one loco on the track to call this function !
 		@return CV 1 value: the loco decoder Id or -1 if no decoder identified.
 		*/
-		static inline int identifyLocoIdProg() { if (!IsPowerOnProg) powerOn(true, true); return identifyLocoId(&(progRegs)); }
+		static inline int identifyLocoIdProg() { return identifyLocoId(&(progRegs)); }
 
 		/** Try to read a CV from a decoder on the programming track.
 		Be sure there is only one loco on the track before calling this function !
@@ -312,7 +312,7 @@ class DCCpp
 		@param callBackSub	a second arbitrary integer (0-32767) that is ignored by the Base Station and is simply echoed back in the output - useful for external programs (e.g. DCC++ Interface) that call this function. Default 200
 		@return CV value: the CV value or -1 if the value cannot be read.
 		*/
-		static int readCvProg(int inCvId, int callBack = 100, int callBackSub = 200) { DCCpp::readCv(&(progRegs), inCvId, callBack, callBackSub); }
+		static int readCvProg(int inCvId, int callBack = 100, int callBackSub = 200) { return DCCpp::readCv(&(progRegs), inCvId, callBack, callBackSub); }
 
 		/** Write the given CV on the programming track.
 		@param inCvId	CV id from 0 to 255.

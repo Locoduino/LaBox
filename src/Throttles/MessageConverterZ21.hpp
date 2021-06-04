@@ -101,8 +101,8 @@ private:
 	static void notifyLocoMode(Throttle* inpThrottle, byte inMSB, byte inLSB);
 	static void notifyFirmwareVersion(Throttle* inpThrottle);
 	static void notifyHWInfo(Throttle* inpThrottle);
-	static void notifyCvNACK(Throttle* inpThrottle, byte incvMSB, byte incvLSB);
-	static void notifyCvRead(Throttle* inpThrottle, byte incvMSB, byte incvLSB, int inValue);
+	static void notifyCvNACK(Throttle* inpThrottle, int cvAddress);
+	static void notifyCvRead(Throttle* inpThrottle, int cvAddress, int inValue);
 
 public:
 
@@ -121,6 +121,7 @@ public:
 	void setFunction(Throttle* inpThrottle, byte inDB1, byte inDB2, byte inDB3);
 	void cvReadProg(Throttle* inpThrottle, byte inDB1, byte inDB2);
 	void cvWriteProg(Throttle* inpThrottle, byte inDB1, byte inDB2, byte inDB3);
+	void cvReadMain(Throttle* inpThrottle, byte inDB1, byte inDB2);
 	void cvReadPom(Throttle* inpThrottle, byte inDB1, byte inDB2, byte inDB3, byte inDB4);
 	void cvWritePom(Throttle* inpThrottle, byte inDB1, byte inDB2, byte inDB3, byte inDB4, byte inDB5);
 

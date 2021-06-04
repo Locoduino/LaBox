@@ -595,10 +595,11 @@ int RegisterList::checkAcknowlegde(int inBit, adc1_channel_t inChannel, int inBa
 	while(micros()-start < 100 * 1000UL)
 	{
 		int val = (int)adc1_get_raw(inChannel);
+		if (val > ackMaxValue)
+			ackMaxValue = val;
 		if (val > ACK_SAMPLE_THRESHOLD + inBase)
 		{
 			numAckGaps++;
-			ackMaxValue = val;
 			if (ackPulseStart == 0)
 				ackPulseStart = micros() - start;
 		}
@@ -706,6 +707,11 @@ int RegisterList::readCVraw(int cv, int callBack, int callBackSub) volatile
 	if (ret == 0)    // No ack, verify unsuccessful
 		bValue = -1;
 
+#ifdef DCCPP_DEBUG_MODE
+	Serial.print(F("end reading value:"));
+	Serial.println(bValue);
+#endif
+
 #ifdef USE_THROTTLES
 	if (TextCommand::pCurrentThrottle == NULL)
 		return bValue;
@@ -724,9 +730,6 @@ int RegisterList::readCVraw(int cv, int callBack, int callBackSub) volatile
 	DCCPP_INTERFACE.sendNewline();
 #endif
 
-#ifdef DCCPP_DEBUG_MODE
-	Serial.println(F("end reading"));
-#endif
 	return bValue;
 }
 

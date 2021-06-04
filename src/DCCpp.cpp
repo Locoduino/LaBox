@@ -374,10 +374,6 @@ void DCCpp::panicStop(bool inStop)
 
 void DCCpp::powerOn(bool inMain, bool inProg)
 {
-#ifdef DCCPP_DEBUG_MODE
-  Serial.println(F("DCCpp PowerOn"));
-#endif
-
   bool done = false;
   if (inProg && DCCppConfig::SignalEnablePinProg != UNDEFINED_PIN)
   {
@@ -385,6 +381,10 @@ void DCCpp::powerOn(bool inMain, bool inProg)
     done = true;
     IsPowerOnProg = true;
     progRegs.powerOn();
+#ifdef DCCPP_DEBUG_MODE
+    Serial.println(F("DCCpp PowerOn prog"));
+#endif
+
   }
 
   if (inMain && DCCppConfig::SignalEnablePinMain != UNDEFINED_PIN)
@@ -393,6 +393,9 @@ void DCCpp::powerOn(bool inMain, bool inProg)
     done = true;
     IsPowerOnMain = true;
     mainRegs.powerOn();
+#ifdef DCCPP_DEBUG_MODE
+    Serial.println(F("DCCpp PowerOn Main"));
+#endif
   }
 
   if (done)
@@ -561,6 +564,17 @@ void DCCpp::setFunctions(volatile RegisterList *inpRegs, int nReg, int inLocoId,
 
 int DCCpp::readCv(volatile RegisterList *inpRegs, int inCvId, int callBack, int callBackSub)
 {
+  if (inpRegs == &mainRegs)
+  {
+    if (!IsPowerOnMain)
+      powerOn();
+  }
+  else
+  {
+    if (!IsPowerOnProg)
+      powerOn(true, true);
+  }
+
   // Try three times. The first good abort the loop.
   for (int i = 0; i < 3; i++)
   {
@@ -574,8 +588,11 @@ int DCCpp::readCv(volatile RegisterList *inpRegs, int inCvId, int callBack, int 
 #endif
           return cvValue;
       }
+
+      delay(50);
   }
 
+  delay(50);
   return -1;
 }
 
@@ -628,7 +645,7 @@ void DCCpp::setAccessory(int inAddress, byte inSubAddress, byte inActivate)
 #ifdef DCCPP_DEBUG_MODE
 void DCCpp::CheckPowerConnectionsWithLeds(uint8_t aDirPin, unsigned int inDelay)
 {
-  if (DCCppConfig::SignalEnablePinMain != 255 || DCCppConfig::SignalEnablePinProg != 255)
+  if (DCCppConfig::SignalEnablePinMain != UNDEFINED_PIN || DCCppConfig::SignalEnablePinProg != UNDEFINED_PIN)
   {
     Serial.print(F("DCC signal is started, this function cannot operates."));
     return;
