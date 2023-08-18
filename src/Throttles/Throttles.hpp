@@ -64,10 +64,10 @@ public:
 
 	/** Suspend all connexions throttles timeouts.
 	*/
-	static bool SuspendTimeouts() { suspendTimeOuts = true; }
+	static bool SuspendTimeouts() { bool old = suspendTimeOuts; suspendTimeOuts = true; return old; }
 	/** Restore all connexions throttles timeouts.
 	*/
-	static bool RestoreTimeouts() {	suspendTimeOuts = false;	}	 	
+	static bool RestoreTimeouts() { bool old = suspendTimeOuts; suspendTimeOuts = false; return old; }
 	/** Check if connexions throttles timeouts are suspended.
 	@return True if connexions throttles timeouts are suspended.
 	*/

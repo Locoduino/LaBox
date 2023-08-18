@@ -25,7 +25,9 @@ MessageStack::MessageStack()
 void MessageStack::FreeMessage(byte inMessageIndex)
 {
 	START_SEMAPHORE()
-  this->messages[inMessageIndex][0] = 0;
+	{
+		this->messages[inMessageIndex][0] = 0;
+	}
 	END_SEMAPHORE()
 
 	this->GetCount();	// update peakCount...
@@ -39,6 +41,7 @@ bool MessageStack::PushMessage(const char *inMessage)
 #endif
 
 	START_SEMAPHORE()
+	{
 	for (int i = 0; i < MESSAGE_MAXNUMBER; i++)
 		if (this->messages[i][0] == 0)
 		{
@@ -49,8 +52,9 @@ bool MessageStack::PushMessage(const char *inMessage)
 		}
 
 #ifdef DCCPP_DEBUG_MODE
-	Serial.println(F("Error : a message has been lost ! Stack is full !"));
+		Serial.println(F("Error : a message has been lost ! Stack is full !"));
 #endif
+	}
 	END_SEMAPHORE()
 
 	this->peakCount = MESSAGE_MAXNUMBER + 1;	// at least !
@@ -60,13 +64,14 @@ bool MessageStack::PushMessage(const char *inMessage)
 byte MessageStack::GetPendingMessageIndex()
 {
 	START_SEMAPHORE()
-	for (int i = 0; i < MESSAGE_MAXNUMBER; i++)
-		if (this->messages[i][0] != 0)
-		{
-			ABORT_SEMAPHORE()
-			return i;
-		}
-
+	{
+		for (int i = 0; i < MESSAGE_MAXNUMBER; i++)
+			if (this->messages[i][0] != 0)
+			{
+				ABORT_SEMAPHORE()
+				return i;
+			}
+	}
 	END_SEMAPHORE()
 	return 255;
 }
@@ -74,7 +79,9 @@ byte MessageStack::GetPendingMessageIndex()
 const char *MessageStack::GetMessage(byte inMessage, char *inMessageBuffer)
 {
 	START_SEMAPHORE()
-	strncpy(inMessageBuffer, this->messages[inMessage], MESSAGE_MAXSIZE);
+	{
+		strncpy(inMessageBuffer, this->messages[inMessage], MESSAGE_MAXSIZE);
+	}
 	END_SEMAPHORE()
 
 	this->FreeMessage(inMessage);
@@ -85,13 +92,14 @@ const char *MessageStack::GetMessage(byte inMessage, char *inMessageBuffer)
 byte MessageStack::GetCount()
 {
   int count = 0;
-  START_SEMAPHORE()
-  for (int i = 0; i < MESSAGE_MAXNUMBER; i++)
-    if (this->messages[i][0] != 0)
-    {
-      count++;
-    }
-
+	START_SEMAPHORE()
+	{
+		for (int i = 0; i < MESSAGE_MAXNUMBER; i++)
+			if (this->messages[i][0] != 0)
+			{
+				count++;
+			}
+	}
 	END_SEMAPHORE()
 
 	if (count > this->peakCount)

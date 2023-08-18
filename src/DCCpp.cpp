@@ -25,7 +25,7 @@ bool DCCpp::powerOnAtFirstClient = true;
 bool DCCpp::resendFunctions = true;
 
 #if defined(ARDUINO_ARCH_ESP32) && defined(USE_TEXTCOMMAND)
-TaskHandle_t Task1;
+TaskHandle_t DCCpp::ThrottleTask = NULL;
 #endif
 
 // *********************************************************** DCCpp class
@@ -238,7 +238,7 @@ void DCCpp::begin()
     10000,       // Stack size of task
     NULL,        // parameter of the task
     1,           // priority of the task
-    &Task1,      // Task handle to keep track of created task
+    &DCCpp::ThrottleTask,      // Task handle to keep track of created task
     Throttles::executionCore);    // pin task to the other available core.
 #endif
 
@@ -341,7 +341,9 @@ void DCCpp::showConfiguration()
 
 #ifdef USE_TEXTCOMMAND
 #ifdef USE_THROTTLES
+#ifdef DCCPP_DEBUG_MODE
   Throttles::printThrottles();
+#endif
 #endif
 #endif
   //	Serial.print(F("\n\nPROGRAM HALTED - PLEASE RESTART ARDUINO"));
@@ -451,6 +453,21 @@ int DCCpp::setAckThreshold(int inNewValue)
   return old;
 }
 
+bool DCCpp::setAckDuration(unsigned int inNewMiniValue, unsigned int inNewMaxiValue)
+{
+  if (inNewMiniValue >= inNewMaxiValue)
+  {
+#ifdef DCCPP_DEBUG_MODE
+    Serial.println(F("setAckDuration : Value mini cant be equal or greater than the maximum value !"));
+#endif
+    return false;
+  }
+  
+  //RegisterList::minAckPulseDuration = inNewMiniValue;
+  //RegisterList::maxAckPulseDuration = inNewMaxiValue;
+  return true;
+}
+
 /***************************** Driving functions */
 
 bool DCCpp::setThrottle(volatile RegisterList *inpRegs, int nReg,  int inLocoId, int inStepsNumber, int inNewSpeed, bool inForward)
@@ -498,7 +515,6 @@ int GetFunctionBlock(int inFunc)
   }
   return blockNb;
 }
-
 
 void DCCpp::setFunctions(volatile RegisterList *inpRegs, int nReg, int inLocoId, Functions &inStates)
 {

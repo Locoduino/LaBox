@@ -35,7 +35,7 @@ Throttle::Throttle(const String& inName, unsigned int inTimeOutDelay)
 
 // If the message starts with '<', this is a classic DCC++ message. Otherwise, this is a throttle message with the following syntax :
 // DDDSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
-// Where DDD is the numerical form of the Throttle Id which have got the message, in ordrer to answer to this throttle only.
+// Where DDD is the numerical form of the Throttle Id which have got the message, in order to answer to this throttle only.
 // SSSSSSSSSSSSSSSSSSSSSSSSSSSSSS is the classic DCC++ message received by the throttle.
 void Throttle::pushMessageInStack(uint16_t inThrottleId, const String& inMessage)
 {

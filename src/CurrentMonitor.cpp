@@ -21,6 +21,9 @@ void CurrentMonitor::begin(int pin, int inSignalPin, const char *msg, float inSa
 	this->msg = msg;
 	this->current = 0;
 	this->currentSampleMax = inSampleMax;
+
+	if (this->pin == UNDEFINED_PIN || this->signalPin == UNDEFINED_PIN)
+		return;
 } // CurrentMonitor::begin
   
 boolean CurrentMonitor::checkTime()
@@ -38,16 +41,23 @@ void CurrentMonitor::check()
 
 	//this->current = (float)(analogRead(this->pin) * CURRENT_SAMPLE_SMOOTHING + this->current * (1.0 - CURRENT_SAMPLE_SMOOTHING));      // compute new exponentially-smoothed current
 	// DB : remplacé par une moyenne de 50 mesures 
-  	float base = 0;
+  float base = 0;
 	for (int j = 0; j < 50; j++)
 	{
-		float val = (float) analogRead(this->pin);
-		base += val;
+		base += (float)analogRead(this->pin);
 	}
 	this->current = (float) (((base / 50)  * 0.9) - 100);
 	// current overload and Signal is on
 	if (this->current > this->currentSampleMax && digitalRead(this->signalPin) == HIGH)
 	{
+#ifdef DCCPP_DEBUG_MODE
+		Serial.print("DCC stopped by CurrentMonitor : ");
+		Serial.print(this->current);
+		Serial.print(" on ");
+		Serial.print(this->currentSampleMax);
+		Serial.println(" max");
+#endif
+
 		digitalWrite(this->signalPin, LOW);
 		DCCPP_INTERFACE.print(this->msg);                                     // print corresponding error message
 #if !defined(USE_ETHERNET)

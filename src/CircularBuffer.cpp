@@ -40,10 +40,12 @@ bool CircularBuffer::CheckIfBeginDone()
 void CircularBuffer::end()
 {
 	START_SEMAPHORE()
-	if (!this->CheckIfBeginDone()) return;
+	{
+		if (!this->CheckIfBeginDone()) return;
 
-	delete[] this->buffer;
-	this->buffer = NULL;	// to be sure to crash at any attemps to use it !
+		delete[] this->buffer;
+		this->buffer = NULL;	// to be sure to crash at any attemps to use it !
+	}
 	END_SEMAPHORE()
 }
 
@@ -52,11 +54,13 @@ void CircularBuffer::clear()
 	if (!this->CheckIfBeginDone()) return;
 
 	START_SEMAPHORE()
-	memset(this->buffer, 0, this->size);
+	{
+		memset(this->buffer, 0, this->size);
 
-	this->full = false;
-	this->head = this->tail = 0;
-	this->peakCount = 0;
+		this->full = false;
+		this->head = this->tail = 0;
+		this->peakCount = 0;
+	}
 	END_SEMAPHORE()
 }
 
@@ -66,27 +70,27 @@ bool CircularBuffer::PushByte(byte inpData)
 
 	bool ok = true;
 	START_SEMAPHORE()
-
-	if (!this->full)
 	{
-		this->buffer[this->head] = inpData;
-		this->head++;
-		this->full = this->head == this->tail;
-
-		if (this->full)
+		if (!this->full)
 		{
-			ok = false;
-			this->peakCount = this->size + 1;	// maximum size !
+			this->buffer[this->head] = inpData;
+			this->head++;
+			this->full = this->head == this->tail;
+
+			if (this->full)
+			{
+				ok = false;
+				this->peakCount = this->size + 1;	// maximum size !
+			}
 		}
-	}
 
 #ifdef DCCPP_DEBUG_MODE
-	if (!ok)
-	{
-		Serial.println(F("Error : the byte has been lost ! Buffer is full !"));
-	}
+		if (!ok)
+		{
+			Serial.println(F("Error : the byte has been lost ! Buffer is full !"));
+		}
 #endif
-
+	}
 	END_SEMAPHORE()
 
 	this->GetCount();	// update peakCount...
@@ -99,29 +103,31 @@ bool CircularBuffer::PushBytes(byte* inpData, int inDataLength)
 
 	bool ok = true;
 	START_SEMAPHORE()
-	if (!this->full)
 	{
-		for (int i = 0; i < inDataLength; i++)
+		if (!this->full)
 		{
-			this->buffer[this->head] = inpData[i];
-			this->head = (this->head + 1) % this->size;
-			this->full = this->head == this->tail;
-
-			if (this->full)
+			for (int i = 0; i < inDataLength; i++)
 			{
-				ok = false;
-				this->peakCount = this->size + (inDataLength - i);	// maximum size !
-				break;
+				this->buffer[this->head] = inpData[i];
+				this->head = (this->head + 1) % this->size;
+				this->full = this->head == this->tail;
+
+				if (this->full)
+				{
+					ok = false;
+					this->peakCount = this->size + (inDataLength - i);	// maximum size !
+					break;
+				}
 			}
 		}
-	}
 
 #ifdef DCCPP_DEBUG_MODE
-	if (!ok)
-	{
-		Serial.println(F("Error : bytes has been lost ! Buffer is full !"));
-	}
+		if (!ok)
+		{
+			Serial.println(F("Error : bytes has been lost ! Buffer is full !"));
+		}
 #endif
+	}
 
 	END_SEMAPHORE()
 	this->GetCount();	// update peakCount...
@@ -137,9 +143,11 @@ byte CircularBuffer::GetByte()
 		return 0;
 
 	START_SEMAPHORE()
-	value = this->buffer[this->tail];
-	this->tail = (this->tail + 1) % this->size;
-	this->full = false;
+	{
+		value = this->buffer[this->tail];
+		this->tail = (this->tail + 1) % this->size;
+		this->full = false;
+	}
 	END_SEMAPHORE()
 
 	return value;
@@ -181,12 +189,14 @@ bool CircularBuffer::GetBytes(byte* inpData, int inDataLength)
 		return false;
 
 	START_SEMAPHORE()
-	for (int i = 0; i < inDataLength; i++)
 	{
-		inpData[i] = this->buffer[this->tail];
-		this->tail = (this->tail + 1) % this->size;
+		for (int i = 0; i < inDataLength; i++)
+		{
+			inpData[i] = this->buffer[this->tail];
+			this->tail = (this->tail + 1) % this->size;
+		}
+		this->full = false;
 	}
-	this->full = false;
 	END_SEMAPHORE()
 
 	return true;

@@ -68,6 +68,7 @@ public:
 	void end();
 	bool sendMessage(const String& inMessage);
 	bool isConnected();
+	bool isStarted() {		return this->currentState != stopped;	}
 
 	void Start();
 	void Stop();

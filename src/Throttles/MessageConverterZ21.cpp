@@ -706,8 +706,10 @@ bool MessageConverterZ21::processBuffer(Throttle* inpThrottle)
 	else
 	{
 		int newNbLocos = Locomotives::count();
+#ifdef DCCPP_DEBUG_MODE
 		if (nbLocos != newNbLocos)
 			Locomotives::printLocomotives();
+#endif
 	}
 	return true;
 }

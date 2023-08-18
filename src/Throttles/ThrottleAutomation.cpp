@@ -140,8 +140,8 @@ bool ThrottleAutomation::loop()
 					}
 #ifdef DCCPP_DEBUG_MODE
 					Serial.println("");
-#endif
 					automationDelay = 0;
+#endif
 				}
 			}
 			else
@@ -159,8 +159,23 @@ bool ThrottleAutomation::loop()
 			}
 		}
 		timeValue = millis();
-		if (currentItem->command[0] > 0)
+		if (currentItem->command[0] != '$')
+		{
+			// DCCpp command
 			Throttle::pushMessageInStack(this->id, currentItem->command);
+		}
+		else
+		{
+			if (strcmp(currentItem->command, "$Wait") == 0)
+			{
+				// Normal wait, do nothing...
+			}
+			if (strcmp(currentItem->command, "$Stop") == 0)
+			{
+				// Do not repeat the sequence and stop the automation throttle now !
+				this->Stop();
+			}
+		}
 #ifdef DCCPP_DEBUG_MODE
 		Serial.println(currentItem->comment);
 #endif

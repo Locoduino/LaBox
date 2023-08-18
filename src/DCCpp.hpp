@@ -63,6 +63,10 @@ class DCCpp
 	public:
 		static DecoderManufacturer DecoderManufacturers[];
 
+#if defined(ARDUINO_ARCH_ESP32) && defined(USE_TEXTCOMMAND)
+		/** Handle of the throttle task. */
+		static TaskHandle_t ThrottleTask;
+#endif
 		/** The threshold that the exponentially-smoothed analogRead samples (after subtracting the baseline current) must cross to establish ACKNOWLEDGEMENT.*/
 		static int ackThreshold;
 		/** Registers for the main track.*/
@@ -79,7 +83,7 @@ class DCCpp
 		static bool IsPowerOnProg;
 		/** True if the main track must be powered on at first Wifi client connection. */
 		static bool powerOnAtFirstClient;
-	
+
 	public:
 		// begins
 		/** Begins the DCCpp library.
@@ -205,6 +209,13 @@ class DCCpp
 		@return Previous value.
 		*/
 		static int setAckThreshold(int inNewValue);
+
+		/** Set the minimum duration in microseconds for a ack to validate a CV reading or writing..
+		@param inNewMiniValue	Minimum value in microseconds. Default is 1500.	NMRA says 5000us.
+		@param inNewMaxiValue	Minimum value in microseconds. Default is 100000. NMRA says 7000us.
+		@return false if the maximum is less than the minimum !
+		*/
+		static bool setAckDuration(unsigned int inNewMiniValue, unsigned int inNewMaxiValue = 100000);
 
 		/** Set if the Throttle should reply to the controller.
 		@param inResendFunctions		False if the functions packets are not repeatedly resend on DCC track..
@@ -355,6 +366,7 @@ class DCCpp
 		static void setAccessory(int inAddress, byte inSubAddress, byte inActivate);
 
 public:
+
 #ifdef DCCPP_DEBUG_MODE
 		/** BEFORE activating the DCC mode, this function will check for power connections by setting the voltage alternatively in one side and the other for the given delay.
 		If two leds are connected to the power module to check the DCC signal, they will go on alternatively.
