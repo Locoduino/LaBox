@@ -1,3 +1,5 @@
+WARNING : This project is now ended. The LaBox project has moved to https://github.com/Locoduino/CommandStation-EX-LaBox .
+
 = LaBox : DCC/Wifi Controller for ESP32 =
 
 This is an adaptation of DCCpp project to build a DCC controller called LaBox with a dedicated hardware.
